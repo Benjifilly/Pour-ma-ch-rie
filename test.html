@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puter.js AI Demo</title>
+    <script src="https://js.puter.com/v2/"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .tab-button:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .output {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 100px;
+            white-space: pre-wrap;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            font-weight: 600;
+            margin: 20px 0;
+        }
+
+        .loading::after {
+            content: '';
+            animation: dots 2s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .generated-image {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .model-info {
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .stream-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stream-toggle input[type="checkbox"] {
+            width: auto;
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+<body>    <div class="container">
+        <h1>🤖 Puter.js AI Playground</h1>
+        
+        <!-- Authentication Info -->
+        <div class="model-info" style="background: linear-gradient(45deg, rgba(255, 107, 107, 0.1), rgba(238, 90, 36, 0.1)); border-left: 4px solid #ff6b6b; margin-bottom: 20px;">
+            <strong>🔐 Authentication:</strong> This app requires a Puter.com account to access AI features. If you see permission errors, please sign in to your Puter account.
+            <button onclick="signInToPuter()" style="margin-left: 15px; padding: 8px 15px; background: #ff6b6b; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">Sign In to Puter</button>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('text', event)">💬 Text Generation</button>
+            <button class="tab-button" onclick="switchTab('image', event)">🎨 Image Generation</button>
+            <button class="tab-button" onclick="switchTab('vision', event)">👁️ Image Analysis</button>
+        </div>
+
+        <!-- Text Generation Tab -->
+        <div id="text-tab" class="tab-content active">
+            <div class="model-info">
+                <strong>Text Generation:</strong> Generate text using various OpenAI models like GPT-4o, GPT-4.1, o1, o3, and more.
+            </div>
+              <div class="input-group">
+                <label>Select Model:</label>
+                <select id="text-model">
+                    <option value="gpt-4o-mini" selected>GPT-4o Mini (Default)</option>
+                    <option value="gpt-4o">GPT-4o</option>
+                    <option value="o1">O1</option>
+                    <option value="o1-mini">O1 Mini</option>
+                    <option value="o1-pro">O1 Pro</option>
+                    <option value="o3">O3</option>
+                    <option value="o3-mini">O3 Mini</option>
+                    <option value="o4-mini">O4 Mini</option>
+                    <option value="gpt-4.1">GPT-4.1</option>
+                    <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
+                    <option value="gpt-4.1-nano">GPT-4.1 Nano</option>
+                    <option value="gpt-4.5-preview">GPT-4.5 Preview</option>
+                    <option value="claude-sonnet-4">Claude Sonnet 4</option>
+                    <option value="claude-opus-4">Claude Opus 4</option>
+                    <option value="claude-3-7-sonnet">Claude 3.7 Sonnet</option>
+                    <option value="claude-3-5-sonnet">Claude 3.5 Sonnet</option>
+                    <option value="deepseek-chat">DeepSeek Chat</option>
+                    <option value="deepseek-reasoner">DeepSeek Reasoner</option>
+                    <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                    <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                    <option value="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo">Llama 3.1 8B Instruct Turbo</option>
+                    <option value="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo">Llama 3.1 70B Instruct Turbo</option>
+                    <option value="meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo">Llama 3.1 405B Instruct Turbo</option>
+                    <option value="mistral-large-latest">Mistral Large Latest</option>
+                    <option value="pixtral-large-latest">Pixtral Large Latest</option>
+                    <option value="codestral-latest">Codestral Latest</option>
+                    <option value="google/gemma-2-27b-it">Gemma 2 27B IT</option>
+                    <option value="grok-beta">Grok Beta</option>
+                </select>
+            </div>
+
+            <div class="stream-toggle">
+                <input type="checkbox" id="stream-mode">
+                <label for="stream-mode">Enable Streaming (for longer responses)</label>
+            </div>
+
+            <div class="input-group">
+                <label>Your Prompt:</label>
+                <textarea id="text-prompt" placeholder="Enter your question or prompt here...">Write a creative short story about a robot learning to paint.</textarea>
+            </div>            
+            <button onclick="generateText()">Generate Text</button>
+            <button onclick="clearTextOutput()">Clear Output</button>
+            <button onclick="testAllModels()">🧪 Test All Models</button>
+
+            <div class="loading" id="text-loading">Generating response</div>
+            <div class="loading" id="test-loading">Testing models</div>
+            <div class="output" id="text-output">Output will appear here...</div>
+        </div>
+
+        <!-- Image Generation Tab -->
+        <div id="image-tab" class="tab-content">
+            <div class="model-info">
+                <strong>Image Generation:</strong> Create stunning images using DALL-E 3 with detailed prompts.
+            </div>
+            
+            <div class="input-group">
+                <label>Image Description:</label>
+                <textarea id="image-prompt" placeholder="Describe the image you want to generate...">A futuristic cityscape at sunset with flying cars and neon lights, cyberpunk style, highly detailed, digital art</textarea>
+            </div>
+
+            <button onclick="generateImage()">Generate Image</button>
+            <button onclick="clearImageOutput()">Clear Output</button>
+
+            <div class="loading" id="image-loading">Generating image</div>
+            <div class="output" id="image-output">Generated image will appear here...</div>
+        </div>
+
+        <!-- Image Analysis Tab -->
+        <div id="vision-tab" class="tab-content">
+            <div class="model-info">
+                <strong>Image Analysis:</strong> Analyze images using GPT-4o Vision. Provide an image URL and ask questions about it.
+            </div>
+            
+            <div class="input-group">
+                <label>Image URL:</label>
+                <input type="url" id="image-url" placeholder="https://example.com/image.jpg" value="https://assets.puter.site/doge.jpeg">
+            </div>
+
+            <div class="input-group">
+                <label>Your Question:</label>
+                <textarea id="vision-prompt" placeholder="What would you like to know about this image?">What do you see in this image? Describe it in detail including colors, objects, mood, and any interesting elements.</textarea>
+            </div>
+
+            <button onclick="analyzeImage()">Analyze Image</button>
+            <button onclick="clearVisionOutput()">Clear Output</button>
+
+            <div class="loading" id="vision-loading">Analyzing image</div>
+            <div class="output" id="vision-output">Analysis will appear here...</div>
+        </div>
+    </div>
+
+    <script>        // Tab switching functionality
+        function switchTab(tabName, event) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab and activate button
+            document.getElementById(tabName + '-tab').classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+        }        // Text Generation
+        async function generateText() {
+            // Check if Puter.js is available
+            if (typeof puter === 'undefined') {
+                alert('Puter.js library is not loaded. Please refresh the page.');
+                return;
+            }
+            
+            const model = document.getElementById('text-model').value;
+            const prompt = document.getElementById('text-prompt').value;
+            const streamMode = document.getElementById('stream-mode').checked;
+            const loading = document.getElementById('text-loading');
+            const output = document.getElementById('text-output');
+            
+            if (!prompt.trim()) {
+                alert('Please enter a prompt!');
+                return;
+            }
+            
+            loading.style.display = 'block';
+            output.textContent = '';            try {
+                if (streamMode) {
+                    // Streaming mode - correct syntax according to documentation
+                    const response = await puter.ai.chat(prompt, false, { model: model, stream: true });
+                    
+                    for await (const part of response) {
+                        if (part?.text) {
+                            output.textContent += part.text;
+                            output.scrollTop = output.scrollHeight;
+                        }
+                    }
+                } else {
+                    // Regular mode - correct syntax according to documentation
+                    const response = await puter.ai.chat(prompt, false, { model: model });
+                    output.textContent = response;
+                }
+            } catch (error) {
+                console.error('Text generation error:', error);
+                
+                // Handle specific permission errors
+                if (error && error.error && error.error.message && error.error.message.includes('Permission denied')) {
+                    output.textContent = '🔒 Authentication required. Please sign in to your Puter account to use AI features.\n\nClick the Sign In button that appeared at the top of the page.';
+                    showAuthenticationMessage();
+                } else if (error && error.error && error.error.delegate === 'usage-limited-chat') {
+                    output.textContent = '⚠️ Usage limit reached. You may need to:\n• Wait for your usage to reset\n• Upgrade your Puter account\n• Try again later';
+                } else {
+                    output.textContent = 'Error: ' + (error && error.message ? error.message : 'Unknown error occurred');
+                }
+            } finally {
+                loading.style.display = 'none';
+            }
+        }        // Image Generation
+        async function generateImage() {
+            // Check if Puter.js is available
+            if (typeof puter === 'undefined') {
+                alert('Puter.js library is not loaded. Please refresh the page.');
+                return;
+            }
+            
+            const prompt = document.getElementById('image-prompt').value;
+            const loading = document.getElementById('image-loading');
+            const output = document.getElementById('image-output');
+            
+            if (!prompt.trim()) {
+                alert('Please enter an image description!');
+                return;
+            }
+            
+            loading.style.display = 'block';
+            output.innerHTML = '';            try {
+                const imageElement = await puter.ai.txt2img(prompt);
+                imageElement.classList.add('generated-image');
+                output.appendChild(imageElement);
+            } catch (error) {
+                console.error('Image generation error:', error);
+                
+                // Handle specific permission errors
+                if (error && error.error && error.error.message && error.error.message.includes('Permission denied')) {
+                    output.textContent = '🔒 Authentication required. Please sign in to your Puter account to use AI features.\n\nClick the Sign In button that appeared at the top of the page.';
+                    showAuthenticationMessage();
+                } else if (error && error.error && error.error.delegate === 'usage-limited-chat') {
+                    output.textContent = '⚠️ Usage limit reached. You may need to:\n• Wait for your usage to reset\n• Upgrade your Puter account\n• Try again later';
+                } else {
+                    output.textContent = 'Error: ' + (error && error.message ? error.message : 'Unknown error occurred');
+                }
+            } finally {
+                loading.style.display = 'none';
+            }
+        }        // Image Analysis
+        async function analyzeImage() {
+            // Check if Puter.js is available
+            if (typeof puter === 'undefined') {
+                alert('Puter.js library is not loaded. Please refresh the page.');
+                return;
+            }
+            
+            const imageUrl = document.getElementById('image-url').value;
+            const prompt = document.getElementById('vision-prompt').value;
+            const loading = document.getElementById('vision-loading');
+            const output = document.getElementById('vision-output');
+            
+            if (!imageUrl.trim() || !prompt.trim()) {
+                alert('Please enter both image URL and your question!');
+                return;
+            }
+            
+            loading.style.display = 'block';
+            output.textContent = '';
+              try {
+                // Correct syntax for image analysis according to Puter.js documentation
+                const response = await puter.ai.chat(prompt, imageUrl, false);
+                output.textContent = response;
+            } catch (error) {
+                console.error('Image analysis error:', error);
+                
+                // Handle specific permission errors
+                if (error && error.error && error.error.message && error.error.message.includes('Permission denied')) {
+                    output.textContent = '🔒 Authentication required. Please sign in to your Puter account to use AI features.\n\nClick the Sign In button that appeared at the top of the page.';
+                    showAuthenticationMessage();
+                } else if (error && error.error && error.error.delegate === 'usage-limited-chat') {
+                    output.textContent = '⚠️ Usage limit reached. You may need to:\n• Wait for your usage to reset\n• Upgrade your Puter account\n• Try again later';
+                } else {
+                    output.textContent = 'Error: ' + (error && error.message ? error.message : 'Unknown error occurred');
+                }
+            } finally {
+                loading.style.display = 'none';
+            }
+        }// Clear functions
+        function clearTextOutput() {
+            document.getElementById('text-output').textContent = 'Output will appear here...';
+        }
+
+        function clearImageOutput() {
+            document.getElementById('image-output').innerHTML = 'Generated image will appear here...';
+        }
+
+        function clearVisionOutput() {
+            document.getElementById('vision-output').textContent = 'Analysis will appear here...';
+        }
+
+        // Test all models function
+        async function testAllModels() {
+            const testLoading = document.getElementById('test-loading');
+            const output = document.getElementById('text-output');
+            const modelSelect = document.getElementById('text-model');
+            
+            const models = Array.from(modelSelect.options).map(option => ({
+                value: option.value,
+                text: option.text
+            }));
+            
+            testLoading.style.display = 'block';
+            output.innerHTML = '<strong>🧪 Testing all models...</strong>\n\n';
+            
+            const testPrompt = "Hello! Please respond with just 'OK' to confirm you're working.";
+            let workingModels = [];
+            let failedModels = [];
+            
+            for (let i = 0; i < models.length; i++) {
+                const model = models[i];
+                output.innerHTML += `Testing ${model.text} (${i + 1}/${models.length})...`;
+                  try {
+                    const startTime = Date.now();
+                    // Correct syntax according to documentation
+                    const response = await puter.ai.chat(testPrompt, false, { model: model.value });
+                    const endTime = Date.now();
+                    const responseTime = endTime - startTime;
+                      workingModels.push({
+                        name: model.text,
+                        value: model.value,
+                        responseTime: responseTime,
+                        response: (response && typeof response === 'string') ? 
+                                 response.slice(0, 50) + (response.length > 50 ? '...' : '') : 
+                                 'No response'
+                    });
+                    
+                    output.innerHTML += ` ✅ OK (${responseTime}ms)\n`;                } catch (error) {
+                    failedModels.push({
+                        name: model.text,
+                        value: model.value,
+                        error: error && error.message ? error.message : 'Unknown error'
+                    });
+                    
+                    output.innerHTML += ` ❌ FAILED (${error && error.message ? error.message : 'Unknown error'})\n`;
+                }
+                
+                // Scroll to bottom to show progress
+                output.scrollTop = output.scrollHeight;
+                
+                // Small delay to prevent rate limiting
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            // Display summary
+            output.innerHTML += `\n<strong>📊 Test Results Summary:</strong>\n`;
+            output.innerHTML += `✅ Working models: ${workingModels.length}/${models.length}\n`;
+            output.innerHTML += `❌ Failed models: ${failedModels.length}/${models.length}\n\n`;
+            
+            if (workingModels.length > 0) {
+                output.innerHTML += `<strong>✅ Working Models:</strong>\n`;
+                workingModels.forEach(model => {
+                    output.innerHTML += `• ${model.name} - ${model.responseTime}ms\n`;
+                });
+                output.innerHTML += `\n`;
+            }
+            
+            if (failedModels.length > 0) {
+                output.innerHTML += `<strong>❌ Failed Models:</strong>\n`;
+                failedModels.forEach(model => {
+                    output.innerHTML += `• ${model.name} - ${model.error}\n`;
+                });
+            }
+            
+            testLoading.style.display = 'none';
+            output.scrollTop = output.scrollHeight;
+        }        // Add some example prompts on page load
+        window.addEventListener('load', function() {
+            console.log('Puter.js AI Playground loaded successfully!');
+            
+            // Check if Puter.js is loaded
+            if (typeof puter === 'undefined') {
+                console.error('Puter.js library is not loaded!');
+                alert('Error: Puter.js library failed to load. Please check your internet connection and refresh the page.');
+                return;
+            }
+            
+            // Check if puter.ai is available
+            if (!puter.ai || typeof puter.ai.chat !== 'function') {
+                console.error('Puter.js AI functionality is not available!');
+                alert('Error: Puter.js AI functionality is not available. Please check if you have proper access permissions.');
+                return;
+            }
+            
+            console.log('Ready to interact with AI models via Puter.js');
+            
+            // Optional: Test API with a simple call
+            testPuterAPI();
+        });
+          // Function to test if Puter API is working
+        async function testPuterAPI() {
+            try {
+                console.log('Testing Puter.js API connection...');
+                const testResponse = await puter.ai.chat('Hello', false, { model: 'gpt-4o-mini' });
+                console.log('Puter.js API test successful:', testResponse);
+            } catch (error) {
+                console.warn('Puter.js API test failed:', error);
+                
+                // Check if it's a permission error
+                if (error && error.error && error.error.message && error.error.message.includes('Permission denied')) {
+                    console.log('Authentication may be required. Attempting to authenticate...');
+                    await attemptAuthentication();
+                } else if (error && error.error && error.error.delegate === 'usage-limited-chat') {
+                    console.warn('Usage limited - you may need to upgrade your Puter account or wait.');
+                    showAuthenticationMessage();
+                }
+            }
+        }
+        
+        // Function to attempt authentication
+        async function attemptAuthentication() {
+            try {
+                // Check if user is already authenticated
+                if (puter.auth && typeof puter.auth.isSignedIn === 'function') {
+                    const isSignedIn = await puter.auth.isSignedIn();
+                    if (!isSignedIn) {
+                        console.log('User not signed in. Please sign in to use AI features.');
+                        showAuthenticationMessage();
+                        return;
+                    }
+                }
+                
+                // If authentication methods are available, try to get user info
+                if (puter.auth && typeof puter.auth.getUser === 'function') {
+                    const user = await puter.auth.getUser();
+                    console.log('Authenticated user:', user);
+                }
+            } catch (authError) {
+                console.warn('Authentication check failed:', authError);
+                showAuthenticationMessage();
+            }
+        }
+        
+        // Function to show authentication message
+        function showAuthenticationMessage() {
+            const authMessage = document.createElement('div');
+            authMessage.id = 'auth-message';
+            authMessage.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                z-index: 1000;
+                font-weight: 600;
+                text-align: center;
+                max-width: 90%;
+            `;
+            
+            authMessage.innerHTML = `
+                <strong>⚠️ Authentication Required</strong><br>
+                Please sign in to your Puter account to use AI features.<br>
+                <button onclick="signInToPuter()" style="margin-top: 10px; padding: 8px 15px; background: white; color: #ee5a24; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">Sign In</button>
+                <button onclick="closeAuthMessage()" style="margin-top: 10px; margin-left: 10px; padding: 8px 15px; background: transparent; color: white; border: 1px solid white; border-radius: 5px; cursor: pointer;">Close</button>
+            `;
+            
+            // Remove existing message if any
+            const existingMessage = document.getElementById('auth-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            document.body.appendChild(authMessage);
+            
+            // Auto-remove after 10 seconds
+            setTimeout(() => {
+                if (authMessage && authMessage.parentNode) {
+                    authMessage.remove();
+                }
+            }, 10000);
+        }
+        
+        // Function to sign in to Puter
+        async function signInToPuter() {
+            try {
+                if (puter.auth && typeof puter.auth.signIn === 'function') {
+                    await puter.auth.signIn();
+                    closeAuthMessage();
+                    // Test API again after sign in
+                    setTimeout(() => {
+                        testPuterAPI();
+                    }, 1000);
+                } else {
+                    // Fallback - open Puter website for manual sign in
+                    window.open('https://puter.com', '_blank');
+                    alert('Please sign in to Puter.com in the new tab, then refresh this page.');
+                }
+            } catch (error) {
+                console.error('Sign in failed:', error);
+                alert('Sign in failed. Please try signing in manually at puter.com');
+            }
+        }
+        
+        // Function to close authentication message
+        function closeAuthMessage() {
+            const authMessage = document.getElementById('auth-message');
+            if (authMessage) {
+                authMessage.remove();
+            }
+        }
+    </script>
+</body>
+</html>
