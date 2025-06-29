@@ -1157,10 +1157,11 @@
             font-weight: 300;
             cursor: pointer;
             transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            /* Centrage absolu et simple */
+            display: block;
             margin: 0 auto;
+            text-align: center;
+            width: fit-content;
             opacity: 0;
             transform: translateY(20px);
             animation: buttonFadeIn 1s ease-out forwards;
@@ -1201,7 +1202,14 @@
             }
 
             .secret-close-btn {
-                margin: 0 20px;
+                /* Centrage simple et efficace sur mobile */
+                padding: 12px 25px;
+                font-size: 15px;
+                margin: 0 auto;
+                display: block;
+                text-align: center;
+                width: fit-content;
+                max-width: calc(100% - 40px);
             }
         }
 
@@ -1213,6 +1221,32 @@
             .kissing-emoji {
                 width: 80px;
                 height: 80px;
+            }
+            
+            .secret-close-btn {
+                /* Adaptation iPhone avec centrage simplifié */
+                padding: 10px 20px;
+                font-size: 14px;
+                border-radius: 20px;
+                margin: 0 auto;
+                display: block;
+                text-align: center;
+                width: fit-content;
+                max-width: calc(100% - 60px);
+            }
+        }
+
+        /* Spécifique pour iPhone/iOS - centrage renforcé */
+        @supports (-webkit-touch-callout: none) {
+            .secret-close-btn {
+                /* Force le centrage sur iOS avec toutes les méthodes */
+                display: block !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+                text-align: center !important;
+                width: fit-content !important;
+                position: static !important;
+                left: auto !important;
             }
         }
     </style>
