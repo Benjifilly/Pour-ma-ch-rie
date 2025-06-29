@@ -25,7 +25,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Kalam:wght@300;400;700&family=Dancing+Script:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/themes-settings.css"><style>
+    <link rel="stylesheet" href="css/themes-settings.css">
+    <link rel="stylesheet" href="css/modals-unified.css"><style>
         html {
             margin: 0;
             padding: 0;
@@ -192,7 +193,8 @@
             grid-column: span 1;
             font-size: 1.2rem;
         }        
-          .loading-screen {
+        
+        .loading-screen {
             position: fixed;
             top: 0;
             left: 0;
@@ -307,6 +309,12 @@
         .main-content.show {
             opacity: 1;
             transform: scale(1);
+        }
+
+        .theme-button,
+        .settings-button
+        {
+            display: none;
         }
 
         .container {
@@ -1084,6 +1092,157 @@
             height: 80px;
             padding-bottom: env(safe-area-inset-bottom, 20px);
         }
+
+        /* Secret Message Styles */
+        .secret-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--theme-gradient);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        .secret-overlay.show {
+            opacity: 1;
+        }
+
+        .secret-overlay.fade-out {
+            opacity: 0;
+        }
+
+        .secret-container {
+            text-align: center;
+            max-width: 600px;
+            margin: 20px;
+            position: relative;
+        }
+
+        .secret-emoji {
+            margin-bottom: 40px;
+        }
+
+        .kissing-emoji {
+            width: 120px;
+            height: 120px;
+            opacity: 0;
+            transform: scale(0) rotate(0deg);
+            animation: emojiSpin 3s ease-out forwards;
+        }
+
+        @keyframes emojiSpin {
+            0% {
+                opacity: 0;
+                transform: scale(0) rotate(0deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(1800deg);
+            }
+        }
+
+        .secret-text {
+            font-family: var(--font-family);
+            font-size: 24px;
+            color: white;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+            line-height: 1.4;
+            margin-bottom: 40px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: textFadeIn 1.5s ease-out forwards;
+            animation-delay: 1.5s;
+            font-weight: 500;
+        }
+
+        @keyframes textFadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .secret-close-btn {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-family: var(--font-family);
+            font-size: 16px;
+            font-weight: 300;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: buttonFadeIn 1s ease-out forwards;
+            animation-delay: 3.5s;
+        }
+
+        @keyframes buttonFadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .secret-close-btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-2px);
+        }
+
+        .secret-close-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Responsive pour mobile */
+        @media (max-width: 768px) {
+            .secret-text {
+                font-size: 20px;
+                margin: 0 20px 40px 20px;
+            }
+
+            .kissing-emoji {
+                width: 100px;
+                height: 100px;
+            }
+
+            .secret-close-btn {
+                margin: 0 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .secret-text {
+                font-size: 18px;
+            }
+
+            .kissing-emoji {
+                width: 80px;
+                height: 80px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1125,15 +1284,18 @@
         <div class="loading-icon">🌸</div>
         <div class="loading-text" id="navigationLoadingText">Chargement...</div>
     </div>
+    
+    <!-- Boutons fixes en dehors de main-content -->
+    <button class="theme-button" id="themeButton" onclick="openThemeModal()" title="Changer le thème">
+        <i class="fas fa-palette"></i>
+    </button>
+    <button class="settings-button" id="settingsButton" onclick="openSettingsModal()" title="Paramètres">
+        <i class="fas fa-cog"></i>
+    </button>
+    
     <div class="main-content" id="mainContent">
     <div class="container">          
         <header class="header">
-            <button class="theme-button hidden" id="themeButton" onclick="openThemeModal()" title="Changer le thème">
-                <i class="fas fa-palette"></i>
-            </button>
-            <button class="settings-button hidden" id="settingsButton" onclick="openSettingsModal()" title="Paramètres">
-                <i class="fas fa-cog"></i>
-            </button>
             <h1 class="title">
                 For My Beautiful Girlfriend
                 <button class="kiss-button" id="kissButton" onclick="showKiss()">💋</button>
@@ -1285,7 +1447,7 @@
     </div>
 
     <script>
-        const correctPasscode = '300807'; 
+        const correctPasscode = '100907'; 
         let enteredPasscode = '';
 
         const lockScreen = document.getElementById('lockScreen');
@@ -1327,8 +1489,10 @@
         }
 
         function checkPasscode() {
-            if (enteredPasscode === correctPasscode) {
+            if (enteredPasscode === correctPasscode || enteredPasscode === '300807') {
                 showLoadingScreen();
+            } else if (enteredPasscode === '211223') {
+                showSecretMessage();
             } else {
                 showError();
             }
@@ -1344,19 +1508,57 @@
                 enteredPasscode = '';
                 updatePasscodeDots();
             }, 1000);
-        }          function showLoadingScreen() {
+        }
+
+        function showSecretMessage() {
+            // Créer l'overlay pour le secret
+            const secretOverlay = document.createElement('div');
+            secretOverlay.className = 'secret-overlay';
+            secretOverlay.innerHTML = `
+                <div class="secret-container">
+                    <div class="secret-emoji">
+                        <img src="images/kissing-emoji.png" alt="�" class="kissing-emoji">
+                    </div>
+                    <div class="secret-text">
+                        Ouiiiiiiiii c'est la date où tout à commencé !!! <br>   
+                        Je t'aime mon cœur 💖
+                    </div>
+                    <button class="secret-close-btn" onclick="closeSecretMessage()">
+                        Retour
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(secretOverlay);
+            
+            // Animation d'apparition
+            setTimeout(() => {
+                secretOverlay.classList.add('show');
+            }, 50);
+            
+            // Auto-fermeture après 10 secondes
+            setTimeout(() => {
+                closeSecretMessage();
+            }, 10000);
+        }
+
+        function closeSecretMessage() {
+            const secretOverlay = document.querySelector('.secret-overlay');
+            if (secretOverlay) {
+                secretOverlay.classList.add('fade-out');
+                setTimeout(() => {
+                    secretOverlay.remove();
+                    // Retourner à l'écran de saisie du mot de passe
+                    enteredPasscode = '';
+                    updatePasscodeDots();
+                }, 500);
+            }
+        }
+
+        function showLoadingScreen() {
             // Marquer l'authentification réussie
             sessionStorage.setItem('isAuthenticated', 'true');
             sessionStorage.setItem('authTime', new Date().getTime().toString());
-              // Masquer les boutons thème et paramètres pendant la transition
-            const themeButton = document.getElementById('themeButton');
-            if (themeButton) {
-                themeButton.classList.add('hidden');
-            }
-            const settingsButton = document.getElementById('settingsButton');
-            if (settingsButton) {
-                settingsButton.classList.add('hidden');
-            }
 
             lockScreen.classList.add('fade-out');
 
@@ -1371,16 +1573,14 @@
                         mainContent.classList.add('show');
                         document.body.style.overflow = 'auto';
 
+                        // Afficher les boutons fixes après l'authentification
+                        const themeButton = document.getElementById('themeButton');
+                        const settingsButton = document.getElementById('settingsButton');
+                        if (themeButton) themeButton.style.display = 'flex';
+                        if (settingsButton) settingsButton.style.display = 'flex';
+
                         const kissButton = document.getElementById('kissButton');
                         kissButton.classList.add('visible');
-                          // Rendre les boutons thème et paramètres visibles après la transition
-                        if (themeButton) {
-                            themeButton.classList.remove('hidden');
-                        }
-                        const settingsButton = document.getElementById('settingsButton');
-                        if (settingsButton) {
-                            settingsButton.classList.remove('hidden');
-                        }
                     }, 400);
                 }, 2000);
             }, 600);
@@ -1439,13 +1639,13 @@
                 return false;
             }
 
-            // Vérifier que l'authentification n'est pas trop ancienne (24h)
+            // Vérifier que l'authentification n'est pas trop ancienne (5 minutes)
             if (authTime) {
                 const currentTime = new Date().getTime();
                 const timeDiff = currentTime - parseInt(authTime);
-                const hoursDiff = timeDiff / (1000 * 60 * 60);
+                const minutesDiff = timeDiff / (1000 * 60);
 
-                if (hoursDiff > 24) {
+                if (minutesDiff > 5) {
                     sessionStorage.removeItem('isAuthenticated');
                     sessionStorage.removeItem('authTime');
                     return false;
@@ -1905,6 +2105,31 @@
         });        document.addEventListener('DOMContentLoaded', function() {
             // Charger tous les paramètres globaux
             loadGlobalSettings();
+            
+            // Vérifier l'authentification au chargement de la page
+            if (isAuthenticated()) {
+                // Si déjà authentifié, afficher quand même l'écran de chargement
+                lockScreen.style.display = 'none';
+                loadingScreen.classList.add('show');
+                
+                setTimeout(() => {
+                    loadingScreen.classList.add('fade-out');
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                        mainContent.classList.add('show');
+                        document.body.style.overflow = 'auto';
+                        
+                        // Afficher les boutons fixes
+                        const themeButton = document.getElementById('themeButton');
+                        const settingsButton = document.getElementById('settingsButton');
+                        const kissButton = document.getElementById('kissButton');
+                        
+                        if (themeButton) themeButton.style.display = 'flex';
+                        if (settingsButton) settingsButton.style.display = 'flex';
+                        if (kissButton) kissButton.classList.add('visible');
+                    }, 400);
+                }, 2000); // Même durée que l'écran de chargement normal
+            }
         });document.addEventListener('DOMContentLoaded', function() {
             const themeModal = document.getElementById('themeModal');
             if (themeModal) {
