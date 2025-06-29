@@ -22,19 +22,13 @@
             padding: 0;
             box-sizing: border-box;
             height: 100%;
-            /* Extension du fond pour iOS - couvre la barre de statut */
-            min-height: calc(100vh + env(safe-area-inset-top));
-            padding-top: env(safe-area-inset-top);
+            overflow: hidden;
             background: var(--theme-gradient);
             background-attachment: fixed;
             -webkit-background-size: cover;
             -moz-background-size: cover;
             -o-background-size: cover;
             background-size: cover;
-            /* Restaurer le scroll bounce sur la page principale */
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior-y: auto;
         }
 
         * {
@@ -49,48 +43,19 @@
             background-color: var(--theme-background-color); 
             background-attachment: fixed;
             min-height: 100vh;
-            height: 100%;
             padding: 20px;
-            /* Étendre le padding pour iOS - évite que le contenu soit caché par la barre de statut */
-            padding-top: calc(20px + env(safe-area-inset-top));
             color: var(--text-primary);
-            user-select: none;
-            position: relative;
-            width: 100%;
-            /* Scroll bounce restauré sur la page principale */
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior-y: auto;
+            overflow-x: hidden;
+            user-select: none;
+            /* Configuration du bounce scroll gérée dans themes-settings.css */
         }
 
         html, body {
             height: 100%;
             width: 100%;
-            /* Permettre le scroll sur la page principale */
-            overflow-y: auto;
         }
         
-        /* Extension complète du fond pour iOS - couverture totale de la barre de statut */
-        @supports (-webkit-touch-callout: none) {
-            html {
-                /* Force l'extension au-dessus de la safe area */
-                min-height: calc(100vh + env(safe-area-inset-top) + env(safe-area-inset-bottom));
-                background: var(--theme-gradient);
-                background-attachment: fixed;
-            }
-            
-            body {
-                /* Assurer que le body s'étend aussi */
-                min-height: calc(100vh + env(safe-area-inset-top) + env(safe-area-inset-bottom));
-            }
-            
-            /* Les éléments conteneurs principaux */
-            .main-container {
-                padding-top: env(safe-area-inset-top);
-                padding-bottom: env(safe-area-inset-bottom);
-            }
-        }
-
         .lock-screen {
             position: fixed;
             top: 0;
@@ -312,6 +277,8 @@
             overflow-y: auto;
             overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
+            /* Bounce scroll activé pour le contenu principal */
+            overscroll-behavior-y: auto;
         }
 
         .main-content.show {
@@ -1000,16 +967,12 @@
                 transform: translateY(-2px);
             }
             
-            html, body {
-                position: fixed;
-                overflow: hidden;
-                -webkit-overflow-scrolling: auto;
-                touch-action: manipulation;
-            }
-            
+            /* Configuration iOS gérée dans themes-settings.css */
             .main-content {
                 -webkit-overflow-scrolling: touch;
-                overscroll-behavior: none;
+                /* Bounce scroll autorisé */
+                overscroll-behavior: auto;
+                overscroll-behavior-y: auto;
             }
         }
         
@@ -2115,8 +2078,6 @@
                     'font-modern', 'font-handwriting', 'font-romantic', 'font-minimal', 'font-retro'
                 );
                 document.body.classList.add(`font-${newFont}`);
-
-
 
                 // Mettre à jour l'interface si les éléments existent
                 document.querySelectorAll('.font-option').forEach(option => {
