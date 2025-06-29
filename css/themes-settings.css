@@ -1513,181 +1513,118 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 }
 
-/* ===== Gestion dynamique du bounce scroll ===== */
+/* ===== Modals plus petits sur très petits écrans ===== */
 
-/* Par défaut, bounce scroll autorisé partout */
-html, body {
-    overscroll-behavior: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-/* Désactiver le bounce scroll uniquement quand l'écran de mot de passe est affiché */
-body.password-screen-active {
-    overscroll-behavior: none;
-    position: fixed;
-    width: 100%;
-    height: 100vh;
-    height: 100dvh;
-}
-
-body.password-screen-active * {
-    overscroll-behavior: none;
-}
-
-/* Container principal avec bounce scroll autorisé */
-.container, .main-content {
-    overscroll-behavior: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-/* Bounce scroll pour les zones de chat et contenu */
-.chat-messages, .chat-container {
-    overscroll-behavior: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-/* Responsive pour les ajustements de bounce scroll */
-@media (max-width: 768px) {
-    html, body {
-        /* Bounce scroll ajusté pour les petits écrans */
-        overscroll-behavior: contain;
-    }
-}
-
-/* Ajustements spécifiques pour iPhone */
+/* Réduire la taille des modals sur petits écrans */
 @media (max-width: 480px) {
-    html, body {
-        /* Bounce scroll autorisé par défaut sur iOS */
-        overscroll-behavior: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    /* Zones spécifiques où le bounce scroll doit être désactivé */
-    .lock-screen,
-    body.password-screen-active {
-        position: fixed;
-        overflow: hidden;
-        overscroll-behavior: none;
-        touch-action: manipulation;
-        -webkit-overflow-scrolling: auto;
-        -webkit-tap-highlight-color: transparent;
-    }
-    
-    .theme-modal,
-    .settings-modal {
-        position: fixed;
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior: auto;
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
-    }
-    
     .theme-modal-content,
     .settings-modal-content {
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior: auto;
-        will-change: transform;
-        -webkit-transform: translate3d(0, 0, 0);
-        transform: translate3d(0, 0, 0);
-        max-height: calc(100vh - env(safe-area-inset-top, 20px) - env(safe-area-inset-bottom, 20px) - 40px);
+        /* Modals beaucoup plus petits sur mobile */
+        width: calc(100% - 30px);
+        margin: 15px;
+        padding: 20px 15px;
+        max-height: calc(100vh - env(safe-area-inset-top, 20px) - env(safe-area-inset-bottom, 20px) - 100px);
+        /* Position plus centrée */
+        transform: scale(0.9);
+    }
+    
+    .theme-modal.show .theme-modal-content,
+    .settings-modal.show .settings-modal-content {
+        transform: scale(1);
+    }
+    
+    /* Headers plus compacts */
+    .theme-modal-header,
+    .settings-modal-header {
+        margin-bottom: 15px;
+    }
+    
+    .theme-modal-header h3,
+    .settings-modal-header h3 {
+        font-size: 1.3rem;
+        margin-bottom: 5px;
+    }
+    
+    .theme-modal-header p,
+    .settings-modal-header p {
+        font-size: 0.85rem;
+    }
+    
+    /* Grilles plus compactes */
+    .themes-grid,
+    .fonts-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+    
+    /* Options plus petites */
+    .theme-option,
+    .font-option {
+        padding: 8px 6px;
+    }
+    
+    .theme-circle {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .font-preview {
+        font-size: 1.2rem;
+    }
+    
+    .theme-name,
+    .font-name {
+        font-size: 0.75rem;
+    }
+    
+    /* Boutons de fermeture plus petits */
+    .close-theme-modal-btn,
+    .close-settings-modal-btn {
+        padding: 8px 15px;
+        font-size: 0.9rem;
     }
 }
 
-/* Corrections pour les problèmes de bounce scroll sur iOS */
-@supports (-webkit-touch-callout: none) {
-    @media (max-width: 480px) {
-        html, body {
-            overscroll-behavior: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .lock-screen {
-            position: fixed;
-            overflow: hidden;
-            overscroll-behavior: none;
-            touch-action: manipulation;
-            -webkit-overflow-scrolling: auto;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        .theme-modal,
-        .settings-modal {
-            position: fixed;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: auto;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        .theme-modal-content,
-        .settings-modal-content {
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: auto;
-            will-change: transform;
-            -webkit-transform: translate3d(0, 0, 0);
-            transform: translate3d(0, 0, 0);
-            max-height: calc(100vh - env(safe-area-inset-top, 20px) - env(safe-area-inset-bottom, 20px) - 40px);
-        }
-    }
-}
-
-/* ===== Optimisation finale pour bounce scroll iPhone ===== */
-
-/* Optimisation pour les gestes iPhone avec bounce scroll */
-@media (max-width: 480px) {
-    /* Page principale avec bounce scroll quand pas de mot de passe */
-    html:not(.password-mode), 
-    body:not(.password-screen-active) {
-        overscroll-behavior: auto !important;
-        -webkit-overflow-scrolling: touch !important;
+/* Pour les très très petits écrans */
+@media (max-width: 375px) {
+    .theme-modal-content,
+    .settings-modal-content {
+        width: calc(100% - 20px);
+        margin: 10px;
+        padding: 15px 12px;
+        max-height: calc(100vh - 80px);
+        border-radius: 15px;
     }
     
-    /* Container principal avec bounce scroll naturel */
-    .container:not(.password-screen-active *),
-    .main-content:not(.password-screen-active *) {
-        overscroll-behavior: auto;
-        -webkit-overflow-scrolling: touch;
+    .themes-grid,
+    .fonts-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
     }
     
-    /* Modals avec bounce scroll sur iPhone */
-    .theme-modal:not(.password-screen-active *),
-    .settings-modal:not(.password-screen-active *) {
-        overscroll-behavior: auto;
-        -webkit-overflow-scrolling: touch;
+    .theme-option,
+    .font-option {
+        padding: 6px 4px;
     }
     
-    .theme-modal-content:not(.password-screen-active *),
-    .settings-modal-content:not(.password-screen-active *) {
-        overscroll-behavior: auto;
-        -webkit-overflow-scrolling: touch;
-        scroll-behavior: smooth;
+    .theme-circle {
+        width: 24px;
+        height: 24px;
     }
     
-    /* Chat et messages avec bounce scroll */
-    .chat-messages:not(.password-screen-active *),
-    .chat-container:not(.password-screen-active *) {
-        overscroll-behavior: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-}
-
-/* Désactivation spécifique pendant l'écran de mot de passe */
-@supports (-webkit-touch-callout: none) {
-    body.password-screen-active,
-    body.password-screen-active * {
-        overscroll-behavior: none !important;
-        -webkit-overflow-scrolling: auto !important;
+    .font-preview {
+        font-size: 1rem;
     }
     
-    /* Seul l'écran de mot de passe reste fixe */
-    body.password-screen-active .lock-screen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 10000;
-        overscroll-behavior: none;
-        overflow: hidden;
+    .theme-name,
+    .font-name {
+        font-size: 0.7rem;
+    }
+    
+    .close-theme-modal-btn,
+    .close-settings-modal-btn {
+        padding: 6px 12px;
+        font-size: 0.85rem;
     }
 }
