@@ -1189,13 +1189,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /* Corrections pour les modals sur iPhone */
 @supports (-webkit-touch-callout: none) {
-    .theme-modal,
-    .settings-modal {
-        /* Empêche le bounce scroll sur iOS */
+    /* Bounce scroll autorisé par défaut sur iOS */
+    html, body {
+        overscroll-behavior: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Désactiver le bounce scroll uniquement pendant l'écran de mot de passe */
+    .lock-screen {
         position: fixed;
         overflow: hidden;
-        -webkit-overflow-scrolling: touch;
         overscroll-behavior: none;
+        touch-action: manipulation;
+        -webkit-overflow-scrolling: auto;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    .theme-modal,
+    .settings-modal {
+        /* Bounce scroll autorisé dans les modals */
+        position: fixed;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: auto;
         /* Prévention du zoom accidentel */
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
@@ -1203,9 +1218,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     .theme-modal-content,
     .settings-modal-content {
-        /* Améliore le scroll sur iOS */
+        /* Améliore le scroll sur iOS avec bounce */
         -webkit-overflow-scrolling: touch;
-        overscroll-behavior: contain;
+        overscroll-behavior: auto;
         /* Prévention des problèmes de positionnement */
         will-change: transform;
         /* Amélioration des performances sur iOS */
@@ -1223,8 +1238,9 @@ document.addEventListener('DOMContentLoaded', function() {
         width: calc(100% - 20px);
         max-width: none;
         margin: 10px;
-        padding: 25px 20px;
-        max-height: calc(100vh - env(safe-area-inset-top, 20px) - env(safe-area-inset-bottom, 20px) - 60px);
+        padding: 20px 15px;
+        /* Modals beaucoup moins hauts sur iPhone */
+        max-height: calc(100vh - env(safe-area-inset-top, 20px) - env(safe-area-inset-bottom, 20px) - 180px);
         /* Position plus haute pour éviter le clavier */
         transform: translateY(-10px) scale(0.95);
     }
