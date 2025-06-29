@@ -11,7 +11,7 @@
     <meta name="mobile-web-app-capable" content="no">
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="theme-color" content="#667eea">
+    <meta name="theme-color" content="#667eea" id="theme-color-meta">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Kalam:wght@300;400;700&family=Dancing+Script:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;900&display=swap" rel="stylesheet">
@@ -2003,6 +2003,9 @@
                 targetCircle.classList.add('active');
             }
 
+            // Mettre à jour la couleur de la barre de statut iPhone
+            updateThemeColor(themeName);
+
             // Utiliser le nouveau système de sauvegarde
             saveGlobalSetting('selectedTheme', themeName);
 
@@ -2100,6 +2103,10 @@
             // Charger tous les paramètres globaux
             loadGlobalSettings();
             
+            // S'assurer que la couleur de la barre de statut est correcte dès le démarrage
+            const currentTheme = localStorage.getItem('selectedTheme') || 'default';
+            updateThemeColor(currentTheme);
+            
             // Vérifier l'authentification au chargement de la page
             if (isAuthenticated()) {
                 // Si déjà authentifié, afficher quand même l'écran de chargement
@@ -2146,6 +2153,37 @@
                 });
             }
         });        
+        // Fonction pour mettre à jour la couleur de la barre de statut iPhone
+        function updateThemeColor(themeName) {
+            const themeColors = {
+                'default': '#667eea',
+                'yellow': '#b8860b',
+                'green': '#2e8b57',
+                'pink': '#da578b',
+                'red': '#cc4d4d',
+                'beige': '#8d6e63',
+                'lavender': '#7b1fa2',
+                'peach': '#ef6c00',
+                'mint': '#00796b'
+            };
+
+            const color = themeColors[themeName] || themeColors['default'];
+            
+            // Mettre à jour la meta tag theme-color
+            const themeColorMeta = document.getElementById('theme-color-meta');
+            if (themeColorMeta) {
+                themeColorMeta.setAttribute('content', color);
+            }
+
+            // Mettre à jour aussi la meta tag apple-mobile-web-app-status-bar-style pour iOS
+            let statusBarMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+            if (statusBarMeta) {
+                // Pour les thèmes sombres, utiliser "black-translucent"
+                const darkThemes = ['lavender', 'green', 'mint', 'beige'];
+                const style = darkThemes.includes(themeName) ? 'black-translucent' : 'default';
+                statusBarMeta.setAttribute('content', style);
+            }
+        }
     </script>
 </body>
 </html>
