@@ -1436,6 +1436,18 @@
         const passcodeDots = document.getElementById('passcodeDots');
         const keypadButtons = document.querySelectorAll('.keypad-button');
 
+        // Gestion du bounce scroll : désactiver quand écran de mot de passe affiché
+        function togglePasswordScreenMode(active) {
+            if (active) {
+                document.body.classList.add('password-screen-active');
+            } else {
+                document.body.classList.remove('password-screen-active');
+            }
+        }
+
+        // Initialiser : écran de mot de passe actif au démarrage
+        togglePasswordScreenMode(true);
+
         keypadButtons.forEach(button => {
             button.addEventListener('click', handleKeypadClick);
         });
@@ -1544,6 +1556,8 @@
 
             setTimeout(() => {
                 lockScreen.classList.add('hidden');
+                // Réactiver le bounce scroll quand on quitte l'écran de mot de passe
+                togglePasswordScreenMode(false);
                 loadingScreen.classList.add('show');
 
                 setTimeout(() => {
@@ -2090,6 +2104,8 @@
             if (isAuthenticated()) {
                 // Si déjà authentifié, afficher quand même l'écran de chargement
                 lockScreen.style.display = 'none';
+                // Réactiver le bounce scroll si déjà authentifié
+                togglePasswordScreenMode(false);
                 loadingScreen.classList.add('show');
                 
                 setTimeout(() => {
