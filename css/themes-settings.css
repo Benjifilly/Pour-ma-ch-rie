@@ -1183,4 +1183,487 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-*/
+
+
+/* ===== Adaptations spécifiques pour iPhone et iOS ===== */
+
+/* Corrections pour les modals sur iPhone */
+@supports (-webkit-touch-callout: none) {
+    .theme-modal,
+    .settings-modal {
+        /* Empêche le bounce scroll sur iOS */
+        position: fixed;
+        overflow: hidden;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: none;
+        /* Prévention du zoom accidentel */
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    .theme-modal-content,
+    .settings-modal-content {
+        /* Améliore le scroll sur iOS */
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        /* Prévention des problèmes de positionnement */
+        will-change: transform;
+        /* Amélioration des performances sur iOS */
+        -webkit-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+        /* Adaptation pour le clavier virtuel iOS */
+        max-height: calc(100vh - env(safe-area-inset-top, 20px) - env(safe-area-inset-bottom, 20px) - 40px);
+    }
+}
+
+/* Adaptations pour iPhone en orientation portrait */
+@media (max-width: 480px) and (orientation: portrait) {
+    .theme-modal-content,
+    .settings-modal-content {
+        width: calc(100% - 20px);
+        max-width: none;
+        margin: 10px;
+        padding: 25px 20px;
+        max-height: calc(100vh - env(safe-area-inset-top, 20px) - env(safe-area-inset-bottom, 20px) - 60px);
+        /* Position plus haute pour éviter le clavier */
+        transform: translateY(-10px) scale(0.95);
+    }
+    
+    .theme-modal.show .theme-modal-content,
+    .settings-modal.show .settings-modal-content {
+        transform: translateY(-10px) scale(1);
+    }
+    
+    .themes-grid,
+    .fonts-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+    
+    .theme-option,
+    .font-option {
+        padding: 12px 8px;
+    }
+    
+    .theme-circle {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .font-preview {
+        font-size: 1.5rem;
+    }
+    
+    .theme-name,
+    .font-name {
+        font-size: 0.8rem;
+    }
+}
+
+/* Adaptations pour iPhone en orientation paysage */
+@media (max-width: 768px) and (orientation: landscape) and (max-height: 500px) {
+    .theme-modal-content,
+    .settings-modal-content {
+        width: calc(100% - 40px);
+        max-width: 600px;
+        margin: 20px;
+        padding: 20px 25px;
+        max-height: calc(100vh - 40px);
+        /* Centrage vertical ajusté pour le paysage */
+        transform: translateY(0) scale(0.95);
+    }
+    
+    .theme-modal.show .theme-modal-content,
+    .settings-modal.show .settings-modal-content {
+        transform: translateY(0) scale(1);
+    }
+    
+    .theme-modal-header,
+    .settings-modal-header {
+        margin-bottom: 15px;
+    }
+    
+    .theme-modal-header h3,
+    .settings-modal-header h3 {
+        font-size: 1.4rem;
+        margin-bottom: 5px;
+    }
+    
+    .theme-modal-header p,
+    .settings-modal-header p {
+        font-size: 0.9rem;
+    }
+    
+    .themes-grid,
+    .fonts-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .theme-option,
+    .font-option {
+        padding: 10px 6px;
+    }
+    
+    .theme-circle {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .font-preview {
+        font-size: 1.3rem;
+    }
+    
+    .theme-name,
+    .font-name {
+        font-size: 0.75rem;
+    }
+}
+
+/* Adaptations pour les très petits iPhones (iPhone SE, etc.) */
+@media (max-width: 375px) {
+    .theme-modal-content,
+    .settings-modal-content {
+        width: calc(100% - 10px);
+        margin: 5px;
+        padding: 20px 15px;
+        border-radius: 20px;
+        max-height: calc(100vh - env(safe-area-inset-top, 20px) - env(safe-area-inset-bottom, 20px) - 40px);
+    }
+    
+    .themes-grid,
+    .fonts-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .theme-option,
+    .font-option {
+        padding: 10px 6px;
+    }
+    
+    .theme-circle {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .font-preview {
+        font-size: 1.4rem;
+    }
+    
+    .close-theme-modal-btn,
+    .close-settings-modal-btn {
+        padding: 10px 15px;
+        font-size: 0.95rem;
+    }
+}
+
+/* Adaptations pour iPhone avec encoche (iPhone X et plus récents) */
+@media (max-width: 480px) and (display-mode: standalone) {
+    .theme-modal,
+    .settings-modal {
+        /* Adaptation pour les encoches et zones sûres */
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        padding-left: env(safe-area-inset-left, 0px);
+        padding-right: env(safe-area-inset-right, 0px);
+    }
+    
+    .theme-modal-content,
+    .settings-modal-content {
+        margin: calc(10px + env(safe-area-inset-top, 0px)) 10px calc(10px + env(safe-area-inset-bottom, 0px)) 10px;
+        max-height: calc(100vh - env(safe-area-inset-top, 40px) - env(safe-area-inset-bottom, 40px) - 40px);
+    }
+}
+
+/* Correction pour le problème de viewport sur iOS Safari */
+@supports (-webkit-touch-callout: none) {
+    @media (max-width: 480px) {
+        .theme-modal,
+        .settings-modal {
+            height: 100vh;
+            height: 100dvh;
+            /* Empêche le redimensionnement lors de l'apparition du clavier */
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        .theme-modal-content,
+        .settings-modal-content {
+            /* Utilise la vraie hauteur de viewport sur iOS */
+            max-height: calc(100dvh - 60px);
+        }
+    }
+}
+
+/* Amélioration des performances d'animation sur iPhone */
+@media (max-width: 480px) {
+    .theme-modal-content,
+    .settings-modal-content {
+        /* Optimisation des animations pour mobile */
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        -webkit-perspective: 1000px;
+        perspective: 1000px;
+        /* Amélioration du rendu sur iOS */
+        -webkit-transform-style: preserve-3d;
+        transform-style: preserve-3d;
+    }
+    
+    .theme-option,
+    .font-option {
+        /* Optimisation des interactions tactiles */
+        -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
+        /* Amélioration de la responsivité */
+        transition: all 0.2s ease;
+    }
+    
+    .theme-option:active,
+    .font-option:active {
+        /* Feedback tactile immédiat */
+        transform: scale(0.95);
+        background: rgba(255, 255, 255, 0.15);
+    }
+}
+
+/* Correction pour les barres de défilement sur iPhone */
+@supports (-webkit-touch-callout: none) {
+    .theme-modal-content,
+    .settings-modal-content {
+        /* Masque les barres de défilement sur iOS */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    
+    .theme-modal-content::-webkit-scrollbar,
+    .settings-modal-content::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+    }
+}
+
+/* Adaptation pour le mode sombre iOS */
+@media (prefers-color-scheme: dark) and (max-width: 480px) {
+    .theme-modal-content,
+    .settings-modal-content {
+        /* Amélioration du contraste en mode sombre */
+        background: rgba(20, 20, 20, 0.95);
+        border: 2px solid rgba(255, 255, 255, 0.15);
+    }
+    
+    .theme-option,
+    .font-option {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .theme-option:hover,
+    .font-option:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+}
+
+/* Corrections pour le clavier virtuel iOS */
+@supports (-webkit-touch-callout: none) {
+    /* Quand le clavier est ouvert, ajuste la position du modal */
+    @media (max-width: 480px) and (max-height: 600px) {
+        .theme-modal-content,
+        .settings-modal-content {
+            /* Position plus haute quand le clavier est probablement ouvert */
+            transform: translateY(-20px) scale(0.9);
+            max-height: calc(100vh - 120px);
+        }
+        
+        .theme-modal.show .theme-modal-content,
+        .settings-modal.show .settings-modal-content {
+            transform: translateY(-20px) scale(1);
+        }
+    }
+}
+
+/* ===== Améliorations tactiles spécifiques iPhone ===== */
+
+/* Amélioration des zones de touch sur iPhone */
+@media (max-width: 480px) {
+    .close-theme-modal-btn,
+    .close-settings-modal-btn {
+        /* Zone de touch plus grande pour iPhone */
+        min-height: 44px;
+        padding: 12px 20px;
+        /* Amélioration de la visibilité */
+        font-weight: 600;
+        /* Espacement pour éviter les touches accidentelles */
+        margin-top: 10px;
+    }
+    
+    .theme-option,
+    .font-option {
+        /* Zone de touch optimale pour iPhone */
+        min-height: 60px;
+        /* Espacement entre les éléments */
+        margin-bottom: 2px;
+    }
+    
+    /* Amélioration du feedback visuel pour les touches */
+    .theme-option:active,
+    .font-option:active,
+    .close-theme-modal-btn:active,
+    .close-settings-modal-btn:active {
+        /* Feedback instantané sur iPhone */
+        transform: scale(0.97);
+        opacity: 0.8;
+        transition: all 0.1s ease;
+    }
+}
+
+/* Prévention du zoom sur les double-taps iPhone */
+@supports (-webkit-touch-callout: none) {
+    .theme-modal *,
+    .settings-modal * {
+        /* Empêche le zoom sur double-tap */
+        touch-action: manipulation;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+    
+    /* Permet la sélection sur les textes importants */
+    .theme-modal-header h3,
+    .theme-modal-header p,
+    .settings-modal-header h3,
+    .settings-modal-header p,
+    .theme-name,
+    .font-name {
+        -webkit-user-select: text;
+        user-select: text;
+    }
+}
+
+/* Optimisation pour les gestes iPhone */
+@media (max-width: 480px) {
+    .theme-modal,
+    .settings-modal {
+        /* Support des gestes de fermeture */
+        -webkit-overflow-scrolling: touch;
+        /* Prévention du bounce scroll */
+        overscroll-behavior-y: contain;
+    }
+    
+    .theme-modal-content,
+    .settings-modal-content {
+        /* Amélioration du scroll vertical */
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        /* Momentum scrolling sur iOS */
+        scroll-behavior: smooth;
+    }
+}
+
+/* Adaptations pour iPhone en mode PWA */
+@media (display-mode: standalone) and (max-width: 480px) {
+    .theme-modal,
+    .settings-modal {
+        /* Plein écran en mode PWA */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        /* Respect des zones sûres */
+        padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+    }
+    
+    .theme-modal-content,
+    .settings-modal-content {
+        /* Adaptation aux encoches iPhone */
+        margin: calc(env(safe-area-inset-top, 20px) + 10px) 15px calc(env(safe-area-inset-bottom, 20px) + 10px) 15px;
+        /* Hauteur adaptée aux zones sûres */
+        max-height: calc(100vh - env(safe-area-inset-top, 40px) - env(safe-area-inset-bottom, 40px) - 40px);
+    }
+}
+
+/* Corrections pour iOS Safari et l'interface utilisateur */
+@supports (-webkit-touch-callout: none) {
+    @media (max-width: 480px) {
+        /* Correction pour la barre d'adresse Safari qui disparaît */
+        .theme-modal,
+        .settings-modal {
+            height: 100vh;
+            height: 100dvh;
+            /* Force la hauteur même avec la barre d'adresse */
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+        
+        .theme-modal-content,
+        .settings-modal-content {
+            /* Utilise la vraie hauteur disponible */
+            max-height: calc(100dvh - 80px);
+        }
+    }
+}
+
+/* Amélioration de l'accessibilité sur iPhone */
+@media (max-width: 480px) {
+    .theme-option,
+    .font-option {
+        /* Amélioration du contraste pour iPhone */
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .theme-option.active,
+    .font-option.active {
+        /* Indicateur d'état plus visible */
+        border-color: rgba(255, 255, 255, 0.6);
+        box-shadow: 
+            0 0 0 2px rgba(255, 255, 255, 0.3),
+            0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    .close-theme-modal-btn,
+    .close-settings-modal-btn {
+        /* Amélioration de la visibilité du bouton de fermeture */
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Optimisation des animations pour iPhone */
+@media (max-width: 480px) and (prefers-reduced-motion: no-preference) {
+    .theme-modal-content,
+    .settings-modal-content {
+        /* Animations optimisées pour iPhone */
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    
+    .theme-option,
+    .font-option {
+        /* Animations plus douces sur mobile */
+        transition: all 0.2s ease-out;
+    }
+}
+
+/* Réduction des animations pour les utilisateurs qui préfèrent moins de mouvement */
+@media (max-width: 480px) and (prefers-reduced-motion: reduce) {
+    .theme-modal-content,
+    .settings-modal-content,
+    .theme-option,
+    .font-option,
+    .close-theme-modal-btn,
+    .close-settings-modal-btn {
+        /* Pas d'animations si préférence pour mouvement réduit */
+        transition: none;
+        animation: none;
+        transform: none !important;
+    }
+    
+    .theme-modal.show .theme-modal-content,
+    .settings-modal.show .settings-modal-content {
+        transform: none !important;
+    }
+}

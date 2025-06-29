@@ -5,22 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="manifest" href="manifest.json">
     <title>For My Beautiful Girlfriend</title>
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="no">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Mon Cœur">
-    <link rel="apple-touch-icon" sizes="180x180" href="images/ben_gene2.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="images/ben_gene2.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="images/ben_gene2.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="images/ben_gene2.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="images/ben_gene2.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="images/ben_gene2.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="images/ben_gene2.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="images/ben_gene2.png">
-    <link rel="apple-touch-icon" sizes="57x57" href="images/ben_gene2.png">
-    <link rel="icon" href="images/ben_gene2.png" type="image/png">    
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="no">
     <meta name="format-detection" content="telephone=no">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#667eea">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Kalam:wght@300;400;700&family=Dancing+Script:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;900&display=swap" rel="stylesheet">
@@ -50,12 +41,12 @@
         body {
             font-family: var(--main-font);
             background: var(--theme-gradient);
-            background-color: var(--theme-background-color); /* Couleur de fond selon le thème */
+            background-color: var(--theme-background-color); 
             background-attachment: fixed;
             min-height: 100vh;
             height: 100%;
             padding: 20px;
-            color: #333;
+            color: var(--text-primary);
             overflow: hidden;
             user-select: none;
             position: fixed;
@@ -63,18 +54,6 @@
             top: 0;
             left: 0;
             -webkit-overflow-scrolling: touch;
-            /* Prévention du scroll bounce sur iOS */
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-            -moz-user-select: none;
-            /* Empêcher le zoom sur iOS */
-            touch-action: manipulation;
-            /* Corrections PWA iPhone */
-            appearance: none;
-            -webkit-appearance: none;
-            -webkit-tap-highlight-color: transparent;
-            overscroll-behavior: none;
         }
 
         html, body {
@@ -1004,7 +983,8 @@
                 overscroll-behavior: none;
             }
         }
-          html::before {
+        
+        html::before {
             content: '';
             position: fixed;
             top: -50vh;
