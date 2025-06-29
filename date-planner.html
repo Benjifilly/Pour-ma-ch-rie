@@ -2512,50 +2512,74 @@
                 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
                 if (isIOS) {
-                    // Créer l'URL pour Google Calendar qui marchera aussi sur iOS
+                    // Utiliser les URL schemes iOS pour ouvrir l'app Calendrier directement
+                    // Format : calshow://[start_date] ou calendars://
+                    
+                    // Essayer d'abord avec le scheme natif iOS Calendrier
+                    const iosCalendarUrl = `calshow://${Math.floor(startDate.getTime() / 1000)}`;
+                    
+                    // Fallback vers Google Calendar si l'app native ne répond pas
                     const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${formatDate(startDate)}/${formatDate(endDate)}&location=${location}&details=${description}`;
                     
-                    // Essayer d'abord d'ouvrir l'app Calendrier native avec un événement spécifique
-                    const calendarData = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Date Planner//EN
-BEGIN:VEVENT
-UID:${date.id}@dateplanner.app
-DTSTART:${formatDate(startDate)}
-DTEND:${formatDate(endDate)}
-SUMMARY:${date.title}
-DESCRIPTION:${date.description || `Rendez-vous romantique proposé par ${date.proposedBy === 'ben' ? 'Ben' : 'Sanaa'}`}
-LOCATION:${date.location}
-END:VEVENT
-END:VCALENDAR`;
-
-                    // Créer un blob et un lien de téléchargement
-                    const blob = new Blob([calendarData], { type: 'text/calendar' });
-                    const url = URL.createObjectURL(blob);
+                    // Tentative d'ouverture de l'app Calendrier iOS
+                    let calendarOpened = false;
+                    
+                    // Créer un lien invisible pour tester l'ouverture
                     const link = document.createElement('a');
-                    link.href = url;
-                    link.download = `${date.title.replace(/[^a-z0-9]/gi, '_')}.ics`;
-                    
-                    // Tenter l'ouverture directe avec l'app calendrier
+                    link.href = iosCalendarUrl;
+                    link.style.display = 'none';
                     document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
                     
-                    // Fallback vers Google Calendar après un petit délai
-                    setTimeout(() => {
+                    // Gestionnaire pour détecter si l'app s'ouvre
+                    const startTime = Date.now();
+                    const timeout = setTimeout(() => {
+                        // Si l'app ne s'ouvre pas, utiliser Google Calendar
+                        if (!calendarOpened && Date.now() - startTime > 1000) {
+                            window.open(googleUrl, '_blank');
+                        }
+                    }, 1500);
+                    
+                    // Gestionnaire de visibilité pour détecter si l'app s'ouvre
+                    const handleVisibilityChange = () => {
+                        if (document.hidden) {
+                            calendarOpened = true;
+                            clearTimeout(timeout);
+                        }
+                    };
+                    
+                    document.addEventListener('visibilitychange', handleVisibilityChange, { once: true });
+                    
+                    // Tenter l'ouverture
+                    try {
+                        link.click();
+                        // Alternative avec window.location si le click ne marche pas
+                        setTimeout(() => {
+                            if (!calendarOpened) {
+                                window.location.href = iosCalendarUrl;
+                            }
+                        }, 100);
+                    } catch (e) {
+                        // Si ça échoue, utiliser Google Calendar directement
+                        clearTimeout(timeout);
                         window.open(googleUrl, '_blank');
-                    }, 500);
+                    }
+                    
+                    // Nettoyer
+                    setTimeout(() => {
+                        document.body.removeChild(link);
+                        document.removeEventListener('visibilitychange', handleVisibilityChange);
+                    }, 2000);
+                    
                 } else {
                     // Pour les autres appareils, utiliser Google Calendar
                     const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${formatDate(startDate)}/${formatDate(endDate)}&location=${location}&details=${description}`;
                     window.open(googleUrl, '_blank');
                 }
 
-                showNotification('Ajout au calendrier en cours...', 'success');
+                showNotification('Ouverture du calendrier...', 'success');
             } catch (error) {
-                console.error('Erreur lors de l\'ajout au calendrier:', error);
-                showNotification('Erreur lors de l\'ajout au calendrier', 'error');
+                console.error('Erreur lors de l\'ouverture du calendrier:', error);
+                showNotification('Erreur lors de l\'ouverture du calendrier', 'error');
             }
         }
 
