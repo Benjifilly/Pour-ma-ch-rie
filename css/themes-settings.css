@@ -1191,12 +1191,28 @@ document.addEventListener('DOMContentLoaded', function() {
 /* Corrections pour les modals sur iPhone */
 @supports (-webkit-touch-callout: none) {
     /* Bounce scroll autorisé par défaut sur iOS */
-    html, body {
-        overscroll-behavior: auto;
+    html {
+        overscroll-behavior-y: auto;
         -webkit-overflow-scrolling: touch;
+        /* Extension du fond pour couvrir complètement la barre de statut iOS */
+        min-height: calc(100vh + env(safe-area-inset-top));
+        padding-top: env(safe-area-inset-top);
+    }
+    
+    body {
+        overscroll-behavior-y: auto;
+        -webkit-overflow-scrolling: touch;
+        /* Padding pour éviter que le contenu soit masqué par la barre de statut */
+        padding-top: calc(20px + env(safe-area-inset-top));
     }
     
     /* Désactiver le bounce scroll uniquement pendant l'écran de mot de passe */
+    body.password-screen-active {
+        overflow: hidden;
+        overscroll-behavior: none;
+        -webkit-overflow-scrolling: auto;
+    }
+    
     body.password-screen-active .lock-screen,
     .lock-screen {
         position: fixed;
@@ -1211,6 +1227,9 @@ document.addEventListener('DOMContentLoaded', function() {
         right: 0;
         bottom: 0;
         z-index: 10000;
+        /* Extension du fond pour iOS */
+        min-height: calc(100vh + env(safe-area-inset-top));
+        padding-top: env(safe-area-inset-top);
     }
     
     .theme-modal,
@@ -1219,11 +1238,26 @@ document.addEventListener('DOMContentLoaded', function() {
         position: fixed;
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: auto;
-        /* Prévention du zoom accidentel */
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
-        /* Permet le scroll naturel sur iOS */
-        overflow: auto;
+        /* Extension pour iOS dans les modals aussi */
+        min-height: calc(100vh + env(safe-area-inset-top));
+        padding-top: env(safe-area-inset-top);
+    }
+    
+    /* Assurer que tous les éléments de fond s'étendent sur iOS */
+    html::before,
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--theme-gradient);
+        background-attachment: fixed;
+        z-index: -1;
+        /* Extension complète sur iOS */
+        min-height: calc(100vh + env(safe-area-inset-top) + env(safe-area-inset-bottom));
+        margin-top: calc(-1 * env(safe-area-inset-top));
     }
     
     .theme-modal-content,
