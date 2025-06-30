@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="manifest" href="manifest.json">
     <title>For My Beautiful Girlfriend</title>
-    <meta name="theme-color" id="theme-color-meta" content="#667eea">
+    <meta name="theme-color" id="theme-color-meta" content="">
     <meta name="apple-mobile-web-app-capable" content="no">
     <meta name="apple-mobile-web-app-title" content="Mon Cœur">
     <meta name="mobile-web-app-capable" content="no">
@@ -2044,21 +2044,33 @@
             const themeColorMeta = document.getElementById('theme-color-meta');
             if (!themeColorMeta) return;
             
-            // Couleurs pour chaque thème
-            const themeColors = {
-                'default': '#667eea',
-                'yellow': '#ffd54f',
-                'green': '#81c784',
-                'pink': '#f48fb1',
-                'red': '#ef5350',
-                'beige': '#dcc9a3',
-                'lavender': '#ce93d8',
-                'peach': '#ffb74d',
-                'mint': '#4db6ac'
-            };
+            // Récupérer la couleur directement depuis l'élément du thème
+            const themeCircle = document.getElementById(`theme-circle-${themeName}`);
+            let themeColor = '#667eea'; // Couleur par défaut (violet)
+            
+            if (themeCircle) {
+                // Récupérer la variable CSS --theme-color-1 du cercle de thème
+                const computedStyle = getComputedStyle(themeCircle);
+                themeColor = computedStyle.getPropertyValue('--theme-color-1').trim() || themeColor;
+            } else {
+                // Couleurs de secours au cas où l'élément n'est pas trouvé
+                const fallbackColors = {
+                    'default': '#667eea',
+                    'yellow': '#ffd54f',
+                    'green': '#81c784',
+                    'pink': '#f48fb1',
+                    'red': '#ef5350',
+                    'beige': '#dcc9a3',
+                    'lavender': '#ce93d8',
+                    'peach': '#ffb74d',
+                    'mint': '#4db6ac'
+                };
+                themeColor = fallbackColors[themeName] || fallbackColors.default;
+            }
             
             // Mettre à jour la couleur
-            themeColorMeta.setAttribute('content', themeColors[themeName] || themeColors.default);
+            themeColorMeta.setAttribute('content', themeColor);
+            console.log(`Barre de statut mise à jour: ${themeName} -> ${themeColor}`);
         }
 
         // Fonctions pour les paramètres
