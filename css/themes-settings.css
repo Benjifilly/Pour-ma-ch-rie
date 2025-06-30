@@ -811,7 +811,6 @@ body .chat-messages .message.bot .message-bubble {
     /* Espace supplémentaire pour tous les mobiles */
     .bottom-spacing {
         padding-bottom: calc(120px + env(safe-area-inset-bottom, 40px)); /* Plus d'espace sur mobile */
-        background: var(--theme-gradient);
     }
 }
 
@@ -843,7 +842,6 @@ body .chat-messages .message.bot .message-bubble {
     /* Encore plus d'espace pour les très petits écrans */
     .bottom-spacing {
         padding-bottom: calc(140px + env(safe-area-inset-bottom, 50px)); /* Maximum d'espace pour très petits écrans */
-        background: var(--theme-gradient);
     }
 }
 
@@ -895,7 +893,6 @@ body .chat-messages .message.bot .message-bubble {
 
     .bottom-spacing {
         padding-bottom: calc(150px + env(safe-area-inset-bottom, 60px)); /* Maximum d'espace en standalone */
-        background: var(--theme-gradient);
     }
     
     .container::after {

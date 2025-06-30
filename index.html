@@ -9,8 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="Mon Cœur">
     <meta name="mobile-web-app-capable" content="no">
     <meta name="format-detection" content="telephone=no">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="transparent" id="theme-color-meta">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Kalam:wght@300;400;700&family=Dancing+Script:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;900&display=swap" rel="stylesheet">
@@ -1039,7 +1038,7 @@
 
             .bottom-spacing {
                 padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px));
-                background: var(--theme-gradient);
+                background-color: transparent;
             }
             
             .container::after {
@@ -1063,6 +1062,7 @@
         .bottom-spacing {
             height: 80px;
             padding-bottom: env(safe-area-inset-bottom, 20px);
+            background-color: transparent;
         }
 
         /* Secret Message Styles */
@@ -2029,9 +2029,6 @@
                 targetCircle.classList.add('active');
             }
 
-            // Mettre à jour la couleur de la barre de statut iPhone
-            updateThemeColor(themeName);
-
             // Utiliser le nouveau système de sauvegarde
             saveGlobalSetting('selectedTheme', themeName);
 
@@ -2129,10 +2126,6 @@
             // Charger tous les paramètres globaux
             loadGlobalSettings();
             
-            // S'assurer que la couleur de la barre de statut est correcte dès le démarrage
-            const currentTheme = localStorage.getItem('selectedTheme') || 'default';
-            updateThemeColor(currentTheme);
-            
             // Vérifier l'authentification au chargement de la page
             if (isAuthenticated()) {
                 // Si déjà authentifié, afficher quand même l'écran de chargement
@@ -2179,22 +2172,7 @@
                 });
             }
         });        
-        // Fonction pour masquer la barre de statut iPhone
-        function updateThemeColor(themeName) {
-            // Masquer la barre de statut en utilisant la couleur transparente
-            const themeColorMeta = document.getElementById('theme-color-meta');
-            if (themeColorMeta) {
-                // Utiliser une couleur transparente pour masquer la barre
-                themeColorMeta.setAttribute('content', 'transparent');
-            }
 
-            // Configurer la barre de statut pour qu'elle soit masquée
-            let statusBarMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
-            if (statusBarMeta) {
-                // black-translucent masque la barre de statut
-                statusBarMeta.setAttribute('content', 'black-translucent');
-            }
-        }
     </script>
 </body>
 </html>
