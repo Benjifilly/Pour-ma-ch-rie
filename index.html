@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="manifest" href="manifest.json">
     <title>For My Beautiful Girlfriend</title>
+    <meta name="theme-color" id="theme-color-meta" content="#667eea">
     <meta name="apple-mobile-web-app-capable" content="no">
     <meta name="apple-mobile-web-app-title" content="Mon Cœur">
     <meta name="mobile-web-app-capable" content="no">
@@ -2029,10 +2030,35 @@
                 targetCircle.classList.add('active');
             }
 
+            // Mise à jour de la couleur de la barre de statut sur iOS
+            updateStatusBarColor(themeName);
+
             // Utiliser le nouveau système de sauvegarde
             saveGlobalSetting('selectedTheme', themeName);
 
             closeThemeModal();
+        }
+        
+        // Fonction pour mettre à jour la couleur de la barre de statut iOS
+        function updateStatusBarColor(themeName) {
+            const themeColorMeta = document.getElementById('theme-color-meta');
+            if (!themeColorMeta) return;
+            
+            // Couleurs pour chaque thème
+            const themeColors = {
+                'default': '#667eea',
+                'yellow': '#ffd54f',
+                'green': '#81c784',
+                'pink': '#f48fb1',
+                'red': '#ef5350',
+                'beige': '#dcc9a3',
+                'lavender': '#ce93d8',
+                'peach': '#ffb74d',
+                'mint': '#4db6ac'
+            };
+            
+            // Mettre à jour la couleur
+            themeColorMeta.setAttribute('content', themeColors[themeName] || themeColors.default);
         }
 
         // Fonctions pour les paramètres
@@ -2081,7 +2107,25 @@
         function loadGlobalSettings() {
             // Charger le thème
             const savedTheme = localStorage.getItem('selectedTheme') || 'default';
-            changeTheme(savedTheme);
+            
+            // Appliquer le thème sans fermer le modal (pour éviter la fermeture au chargement)
+            document.body.classList.remove(
+                'theme-default', 'theme-yellow', 'theme-green', 'theme-pink', 
+                'theme-red', 'theme-beige', 'theme-lavender', 'theme-peach', 'theme-mint'
+            );
+            document.body.classList.add(`theme-${savedTheme}`);
+            
+            // Mettre à jour la barre de statut
+            updateStatusBarColor(savedTheme);
+            
+            // Mise à jour visuelle des cercles de thèmes
+            document.querySelectorAll('.theme-circle').forEach(circle => {
+                circle.classList.remove('active');
+            });
+            const targetCircle = document.getElementById(`theme-circle-${savedTheme}`);
+            if (targetCircle) {
+                targetCircle.classList.add('active');
+            }
 
             // Charger la font
             const savedFont = localStorage.getItem('selectedFont') || 'default';
@@ -2120,7 +2164,24 @@
                 }
             } else if (e.key === 'selectedTheme') {
                 const newTheme = e.newValue || 'default';
-                changeTheme(newTheme);
+                // Appliquer le thème sans fermer de modal
+                document.body.classList.remove(
+                    'theme-default', 'theme-yellow', 'theme-green', 'theme-pink', 
+                    'theme-red', 'theme-beige', 'theme-lavender', 'theme-peach', 'theme-mint'
+                );
+                document.body.classList.add(`theme-${newTheme}`);
+                
+                // Mise à jour de la barre de statut
+                updateStatusBarColor(newTheme);
+                
+                // Mise à jour visuelle
+                document.querySelectorAll('.theme-circle').forEach(circle => {
+                    circle.classList.remove('active');
+                });
+                const targetCircle = document.getElementById(`theme-circle-${newTheme}`);
+                if (targetCircle) {
+                    targetCircle.classList.add('active');
+                }
             }
         });        document.addEventListener('DOMContentLoaded', function() {
             // Charger tous les paramètres globaux
