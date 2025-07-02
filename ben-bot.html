@@ -980,12 +980,9 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
                 if (typeof marked !== 'undefined') {
                     processedHtml = marked.parse(text);
                 } else {
-                    // Fallback simple pour le markdown si marked.js n'est pas disponible
-                    processedHtml = text
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                        .replace(/`(.*?)`/g, '<code>$1</code>')
-                        .replace(/\n/g, '<br>');
+                    // Message d'erreur au lieu du fallback simple
+                    console.error("La bibliothèque marked.js n'est pas disponible");
+                    processedHtml = "<p>ERREUR: Le formatage du texte n'est pas disponible car marked.js n'est pas chargé.</p>" + text.replace(/\n/g, '<br>');
                 }
             }
             
@@ -1057,13 +1054,20 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
                     puterAI = puter.ai;
                     console.log('Puter.js initialisé avec succès');
                     updateChatStatus('online');
+                    console.log('True'); // Pour vérifier dans la console
+                    return true;
                 } else {
-                    throw new Error('Puter.js non disponible');
+                    console.error('Puter.js non disponible');
+                    updateChatStatus('offline');
+                    addMessage("Erreur: Ben-Bot ne peut pas fonctionner car Puter.js n'est pas disponible. Vérifie ta connexion et rafraîchis la page.");
+                    return false;
                 }
             } catch (error) {
                 console.error('Erreur initialisation Puter:', error);
                 puterAI = null;
                 updateChatStatus('offline');
+                addMessage("Erreur: Ben-Bot ne peut pas fonctionner car une erreur s'est produite lors de l'initialisation de Puter.js. Vérifie ta connexion et rafraîchis la page.");
+                return false;
             }
         }
 
@@ -1268,8 +1272,9 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
             }
         });            async function displayStreamingResponse(userMessage) {
             if (!puterAI) {
-                const response = "Désolé ma chérie, Ben-Bot a un problème technique. Envoie moi un message.";
+                const response = "ERREUR: Ben-Bot ne fonctionne pas car Puter.js n'est pas correctement chargé. Vérifie ta connexion et rafraîchis la page.";
                 addMessage(response);
+                console.error("* Load failed - puterAI non disponible");
                 return response;
             }
 
@@ -1311,6 +1316,11 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
                         // Démarrer le streaming
                         (async () => {
                             try {
+                                // Vérifier une dernière fois que puterAI est disponible
+                                if (!puterAI) {
+                                    throw new Error("puterAI n'est pas disponible");
+                                }
+                                
                                 const stream = await puterAI.chat([
                                     {
                                         role: 'system',
@@ -1334,21 +1344,11 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
                                 }
 
                             } catch (streamError) {
-                                console.log('Streaming non disponible, utilisation du mode normal');
-                                const response = await puterAI.chat([
-                                    {
-                                        role: 'system',
-                                        content: context
-                                    }
-                                ], {
-                                    model: 'gpt-4o-mini',
-                                    stream: false
-                                });
-                                fullResponse = response.message?.content || "Je t'aime ma chérie";
-                                const processed = processMarkdownAndStickers(fullResponse);
-                                streamingBubble.innerHTML = processed.text;
-                                streamingStickers.innerHTML = processed.stickers;
-                                console.log('Response non-streaming:', fullResponse);
+                                console.error('Erreur de streaming:', streamError);
+                                // Pas de tentative de fallback, afficher directement un message d'erreur
+                                fullResponse = "ERREUR: Ben-Bot ne peut pas répondre car Puter.js a rencontré une erreur lors du streaming. Message d'erreur: " + streamError.message;
+                                streamingBubble.innerHTML = fullResponse;
+                                throw streamError;
                             }
 
                             console.log('Full response final:', fullResponse);
@@ -1378,25 +1378,30 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
                         })().catch(error => {
                             console.error('Erreur dans le streaming:', error);
                             hideTyping();
-                            const fallbackResponse = "Désolé mon coeur, Ben-Bot a un problème technique. Envoie moi un message.";
-                            addMessage(fallbackResponse);
+                            const errorResponse = "ERREUR: Ben-Bot ne peut pas répondre car Puter.js a rencontré une erreur. Message d'erreur: " + error.message;
+                            // Mettre à jour le message déjà créé
+                            if (streamingBubble) {
+                                streamingBubble.textContent = errorResponse;
+                            } else {
+                                addMessage(errorResponse);
+                            }
                             reject(error);
                         });
                     }, 1000); // Attendre 1 seconde avant de masquer l'indicateur
 
                 } catch (error) {
                     console.error('Erreur streaming complète:', error);
-                    const fallbackResponse = "Désolé mon coeur, Ben-Bot a un problème technique. Envoie moi un message.";
+                    const errorResponse = "ERREUR: Ben-Bot ne peut pas répondre car Puter.js a rencontré une erreur. Message d'erreur: " + error.message;
                     hideTyping();
-                    addMessage(fallbackResponse);
-                    reject(fallbackResponse);
+                    addMessage(errorResponse);
+                    reject(errorResponse);
                 }
             });
         }
 
         async function getBenResponse(userMessage) {
             if (!puterAI) {
-                return "Désolé ma chérie, Ben-Bot a un problème technique. Envoie moi un message.";
+                return "ERREUR: Ben-Bot ne peut pas fonctionner car Puter.js n'est pas disponible. Vérifie ta connexion et rafraîchis la page.";
             }
 
             try {                let context = benjaminPersonality + '\n\nHistorique de conversation:\n';
@@ -1435,7 +1440,7 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
                   
             } catch (error) {
                 console.error('Erreur Puter.js:', error);
-                return "Désolé mon coeur, Ben-Bot a un problème technique. Envoie moi un message.";
+                return "ERREUR: Ben-Bot ne peut pas répondre car Puter.js a rencontré une erreur. Message d'erreur: " + error.message;
             }
         }        async function sendMessage() {
             const content = chatInput.value.trim();
@@ -1455,13 +1460,13 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
                     await displayStreamingResponse(content);
                 } else {
                     hideTyping();
-                    addMessage("Désolé ma chérie, Ben-Bot a un problème technique. Envoie moi un message.");
+                    addMessage("ERREUR: Ben-Bot ne peut pas fonctionner car Puter.js n'est pas disponible. Vérifie ta connexion et rafraîchis la page.");
                 }
                 
             } catch (error) {
                 console.error('Erreur lors de l\'envoi:', error);
                 hideTyping();
-                addMessage("Désolé mon coeur, j'ai un petit souci... Envoie moi un message.");
+                addMessage("ERREUR: Ben-Bot ne peut pas traiter cette requête car Puter.js a rencontré une erreur. Vérifie ta connexion et rafraîchis la page.");
             } finally {
                 sendButton.disabled = false;
                 chatInput.focus();

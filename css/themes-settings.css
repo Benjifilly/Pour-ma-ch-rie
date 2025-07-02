@@ -1527,130 +1527,64 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 }
 
-/* ===== Modals plus petits sur très petits écrans ===== */
+/* ===== STYLES POUR LES STATUTS DES RENDEZ-VOUS ===== */
 
-/* Réduire la taille des modals sur petits écrans */
-@media (max-width: 480px) {
-    .theme-modal-content,
-    .settings-modal-content {
-        /* Modals beaucoup plus petits sur mobile */
-        width: calc(100% - 30px);
-        margin: 15px;
-        padding: 20px 15px;
-        max-height: calc(100vh - env(safe-area-inset-top, 20px) - env(safe-area-inset-bottom, 20px) - 100px);
-        /* Position plus centrée */
-        transform: scale(0.9);
-    }
-    
-    .theme-modal.show .theme-modal-content,
-    .settings-modal.show .settings-modal-content {
-        transform: scale(1);
-    }
-    
-    /* Headers plus compacts */
-    .theme-modal-header,
-    .settings-modal-header {
-        margin-bottom: 15px;
-    }
-    
-    .theme-modal-header h3,
-    .settings-modal-header h3 {
-        font-size: 1.3rem;
-        margin-bottom: 5px;
-    }
-    
-    .theme-modal-header p,
-    .settings-modal-header p {
-        font-size: 0.85rem;
-    }
-    
-    /* Grilles plus compactes */
-    .themes-grid,
-    .fonts-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-        margin-bottom: 15px;
-    }
-    
-    /* Options plus petites */
-    .theme-option,
-    .font-option {
-        padding: 8px 6px;
-    }
-    
-    .theme-circle {
-        width: 28px;
-        height: 28px;
-    }
-    
-    .font-preview {
-        font-size: 1.2rem;
-    }
-    
-    .theme-name,
-    .font-name {
-        font-size: 0.75rem;
-    }
-    
-    /* Boutons de fermeture plus petits */
-    .close-theme-modal-btn,
-    .close-settings-modal-btn {
-        padding: 8px 15px;
-        font-size: 0.9rem;
-    }
+/* Statut proposé */
+.date-card.proposed .date-status.status-proposed {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
-/* Pour les très très petits écrans */
-@media (max-width: 375px) {
-    .theme-modal-content,
-    .settings-modal-content {
-        width: calc(100% - 20px);
-        margin: 10px;
-        padding: 15px 12px;
-        max-height: calc(100vh - 80px);
-        border-radius: 15px;
-    }
-    
-    .themes-grid,
-    .fonts-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 6px;
-    }
-    
-    .theme-option,
-    .font-option {
-        padding: 6px 4px;
-    }
-    
-    .theme-circle {
-        width: 24px;
-        height: 24px;
-    }
-    
-    .font-preview {
-        font-size: 1rem;
-    }
-    
-    .theme-name,
-    .font-name {
-        font-size: 0.7rem;
-    }
-    
-    .close-theme-modal-btn,
-    .close-settings-modal-btn {
-        padding: 6px 12px;
-        font-size: 0.85rem;
-    }
+/* Statut confirmé */
+.date-card.confirmed .date-status.status-confirmed {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
-/* Règle spécifique pour garantir le bounce scroll sur iOS */
-* {
-    -webkit-overflow-scrolling: touch;
+/* Statut en attente */
+.date-card.pending .date-status.status-pending {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
-/* Container principal avec bounce scroll */
-.container, .main-content {
-    /* Force le bounce scroll sur iOS */
-    -webkit-overflow-scrolling: touch !important;
-    overscroll-behavior-y: auto !important;
+/* Statut annulé */
+.date-card.cancelled .date-status.status-cancelled {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Statut archivé */
+.date-card.archived {
+    opacity: 0.7;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.date-card.archived .date-status.status-archived {
+    background: rgba(107, 114, 128, 0.15);
+    color: #6b7280;
+    border: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+.date-card.archived .date-title {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.date-card.archived .date-info {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+/* Bouton spécifique pour désarchiver */
+.btn.btn-info {
+    background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+    color: white;
+}
+
+.btn.btn-info:hover {
+    background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(107, 114, 128, 0.3);
 }

@@ -827,59 +827,7 @@
             transform: rotate(90deg) scale(0.95);
         }
 
-        /* Styles pour les notifications */
-        .notification {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 12px;
-            padding: 16px 20px;
-            color: #1f2937;
-            font-weight: 500;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
-            transform: translateX(400px);
-            transition: all 0.4s ease;
-            z-index: 10000;
-            max-width: 300px;
-            min-width: 250px;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification.success {
-            border-left: 4px solid #22c55e;
-            background: rgba(34, 197, 94, 0.1);
-        }
-
-        .notification.error {
-            border-left: 4px solid #ef4444;
-            background: rgba(239, 68, 68, 0.1);
-        }
-
-        .notification.warning {
-            border-left: 4px solid #f59e0b;
-            background: rgba(245, 158, 11, 0.1);
-        }
-
-        @media (max-width: 480px) {
-            .notification {
-                top: 60px;
-                right: 10px;
-                left: 10px;
-                max-width: none;
-                min-width: auto;
-                transform: translateY(-100px);
-            }
-            
-            .notification.show {
-                transform: translateY(0);
-            }
-        }
+        /* Les styles pour les notifications sont définis dans modals-unified.css */
 
         /* Styles pour le modal */
         .modal {
@@ -1313,38 +1261,7 @@
             }
         }
 
-        /* Notification styles */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            padding: 15px 20px;
-            color: var(--text-primary);
-            z-index: 3000;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification.success {
-            border-left: 4px solid #4ade80;
-        }
-
-        .notification.error {
-            border-left: 4px solid #f87171;
-        }
-
-        .notification.warning {
-            border-left: 4px solid #fbbf24;
-        }
+        /* Les styles des notifications sont déjà définis plus haut */
 
         /* ===== Corrections pour l'autocomplete ===== */
         /* Empêche les suggestions automatiques de modifier l'apparence des inputs */
@@ -1542,6 +1459,10 @@
             box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
         }
     </style>
+    
+    <!-- EmailJS pour les notifications par email -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript" src="js/emailjs-integration.js"></script>
 </head>
 <body>
     <a href="index.html" class="back-button" title="Retour à l'accueil">
@@ -1611,15 +1532,6 @@
                         <textarea id="dateDescription" name="description" class="form-textarea" placeholder="Tu veux faire quoi exactement ?"></textarea>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="dateProposedBy">Proposé par</label>
-                        <select id="dateProposedBy" name="proposedBy" class="form-select" required>
-                            <option value="">Qui propose ?</option>
-                            <option value="ben">Ben</option>
-                            <option value="sanaa">Sanaa</option>
-                        </select>
-                    </div>
-
                     <button type="submit" class="btn">
                         <i class="fas fa-heart"></i>
                         Proposer ce rendez-vous
@@ -1646,6 +1558,7 @@
                         <option value="confirmed">Confirmés</option>
                         <option value="pending">En attente</option>
                         <option value="cancelled">Annulés</option>
+                        <option value="archived">Archivés</option>
                     </select>
                 </div>
 
@@ -1808,6 +1721,9 @@
                 <h3>Paramètres</h3>
                 <p>Dis-moi si t'en veux d'autres 😽</p>
             </div>
+            <div class="user-status-container">
+                <div id="connectedUserIndicator" class="connected-user-indicator"></div>
+            </div>
             <div class="fonts-grid">
                 <div class="font-option active" id="font-option-default" onclick="changeFont('default')">
                     <div class="font-preview" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">Abc</div>
@@ -1851,6 +1767,43 @@
                 </div>
                        </div>
             <button class="close-settings-modal-btn" onclick="closeSettingsModal()">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Modal pour désarchiver un rendez-vous -->
+    <div class="theme-modal" id="unarchiveModal">
+        <div class="theme-modal-content">
+            <div class="theme-modal-header">
+                <h3>Désarchiver le rendez-vous</h3>
+                <p>Choisis une nouvelle date et heure pour ce rendez-vous 😊</p>
+            </div>
+            
+            <div id="unarchivePreview" style="margin-bottom: 20px; padding: 15px; background: rgba(255, 255, 255, 0.1); border-radius: 10px; color: white;">
+                <!-- Le contenu sera rempli dynamiquement -->
+            </div>
+            
+            <form id="unarchiveForm">
+                <input type="hidden" id="unarchiveDateId" name="dateId">
+                
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label class="form-label" for="unarchiveDate" style="color: white; display: block; margin-bottom: 5px;">Nouvelle date</label>
+                    <input type="date" id="unarchiveDate" name="date" class="form-input" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.1); color: white;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label class="form-label" for="unarchiveTime" style="color: white; display: block; margin-bottom: 5px;">Nouvelle heure</label>
+                    <input type="time" id="unarchiveTime" name="time" class="form-input" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.1); color: white;">
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="close-theme-modal-btn" onclick="closeUnarchiveModal()" style="flex: 1; background: rgba(255, 255, 255, 0.1);">
+                        <i class="fas fa-times"></i> Annuler
+                    </button>
+                    <button type="submit" class="close-theme-modal-btn" style="flex: 1; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="fas fa-box-open"></i> Désarchiver
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -1941,23 +1894,89 @@
 
         // Fonction pour afficher une notification
         function showNotification(message, type = 'success') {
+            // Supprimer les notifications existantes si besoin
+            const existingNotifications = document.querySelectorAll('.notification');
+            if (existingNotifications.length > 0) {
+                existingNotifications.forEach(notif => {
+                    if (notif.parentNode) {
+                        notif.parentNode.removeChild(notif);
+                    }
+                });
+            }
+            
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
+            notification.setAttribute('role', 'alert');
+            notification.setAttribute('aria-live', 'assertive');
+            
+            // Utilisation d'une icône adaptée au type de notification
+            let icon = 'check-circle';
+            if (type === 'error') icon = 'exclamation-circle';
+            else if (type === 'warning') icon = 'exclamation-triangle';
+            else if (type === 'info') icon = 'info-circle';
+            
             notification.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'exclamation-triangle'}"></i>
+                <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                    <i class="fas fa-${icon}" style="font-size: 1.1em;"></i>
                     <span>${message}</span>
                 </div>
+                <button class="close-notification" aria-label="Fermer">
+                    <i class="fas fa-times"></i>
+                </button>
             `;
             
+            // Ajout au corps du document
             document.body.appendChild(notification);
             
-            setTimeout(() => notification.classList.add('show'), 100);
+            // Délai pour permettre l'affichage de la notification
+            setTimeout(() => notification.classList.add('show'), 10);
             
+            // Fonction pour fermer la notification avec animation
+            const closeNotification = () => {
+                // Ajouter la classe hide qui contient l'animation de sortie
+                notification.classList.add('hide');
+                
+                // Supprimer l'élément après la fin de l'animation
+                const handleAnimationEnd = () => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                    notification.removeEventListener('animationend', handleAnimationEnd);
+                };
+                
+                notification.addEventListener('animationend', handleAnimationEnd);
+                
+                // Fallback au cas où l'événement animationend ne se déclencherait pas
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 700);
+            };
+            
+            // Fermer en cliquant sur la notification
+            notification.addEventListener('click', (e) => {
+                if (e.target !== notification.querySelector('.close-notification') && 
+                    !notification.querySelector('.close-notification').contains(e.target)) {
+                    closeNotification();
+                }
+            });
+            
+            // Ajout d'un gestionnaire d'événements pour le bouton de fermeture
+            const closeButton = notification.querySelector('.close-notification');
+            if (closeButton) {
+                closeButton.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Éviter la propagation au clic sur la notification
+                    closeNotification();
+                });
+            }
+            
+            // Fermeture automatique après 5 secondes
             setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => document.body.removeChild(notification), 300);
-            }, 3000);
+                if (document.body.contains(notification)) {
+                    closeNotification();
+                }
+            }, 5000);
         }
 
         // Charger les rendez-vous depuis l'API
@@ -2043,6 +2062,28 @@
             const container = document.getElementById('datesContainer');
             const statusFilter = document.getElementById('statusFilter').value;
             
+            // Archiver automatiquement les rendez-vous passés
+            const now = new Date();
+            let hasArchivedDates = false;
+            
+            datesData.forEach(date => {
+                if (date.date && date.time && date.status !== 'archived') {
+                    const dateTime = new Date(`${date.date}T${date.time}`);
+                    if (dateTime < now) {
+                        date.status = 'archived';
+                        hasArchivedDates = true;
+                    }
+                }
+            });
+            
+            // Sauvegarder si des dates ont été archivées
+            if (hasArchivedDates) {
+                lastDatesHash = JSON.stringify(datesData);
+                saveDatesToOnline().catch(error => {
+                    console.error('Erreur lors de la sauvegarde des archives:', error);
+                });
+            }
+            
             // Filtrer les rendez-vous et exclure ceux avec des données manquantes
             let filteredDates = datesData.filter(date => {
                 // Vérifier que les données essentielles existent
@@ -2126,7 +2167,7 @@
                     
                     <div class="date-actions">
                         ${getActionButtons(date)}
-                        ${date.status !== 'cancelled' ? `
+                        ${date.status !== 'cancelled' && date.status !== 'archived' ? `
                             <button class="btn btn-small btn-calendar" onclick="addToCalendar('${date.id}')">
                                 <i class="fas fa-calendar-plus"></i> Calendrier
                             </button>
@@ -2142,7 +2183,8 @@
                 proposed: 'Proposé',
                 confirmed: 'Confirmé',
                 pending: 'En attente',
-                cancelled: 'Annulé'
+                cancelled: 'Annulé',
+                archived: 'Archivé'
             };
             return statusTexts[status] || status;
         }
@@ -2170,7 +2212,15 @@
                 `;
             }
             
-            if (date.status !== 'cancelled') {
+            if (date.status === 'archived') {
+                buttons += `
+                    <button class="btn btn-small btn-info" onclick="unarchiveDate('${date.id}')">
+                        <i class="fas fa-box-open"></i> Désarchiver
+                    </button>
+                `;
+            }
+            
+            if (date.status !== 'cancelled' && date.status !== 'archived') {
                 buttons += `
                     <button class="btn btn-small btn-edit" onclick="editDate('${date.id}')">
                         <i class="fas fa-edit"></i> Modifier
@@ -2195,9 +2245,12 @@
             const time = formData.get('time');
             const location = formData.get('location');
             const category = formData.get('category');
-            const proposedBy = formData.get('proposedBy');
+            
+            // Utiliser automatiquement l'utilisateur connecté
+            const currentUser = sessionStorage.getItem('currentUser') || 'Benjamin';
+            const proposedBy = currentUser.toLowerCase() === 'benjamin' ? 'ben' : 'sanaa';
 
-            if (!title || !date || !time || !location || !category || !proposedBy) {
+            if (!title || !date || !time || !location || !category) {
                 showNotification('Veuillez remplir tous les champs obligatoires', 'error');
                 return;
             }
@@ -2222,6 +2275,20 @@
                 await saveDatesToOnline();
                 displayDates();
                 
+                // Envoyer une notification par email à l'autre utilisateur
+                if (typeof notifyUserByEmail === 'function') {
+                    notifyUserByEmail({
+                        action: 'create',
+                        date: newDate
+                    }).then(success => {
+                        if (success) {
+                            console.log('Email de notification envoyé avec succès');
+                        } else {
+                            console.warn('L\'envoi de l\'email de notification a échoué');
+                        }
+                    });
+                }
+                
                 showNotification('Rendez-vous proposé avec succès ! 💕');
             } catch (error) {
                 // Retirer le rendez-vous de la liste en cas d'erreur
@@ -2241,6 +2308,21 @@
                     lastDatesHash = JSON.stringify(datesData);
                     await saveDatesToOnline();
                     displayDates();
+                    
+                    // Envoyer une notification par email pour la confirmation
+                    if (typeof notifyUserByEmail === 'function') {
+                        notifyUserByEmail({
+                            action: 'confirm',
+                            date: datesData[dateIndex]
+                        }).then(success => {
+                            if (success) {
+                                console.log('Email de notification pour confirmation envoyé avec succès');
+                            } else {
+                                console.warn('L\'envoi de l\'email de notification pour confirmation a échoué');
+                            }
+                        });
+                    }
+                    
                     showNotification('Rendez-vous confirmé ! 🎉');
                 } catch (error) {
                     // Restaurer le statut original en cas d'erreur
@@ -2261,6 +2343,21 @@
                     lastDatesHash = JSON.stringify(datesData);
                     await saveDatesToOnline();
                     displayDates();
+                    
+                    // Envoyer une notification par email pour le refus
+                    if (typeof notifyUserByEmail === 'function') {
+                        notifyUserByEmail({
+                            action: 'cancel',
+                            date: datesData[dateIndex]
+                        }).then(success => {
+                            if (success) {
+                                console.log('Email de notification pour refus envoyé avec succès');
+                            } else {
+                                console.warn('L\'envoi de l\'email de notification pour refus a échoué');
+                            }
+                        });
+                    }
+                    
                     showNotification('Rendez-vous refusé.', 'warning');
                 } catch (error) {
                     // Restaurer le statut original en cas d'erreur
@@ -2285,6 +2382,137 @@
                 } catch (error) {
                     // Restaurer le statut original en cas d'erreur
                     datesData[dateIndex].status = originalStatus;
+                    displayDates();
+                }
+            }
+        }
+
+        // Désarchiver un rendez-vous archivé
+        function unarchiveDate(dateId) {
+            const date = datesData.find(d => d.id === dateId);
+            if (!date) return;
+            
+            // Préparer l'aperçu du rendez-vous à désarchiver
+            const formattedDate = new Date(date.date).toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            const categoryEmoji = {
+                restaurant: '🍽️',
+                cinema: '🎬',
+                promenade: '🚶‍♀️',
+                sport: '🏃‍♀️',
+                culture: '🎭',
+                detente: '🛁',
+                voyage: '✈️',
+                surprise: '🎁',
+                autre: '❤️'
+            };
+
+            const proposerName = date.proposedBy === 'ben' ? 'Ben' : 'Sanaa';
+
+            const previewHTML = `
+                <h4>${categoryEmoji[date.category]} ${date.title}</h4>
+                <p><i class="fas fa-calendar"></i> ${formattedDate}</p>
+                <p><i class="fas fa-clock"></i> ${date.time}</p>
+                <p><i class="fas fa-map-marker-alt"></i> ${date.location}</p>
+                <p><i class="fas fa-user"></i> Proposé par ${proposerName}</p>
+            `;
+
+            document.getElementById('unarchivePreview').innerHTML = previewHTML;
+            document.getElementById('unarchiveDateId').value = dateId;
+            
+            // Préremplir avec la date et heure actuelles
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            const currentTime = now.toTimeString().slice(0, 5);
+            
+            document.getElementById('unarchiveDate').value = today;
+            document.getElementById('unarchiveTime').value = currentTime;
+            document.getElementById('unarchiveDate').min = today;
+            
+            openUnarchiveModal();
+        }
+
+        // Ouvrir le modal de désarchivage
+        function openUnarchiveModal() {
+            const modal = document.getElementById('unarchiveModal');
+            const content = modal.querySelector('.theme-modal-content');
+            
+            modal.style.display = 'flex';
+            modal.classList.remove('closing');
+            content.classList.remove('animate-out');
+            
+            requestAnimationFrame(() => {
+                modal.classList.add('show');
+                content.classList.add('animate-in');
+            });
+        }
+
+        // Fermer le modal de désarchivage
+        function closeUnarchiveModal() {
+            const modal = document.getElementById('unarchiveModal');
+            const content = modal.querySelector('.theme-modal-content');
+            
+            modal.classList.add('closing');
+            content.classList.remove('animate-in');
+            content.classList.add('animate-out');
+            
+            setTimeout(() => {
+                modal.classList.remove('show', 'closing');
+                modal.style.display = 'none';
+                content.classList.remove('animate-out');
+            }, 300);
+        }
+
+        // Confirmer le désarchivage avec nouvelle date/heure
+        async function confirmUnarchiveDate(formData) {
+            const dateId = formData.get('dateId');
+            const newDate = formData.get('date');
+            const newTime = formData.get('time');
+            
+            if (!newDate || !newTime) {
+                showNotification('Veuillez remplir la date et l\'heure', 'error');
+                return;
+            }
+            
+            const dateIndex = datesData.findIndex(d => d.id === dateId);
+            if (dateIndex !== -1) {
+                const originalData = { ...datesData[dateIndex] };
+                
+                try {
+                    datesData[dateIndex].status = 'proposed';
+                    datesData[dateIndex].date = newDate;
+                    datesData[dateIndex].time = newTime;
+                    datesData[dateIndex].updatedAt = new Date().toISOString();
+                    
+                    lastDatesHash = JSON.stringify(datesData);
+                    await saveDatesToOnline();
+                    
+                    // Envoyer une notification par email pour le désarchivage
+                    if (typeof notifyUserByEmail === 'function') {
+                        notifyUserByEmail({
+                            action: 'unarchive',
+                            date: datesData[dateIndex],
+                            customMessage: `Le rendez-vous a été désarchivé et déplacé au ${new Date(newDate).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} à ${newTime}.`
+                        }).then(success => {
+                            if (success) {
+                                console.log('Email de notification pour désarchivage envoyé avec succès');
+                            } else {
+                                console.warn('L\'envoi de l\'email de notification pour désarchivage a échoué');
+                            }
+                        });
+                    }
+                    
+                    displayDates();
+                    closeUnarchiveModal();
+                    showNotification('Rendez-vous désarchivé avec la nouvelle date ! 📅', 'success');
+                } catch (error) {
+                    // Restaurer les données originales en cas d'erreur
+                    datesData[dateIndex] = originalData;
                     displayDates();
                 }
             }
@@ -2467,6 +2695,10 @@
                 const originalData = { ...datesData[dateIndex] }; // Sauvegarde pour restauration
                 
                 try {
+                    // Sauvegarder les données originales pour comparer les changements
+                    const oldData = { ...datesData[dateIndex] };
+                    
+                    // Mettre à jour avec les nouvelles valeurs
                     datesData[dateIndex] = {
                         ...datesData[dateIndex],
                         title: title,
@@ -2478,8 +2710,40 @@
                         updatedAt: new Date().toISOString()
                     };
                     
+                    // Préparer un résumé des modifications pour l'email
+                    const changes = [];
+                    if (oldData.title !== title) changes.push(`Titre: "${oldData.title}" → "${title}"`);
+                    if (oldData.date !== date) {
+                        const oldFormatted = new Date(oldData.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+                        const newFormatted = new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+                        changes.push(`Date: ${oldFormatted} → ${newFormatted}`);
+                    }
+                    if (oldData.time !== time) changes.push(`Heure: ${oldData.time} → ${time}`);
+                    if (oldData.location !== location) changes.push(`Lieu: "${oldData.location}" → "${location}"`);
+                    if (oldData.category !== category) changes.push(`Catégorie: ${oldData.category} → ${category}`);
+                    if (oldData.description !== formData.get('description')) changes.push(`Description modifiée`);
+                    
                     lastDatesHash = JSON.stringify(datesData);
                     await saveDatesToOnline();
+                    
+                    // Envoyer une notification par email avec les détails des modifications
+                    if (typeof notifyUserByEmail === 'function') {
+                        const changesMessage = changes.length > 0 ? 
+                            `\n\nModifications:\n• ${changes.join('\n• ')}` : '';
+                            
+                        notifyUserByEmail({
+                            action: 'update',
+                            date: datesData[dateIndex],
+                            customMessage: changesMessage
+                        }).then(success => {
+                            if (success) {
+                                console.log('Email de notification pour modification envoyé avec succès');
+                            } else {
+                                console.warn('L\'envoi de l\'email de notification pour modification a échoué');
+                            }
+                        });
+                    }
+                    
                     displayDates();
                     closeEditModal();
                     showNotification('Rendez-vous modifié avec succès !');
@@ -2665,6 +2929,16 @@
             loadGlobalSettings();
             loadDatesFromOnline();
             
+            // Initialiser EmailJS
+            if (typeof initEmailJS === 'function') {
+                initEmailJS();
+            }
+            
+            // Définir un utilisateur par défaut si pas défini
+            if (!sessionStorage.getItem('currentUser')) {
+                sessionStorage.setItem('currentUser', 'Benjamin'); // Par défaut Benjamin
+            }
+            
             // Actualiser toutes les 5 minutes (300 secondes) au lieu de 30 secondes
             setInterval(loadDatesFromOnline, 300000);
             
@@ -2732,6 +3006,13 @@
                 await saveEdit(formData);
             });
             
+            // Formulaire de désarchivage
+            document.getElementById('unarchiveForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                await confirmUnarchiveDate(formData);
+            });
+            
             // Filtre de statut
             document.getElementById('statusFilter').addEventListener('change', displayDates);
             
@@ -2742,13 +3023,100 @@
                 }
             });
             
+            // Fermer modal de désarchivage en cliquant à l'extérieur
+            document.getElementById('unarchiveModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeUnarchiveModal();
+                }
+            });
+            
             // Fermer modal avec Escape
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
                     closeEditModal();
+                    closeUnarchiveModal();
                 }
             });
         });
+
+        /**
+         * Vérifie si l'utilisateur est authentifié et si la session est encore valide
+         * Nettoie la session si elle est expirée et redirige vers la page de connexion
+         * @returns {boolean} - true si l'utilisateur est authentifié et la session est valide
+         */
+        function isAuthenticated() {
+            const isAuth = sessionStorage.getItem('isAuthenticated');
+            const authTime = sessionStorage.getItem('authTime');
+            const currentUser = sessionStorage.getItem('currentUser');
+            
+            // Vérifier que toutes les données d'authentification sont présentes
+            if (!isAuth || !authTime || !currentUser) {
+                console.log("Données d'authentification incomplètes");
+                cleanupAuthSession();
+                return false;
+            }
+            
+            // Vérifier si la session n'a pas expiré (24 heures)
+            const now = Date.now();
+            const authTimestamp = parseInt(authTime);
+            const twentyFourHours = 24 * 60 * 60 * 1000;
+            
+            if (isNaN(authTimestamp) || now - authTimestamp > twentyFourHours) {
+                console.log("Session expirée");
+                cleanupAuthSession();
+                return false;
+            }
+            
+            // Mettre à jour le timestamp d'authentification à chaque vérification réussie
+            // pour prolonger la session tant que l'utilisateur est actif
+            sessionStorage.setItem('authTime', Date.now().toString());
+            return isAuth === 'true';
+        }
+        
+        /**
+         * Nettoie les données de session et redirige vers la page de connexion
+         */
+        function cleanupAuthSession() {
+            sessionStorage.removeItem('isAuthenticated');
+            sessionStorage.removeItem('authTime');
+            sessionStorage.removeItem('currentUser');
+            
+            // Redirection vers la page de connexion avec un délai pour permettre
+            // l'affichage de notifications si nécessaire
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 500);
+        }
+        
+        window.addEventListener('load', function() {
+            if (!isAuthenticated()) {
+                // Redirection vers la page de connexion si non authentifié
+                console.log("Session expirée ou utilisateur non connecté");
+                window.location.href = 'index.html?redirect=date-planner.html';
+                return;
+            }
+            
+            // Mettre à jour l'heure d'authentification pour prolonger la session
+            sessionStorage.setItem('authTime', Date.now().toString());
+            
+            // Charger tous les paramètres globaux
+            loadGlobalSettings();
+            
+            // Afficher l'utilisateur connecté dans l'interface si l'élément existe
+            const currentUser = sessionStorage.getItem('currentUser') || 'Benjamin';
+            const userBadge = document.getElementById('userBadge');
+            if (userBadge) {
+                const userIcon = currentUser.toLowerCase() === 'benjamin' ? 
+                    '<i class="fas fa-user-circle"></i>' : 
+                    '<i class="fas fa-heart"></i>';
+                userBadge.innerHTML = `${userIcon} ${currentUser}`;
+                userBadge.classList.add(currentUser.toLowerCase() === 'benjamin' ? 'user-benjamin' : 'user-sanaa');
+            }
+        });
+
+        function goBackToIndex() {
+            window.location.href = 'index.html';
+        }
 
         // Fonctions pour les modals de thème et paramètres avec animations
         function openThemeModal() {
@@ -2806,6 +3174,23 @@
         function openSettingsModal() {
             const modal = document.getElementById('settingsModal');
             const content = modal.querySelector('.settings-modal-content');
+            
+            // Afficher l'utilisateur connecté
+            const currentUser = sessionStorage.getItem('currentUser') || 'Benjamin';
+            const userIndicator = document.getElementById('connectedUserIndicator');
+            
+            if (userIndicator) {
+                // Choisir une icône appropriée selon l'utilisateur
+                const userIcon = currentUser === 'Benjamin' ? 
+                    '<i class="fas fa-user-circle" style="margin-right: 8px;"></i>' : 
+                    '<i class="fas fa-heart" style="margin-right: 8px;"></i>';
+                
+                // Mise en forme améliorée avec icône
+                userIndicator.innerHTML = `${userIcon}Connecté en tant que <strong>${currentUser}</strong>`;
+                
+                // Plus besoin des classes spécifiques puisque nous avons une couleur unique
+                userIndicator.classList.remove('user-benjamin', 'user-sanaa');
+            }
             
             modal.style.display = 'flex';
             modal.classList.remove('closing');

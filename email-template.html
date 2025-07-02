@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #764ba2;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            font-size: 22px;
+            margin-top: 5px;
+            color: #333;
+        }
+        .date-card {
+            background-color: #f9f9f9;
+            border-left: 4px solid #764ba2;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .date-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .date-info {
+            margin: 5px 0;
+        }
+        .label {
+            font-weight: bold;
+            color: #666;
+        }
+        .message-box {
+            background-color: #f0f0f0;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-style: italic;
+            color: #555;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+        @media screen and (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            .button {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <p class="logo">Notification</p>
+        <h1>{{subject}}</h1>
+    </div>
+    
+    <p>Coucouuu {{to_name}},</p>
+    
+    <p>{{message}}</p>
+    
+    <div class="date-card">
+        <div class="date-title">{{date_title}}</div>
+        <p class="date-info"><span class="label">📅 Date :</span> {{date_day}}</p>
+        <p class="date-info"><span class="label">⏰ Heure :</span> {{date_time}}</p>
+        <p class="date-info"><span class="label">📍 Lieu :</span> {{date_location}}</p>
+        <p class="date-info"><span class="label">🏷️ Catégorie :</span> {{date_category}}</p>
+        
+        <p class="date-info"><span class="label">📝 Description :</span> {{date_description}}</p>
+    </div>
+    
+    <div style="text-align: center;">
+        <a href="https://benjifilly.github.io/Pour-ma-ch-rie/" class="button">
+            Voir tous les rendez-vous
+        </a>
+    </div>
+    
+    <div class="footer">
+        <p>De la part de {{from_name}} ({{from_email}})</p>
+    </div>
+</body>
+</html>
+
+<!--
+Configuration EmailJS:
+- Subject: {{subject}}
+- To Email: {{to_email}}  
+- From Name: {{from_name}}
+- Reply To: {{reply_to}}
+-->

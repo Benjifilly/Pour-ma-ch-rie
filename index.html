@@ -287,9 +287,18 @@
         }
 
         .theme-button,
-        .settings-button
+        .settings-button,
+        .logout-button
         {
-            display: none;
+            display: flex;
+        }
+
+        .theme-button.hidden,
+        .settings-button.hidden,
+        .logout-button.hidden
+        {
+            opacity: 0;
+            visibility: hidden;
         }
 
         .container {
@@ -659,6 +668,63 @@
             margin-bottom: 10px;
             text-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
+
+        .section-title-with-refresh {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .refresh-button {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .refresh-button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .refresh-button:active {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .refresh-button.spinning {
+            pointer-events: none;
+        }
+
+        .refresh-button.spinning i {
+            animation: spin 1s linear;
+        }
+
+        .refresh-button:disabled {
+            opacity: 0.4;
+            background: rgba(255, 255, 255, 0.05);
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
         
         .notes-horizontal-container {
             display: flex;
@@ -815,11 +881,13 @@
             text-shadow: 0 1px 3px rgba(255, 255, 255, 0.3);
             word-break: break-word;
             overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            line-clamp: 2;
-            -webkit-box-orient: vertical;
             margin-bottom: 4px;
+        }
+
+        .note-meta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .note-date {
@@ -827,6 +895,259 @@
             font-size: 0.75rem;
             font-weight: 300;
             text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .note-author {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.7rem;
+            font-weight: 400;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            opacity: 0.8;
+        }
+        
+        /* Styles pour le bouton "Voir plus" */
+        .load-more-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .load-more-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .load-more-btn:active {
+            transform: translateY(0) scale(0.98);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .load-more-btn i {
+            font-size: 1.5rem;
+            opacity: 0.9;
+        }
+        
+        @media (max-width: 768px) {
+            .load-more-btn {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .load-more-btn i {
+                font-size: 1.2rem;
+            }
+        }
+        
+        /* Styles pour le modal de note */
+        .note-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        
+        .note-modal.show {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        
+        .note-modal.closing {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.55, 0.055, 0.675, 0.19);
+        }
+        
+        .note-modal-content {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 85vh;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .note-modal.show .note-modal-content {
+            transform: translateY(0);
+        }
+        
+        .note-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .note-modal-header h3 {
+            color: white;
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        
+        .note-modal-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .note-modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .note-modal-body {
+            padding: 20px;
+            color: white;
+            overflow-y: auto;
+            flex-grow: 1;
+            max-height: calc(85vh - 60px); /* hauteur max du modal moins la hauteur du header */
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+        }
+        
+        /* Styles pour les scrollbars sur Chrome/Safari */
+        .note-modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .note-modal-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .note-modal-body::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+        }
+        
+        .note-detail-content {
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .note-detail-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 10px;
+            margin-top: 15px;
+        }
+        
+        /* Styles spécifiques pour mobiles et iOS */
+        @media (max-width: 768px) {
+            .note-modal-content {
+                width: 95%;
+                max-height: 80vh;
+                border-radius: 12px;
+            }
+            
+            .note-modal-body {
+                padding: 15px;
+                -webkit-overflow-scrolling: touch; /* Amélioration du défilement pour iOS */
+            }
+            
+            /* Assurer que les boutons sont suffisamment grands pour être facilement touchés sur mobile */
+            .note-modal-close {
+                width: 36px;
+                height: 36px;
+                font-size: 1.3rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .note-detail-content {
+                font-size: 0.95rem;
+                margin-bottom: 10px;
+            }
+            
+            .note-modal-header h3 {
+                font-size: 1.1rem;
+            }
+            
+            .connected-user-indicator {
+                font-size: 0.9rem;
+                padding: 8px 15px;
+                max-width: 260px;
+            }
+        }
+        
+        /* Styles pour l'indicateur d'utilisateur connecté */
+        .connected-user-indicator {
+            background: linear-gradient(135deg, rgba(127, 0, 255, 0.15) 0%, rgba(73, 58, 217, 0.25) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 10px 18px;
+            margin-top: 20px;
+            font-size: 1rem;
+            color: white;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: inline-block;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .user-status-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            padding: 0 15px;
         }
 
         .delete-note {
@@ -932,6 +1253,20 @@
             .card-content {
                 padding: 20px;
             }
+            
+            .section-title-with-refresh {
+                gap: 15px;
+            }
+            
+            .refresh-button {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+            
+            .notes-title {
+                font-size: 1.6rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -955,6 +1290,21 @@
             
             .card-description {
                 font-size: 0.9rem;
+            }
+            
+            .section-title-with-refresh {
+                gap: 12px;
+            }
+            
+            .refresh-button {
+                width: 34px;
+                height: 34px;
+                font-size: 0.85rem;
+            }
+            
+            .notes-title {
+                font-size: 1.4rem;
+                margin-bottom: 0;
             }
         }
         
@@ -1029,7 +1379,8 @@
             }
             
             .settings-button,
-            .theme-button {
+            .theme-button,
+            .logout-button {
                 top: calc(40px + env(safe-area-inset-top, 0px));
             }
 
@@ -1250,6 +1601,52 @@
                 left: auto !important;
             }
         }
+
+        /* Styles pour le bouton logout */
+        .logout-button {
+            position: fixed;
+            top: calc(40px + env(safe-area-inset-top, 0px));
+            left: 140px; /* Positionnement après les boutons thème et paramètres (20px + 50px + 10px + 50px + 10px) */
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .logout-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 768px) {
+            .logout-button {
+                width: 45px;
+                height: 45px;
+                font-size: 1rem;
+                left: 130px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logout-button {
+                width: 40px;
+                height: 40px;
+                font-size: 0.9rem;
+                left: 120px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1293,11 +1690,14 @@
     </div>
     
     <!-- Boutons fixes en dehors de main-content -->
-    <button class="theme-button" id="themeButton" onclick="openThemeModal()" title="Changer le thème">
+    <button class="theme-button hidden" id="themeButton" onclick="openThemeModal()" title="Changer le thème">
         <i class="fas fa-palette"></i>
     </button>
-    <button class="settings-button" id="settingsButton" onclick="openSettingsModal()" title="Paramètres">
+    <button class="settings-button hidden" id="settingsButton" onclick="openSettingsModal()" title="Paramètres">
         <i class="fas fa-cog"></i>
+    </button>
+    <button class="logout-button hidden" id="logoutButton" onclick="logout()" title="Se déconnecter">
+        <i class="fas fa-sign-out-alt"></i>
     </button>
     
     <div class="main-content" id="mainContent">
@@ -1312,7 +1712,12 @@
         <div class="separator"></div>
 
         <div class="notes-section">
-            <h2 class="notes-title">💭 Notes ensemble 💭</h2>
+            <div class="section-title-with-refresh">
+                <h2 class="notes-title">💭 Notes ensemble 💭</h2>
+                <button class="refresh-button" id="refreshNotesButton" onclick="refreshNotes()" title="Actualiser les notes">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
               <div class="notes-horizontal-container">
                 <div class="notes-input-item">
                     <input type="text" id="noteInput" placeholder="buhbuhbuh" maxlength="200">
@@ -1406,6 +1811,9 @@
             <div class="settings-modal-header">
                 <h3>Paramètres</h3>
                 <p>Dis-moi si t'en veux d'autres 😽</p>
+            </div>
+            <div class="user-status-container">
+                <div id="connectedUserIndicator" class="connected-user-indicator"></div>
             </div>
             <div class="fonts-grid">
                 <div class="font-option active" id="font-option-default" onclick="changeFont('default')">
@@ -1508,7 +1916,13 @@
         }
 
         function checkPasscode() {
-            if (enteredPasscode === correctPasscode || enteredPasscode === '300807') {
+            if (enteredPasscode === correctPasscode) {
+                // Benjamin se connecte (100907)
+                sessionStorage.setItem('currentUser', 'Benjamin');
+                showLoadingScreen();
+            } else if (enteredPasscode === '300807') {
+                // Sanaa se connecte (300807)
+                sessionStorage.setItem('currentUser', 'Sanaa');
                 showLoadingScreen();
             } else if (enteredPasscode === '211223') {
                 showSecretMessage();
@@ -1579,26 +1993,47 @@
             sessionStorage.setItem('isAuthenticated', 'true');
             sessionStorage.setItem('authTime', new Date().getTime().toString());
 
+            // Réinitialiser complètement les états
+            const lockScreen = document.getElementById('lockScreen');
+            const loadingScreen = document.getElementById('loadingScreen');
+            const mainContent = document.getElementById('mainContent');
+            
+            // S'assurer que l'écran de chargement est dans un état propre
+            loadingScreen.classList.remove('show', 'fade-out');
+            loadingScreen.style.display = 'none';
+            
+            // Masquer l'écran de verrouillage
             lockScreen.classList.add('fade-out');
 
             setTimeout(() => {
                 lockScreen.classList.add('hidden');
+                lockScreen.style.display = 'none';
+                
                 // Réactiver le bounce scroll quand on quitte l'écran de mot de passe
                 togglePasswordScreenMode(false);
+                
+                // Afficher l'écran de chargement
+                loadingScreen.style.display = 'flex';
                 loadingScreen.classList.add('show');
 
                 setTimeout(() => {
                     loadingScreen.classList.add('fade-out');
-                      setTimeout(() => {
+                    
+                    setTimeout(() => {
                         loadingScreen.style.display = 'none';
+                        loadingScreen.classList.remove('show', 'fade-out');
+                        
+                        // Afficher le contenu principal
                         mainContent.classList.add('show');
                         document.body.style.overflow = 'auto';
 
                         // Afficher les boutons fixes après l'authentification
                         const themeButton = document.getElementById('themeButton');
                         const settingsButton = document.getElementById('settingsButton');
-                        if (themeButton) themeButton.style.display = 'flex';
-                        if (settingsButton) settingsButton.style.display = 'flex';
+                        const logoutButton = document.getElementById('logoutButton');
+                        if (themeButton) themeButton.classList.remove('hidden');
+                        if (settingsButton) settingsButton.classList.remove('hidden');
+                        if (logoutButton) logoutButton.classList.remove('hidden');
 
                         const kissButton = document.getElementById('kissButton');
                         kissButton.classList.add('visible');
@@ -1817,8 +2252,12 @@
                 binId: atob("NjgzMmQ4MzU4OTYwYzk3OWE1YTBkOTRi")
             },
             saveMode: 'hybrid'
-        };        let notesData = [];
-        let lastNotesHash = '';        
+        };        
+        let notesData = [];
+        let lastNotesHash = '';
+        let notesPerPage = 9;  // Nombre de notes à afficher initialement
+        let notesIncrement = 10;  // Nombre de notes à ajouter à chaque "Voir plus"
+        let currentPage = 1;
 
         async function loadNotesFromOnline() {
             if (CONFIG.saveMode === 'local') {
@@ -1904,17 +2343,42 @@
                 return;
             }
 
-            notesList.innerHTML = notesData.map((note, index) => `
-                <div class="note-item" data-note-id="${note.id}" style="animation-delay: ${index * 0.1}s">
+            // Calculer le nombre total de notes à afficher
+            // Première page: notesPerPage (9) notes, puis +notesIncrement (10) à chaque page suivante
+            const totalNotes = currentPage === 1 ? notesPerPage : notesPerPage + (currentPage - 1) * notesIncrement;
+            const displayedNotes = notesData.slice(0, Math.min(totalNotes, notesData.length));
+
+            // Générer le HTML pour chaque note
+            notesList.innerHTML = displayedNotes.map((note, index) => `
+                <div class="note-item" data-note-id="${note.id}" onclick="showNoteDetails('${note.id}')" style="animation-delay: ${index * 0.1}s">
                     <div class="note-info">
                         <div class="note-content">${note.content}</div>
-                        <div class="note-date">${note.date}</div>
+                        <div class="note-meta">
+                            <span class="note-date">${note.date}</span>
+                            ${note.author ? `<span class="note-author">• ${note.author === 'Benjamin' ? 'B' : 'S'}</span>` : ''}
+                        </div>
                     </div>
-                    <button class="delete-note" onclick="deleteNote('${note.id}')" title="Supprimer cette note">
+                    <button class="delete-note" onclick="deleteNote('${note.id}'); event.stopPropagation();" title="Supprimer cette note">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
             `).join('');
+            
+            // Ajouter le bouton "Voir plus" si nécessaire
+            if (notesData.length > displayedNotes.length) {
+                const loadMoreBtn = document.createElement('button');
+                loadMoreBtn.className = 'load-more-btn';
+                loadMoreBtn.innerHTML = '<i class="fas fa-plus"></i>';
+                loadMoreBtn.onclick = () => {
+                    currentPage++;
+                    displayNotes();
+                };
+                notesList.appendChild(loadMoreBtn);
+                
+                // Afficher le nombre de notes restantes
+                const restantes = notesData.length - displayedNotes.length;
+                loadMoreBtn.setAttribute('title', `Afficher ${Math.min(notesIncrement, restantes)} notes supplémentaires (${restantes} restantes)`);
+            }
         }        
 
         async function addNote() {
@@ -1929,9 +2393,13 @@
                 return;
             }
 
+            // Récupérer l'utilisateur actuel
+            const currentUser = sessionStorage.getItem('currentUser') || 'Benjamin'; // Par défaut Benjamin
+
             const newNote = {
                 id: Date.now().toString(),
                 content: content,
+                author: currentUser,
                 date: new Date().toLocaleString('fr-FR', {
                     day: '2-digit',
                     month: '2-digit',
@@ -1939,40 +2407,78 @@
                     hour: '2-digit',
                     minute: '2-digit'
                 })
-            };            notesData.unshift(newNote); 
+            };
+            
+            // Ajouter la nouvelle note au début du tableau
+            notesData.unshift(newNote); 
             noteInput.value = '';
 
             // Mettre à jour le hash pour éviter le rechargement inutile
             lastNotesHash = JSON.stringify(notesData);
 
             await saveNotesToOnline();
-
-            const notesList = document.getElementById('notesList');
-
+            
+            // Gérer l'affichage des notes après l'ajout
             if (notesData.length === 1) {
+                // S'il n'y avait pas de notes avant, on affiche simplement la nouvelle note
                 displayNotes();
             } else {
-                const newNoteHTML = `
-                    <div class="note-item new-note" data-note-id="${newNote.id}">
-                        <div class="note-info">
-                            <div class="note-content">${newNote.content}</div>
-                            <div class="note-date">${newNote.date}</div>
-                        </div>
-                        <button class="delete-note" onclick="deleteNote('${newNote.id}')" title="Supprimer cette note">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-
-                if (notesList.querySelector('.no-notes')) {
-                    notesList.innerHTML = newNoteHTML;
+                // Gestion de la pagination lors de l'ajout d'une note
+                if (currentPage !== 1) {
+                    // Si nous ne sommes pas sur la première page,
+                    // revenir à la première page pour afficher la nouvelle note
+                    currentPage = 1;
+                    displayNotes();
+                    
+                    // Faire défiler la liste vers le haut pour voir la nouvelle note
+                    const notesContainer = document.querySelector('.notes-horizontal-container');
+                    if (notesContainer) notesContainer.scrollLeft = 0;
+                    return;
+                }
+                
+                const notesList = document.getElementById('notesList');
+                
+                // Si nous avons déjà atteint la limite de notes par page
+                // et que nous sommes sur la première page
+                if (notesList.querySelectorAll('.note-item').length >= notesPerPage) {
+                    // On réaffiche simplement toutes les notes avec la pagination
+                    // La nouvelle note remplacera la dernière note visible
+                    displayNotes();
                 } else {
-                    notesList.insertAdjacentHTML('afterbegin', newNoteHTML);
+                    // S'il y a encore de la place, on insère la nouvelle note sans recharger toute la liste
+                    const newNoteHTML = `
+                        <div class="note-item new-note" data-note-id="${newNote.id}" onclick="showNoteDetails('${newNote.id}')">
+                            <div class="note-info">
+                                <div class="note-content">${newNote.content}</div>
+                                <div class="note-meta">
+                                    <span class="note-date">${newNote.date}</span>
+                                    <span class="note-author">• ${newNote.author === 'Benjamin' ? 'B' : 'S'}</span>
+                                </div>
+                            </div>
+                            <button class="delete-note" onclick="deleteNote('${newNote.id}'); event.stopPropagation();" title="Supprimer cette note">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+
+                    if (notesList.querySelector('.no-notes')) {
+                        notesList.innerHTML = newNoteHTML;
+                    } else {
+                        // Ajouter au début de la liste
+                        notesList.insertAdjacentHTML('afterbegin', newNoteHTML);
+                        
+                        // Si la liste contient un bouton "Voir plus", on s'assure qu'il reste à la fin
+                        const loadMoreBtn = notesList.querySelector('.load-more-btn');
+                        if (loadMoreBtn) {
+                            notesList.appendChild(loadMoreBtn);
+                        }
+                    }
                 }
             }
 
+            // Faire défiler la liste vers le haut pour voir la nouvelle note
             const notesContainer = document.querySelector('.notes-horizontal-container');
-            notesContainer.scrollLeft = 0;
+            if (notesContainer) notesContainer.scrollLeft = 0;
         }        
 
         async function deleteNote(noteId) {
@@ -1992,10 +2498,60 @@
             }
         }
 
+        // Fonction pour actualiser manuellement les notes
+        async function refreshNotes() {
+            const refreshButton = document.getElementById('refreshNotesButton');
+            
+            // Empêcher les clics multiples pendant le refresh
+            if (refreshButton.classList.contains('spinning')) {
+                return;
+            }
+            
+            // Animation de rotation
+            refreshButton.classList.add('spinning');
+            refreshButton.disabled = true;
+            
+            // Réinitialiser la pagination
+            currentPage = 1;
+            
+            try {
+                // Forcer le rechargement depuis l'API
+                lastNotesHash = ''; // Reset du hash pour forcer la mise à jour
+                await loadNotesFromOnline();
+                
+                // Feedback visuel de succès
+                setTimeout(() => {
+                    refreshButton.style.background = 'rgba(74, 222, 128, 0.3)';
+                    refreshButton.style.borderColor = 'rgba(74, 222, 128, 0.5)';
+                    
+                    setTimeout(() => {
+                        refreshButton.style.background = '';
+                        refreshButton.style.borderColor = '';
+                    }, 1000);
+                }, 200);
+                
+            } catch (error) {
+                console.error('Erreur lors du refresh des notes:', error);
+                
+                // Feedback visuel d'erreur
+                refreshButton.style.background = 'rgba(248, 113, 113, 0.3)';
+                refreshButton.style.borderColor = 'rgba(248, 113, 113, 0.5)';
+                
+                setTimeout(() => {
+                    refreshButton.style.background = '';
+                    refreshButton.style.borderColor = '';
+                }, 1000);
+            } finally {
+                // Retirer l'animation et réactiver le bouton après 1.5 secondes
+                setTimeout(() => {
+                    refreshButton.classList.remove('spinning');
+                    refreshButton.disabled = false;
+                }, 1500);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             loadNotesFromOnline();
-
-            setInterval(loadNotesFromOnline, 30000);
 
             const noteInput = document.getElementById('noteInput');            if (noteInput) {
                 noteInput.addEventListener('keypress', function(e) {
@@ -2064,13 +2620,160 @@
         // Fonctions pour les paramètres
         function openSettingsModal() {
             const settingsModal = document.getElementById('settingsModal');
+            
+            // Afficher l'utilisateur connecté
+            const currentUser = sessionStorage.getItem('currentUser') || 'Benjamin';
+            const userIndicator = document.getElementById('connectedUserIndicator');
+            
+            if (userIndicator) {
+                // Choisir une icône appropriée selon l'utilisateur
+                const userIcon = currentUser === 'Benjamin' ? 
+                    '<i class="fas fa-user-circle" style="margin-right: 8px;"></i>' : 
+                    '<i class="fas fa-heart" style="margin-right: 8px;"></i>';
+                
+                // Mise en forme améliorée avec icône
+                userIndicator.innerHTML = `${userIcon}Connecté en tant que <strong>${currentUser}</strong>`;
+                
+                // Plus besoin des classes spécifiques puisque nous avons une couleur unique
+                userIndicator.classList.remove('user-benjamin', 'user-sanaa');
+            }
+            
             settingsModal.classList.add('show');
         }
 
         function closeSettingsModal() {
             const settingsModal = document.getElementById('settingsModal');
             settingsModal.classList.remove('show');
-        }        function changeFont(fontName) {
+        }
+
+        // Fonction de déconnexion
+        function logout() {
+            // Effacer toutes les données de session
+            sessionStorage.removeItem('isAuthenticated');
+            sessionStorage.removeItem('authTime');
+            sessionStorage.removeItem('currentUser');
+            
+            // Réinitialiser l'écran de mot de passe
+            enteredPasscode = '';
+            updatePasscodeDots();
+            
+            // Activer le mode écran de mot de passe
+            togglePasswordScreenMode(true);
+            
+            // Masquer les boutons fixes
+            const themeButton = document.getElementById('themeButton');
+            const settingsButton = document.getElementById('settingsButton');
+            const logoutButton = document.getElementById('logoutButton');
+            const kissButton = document.getElementById('kissButton');
+            
+            if (themeButton) themeButton.classList.add('hidden');
+            if (settingsButton) settingsButton.classList.add('hidden');
+            if (logoutButton) logoutButton.classList.add('hidden');
+            if (kissButton) kissButton.classList.remove('visible');
+            
+            // Réinitialiser complètement l'état de la page
+            let mainContent = document.getElementById('mainContent');
+            let lockScreen = document.getElementById('lockScreen');
+            let loadingScreen = document.getElementById('loadingScreen');
+            
+            // Masquer le contenu principal et l'écran de chargement
+            mainContent.classList.remove('show');
+            loadingScreen.classList.remove('show', 'fade-out');
+            loadingScreen.style.display = 'none';
+            
+            // Réinitialiser le body
+            document.body.style.overflow = 'hidden';
+            
+            // Afficher l'écran de verrouillage avec un délai
+            setTimeout(() => {
+                lockScreen.style.display = 'flex';
+                lockScreen.classList.remove('hidden', 'fade-out');
+                
+                // S'assurer que l'écran de verrouillage est entièrement visible
+                setTimeout(() => {
+                    lockScreen.style.opacity = '1';
+                }, 50);
+            }, 300);
+        }
+        
+        // Fonctions pour le modal de détail des notes
+        function showNoteDetails(noteId) {
+            // Trouver la note
+            const note = notesData.find(n => n.id === noteId);
+            if (!note) return;
+            
+            // Remplir le contenu du modal
+            const noteDetailContent = document.getElementById('noteDetailContent');
+            const noteDetailDate = document.getElementById('noteDetailDate');
+            const noteDetailAuthor = document.getElementById('noteDetailAuthor');
+            
+            noteDetailContent.textContent = note.content;
+            noteDetailDate.textContent = note.date;
+            
+            if (note.author) {
+                const authorFullName = note.author === 'Benjamin' ? 'Benjamin' : 'Sanaa';
+                noteDetailAuthor.textContent = `Par ${authorFullName}`;
+                noteDetailAuthor.style.display = 'block';
+            } else {
+                noteDetailAuthor.style.display = 'none';
+            }
+            
+            // Afficher le modal
+            const noteModal = document.getElementById('noteModal');
+            noteModal.classList.add('show');
+            
+            // Adapter la hauteur du modal en fonction du contenu (avec une hauteur max)
+            const modalContent = noteModal.querySelector('.note-modal-content');
+            const modalBody = noteModal.querySelector('.note-modal-body');
+            
+            // Réinitialiser la hauteur pour calculer correctement les nouvelles dimensions
+            modalBody.style.maxHeight = '';
+            
+            // Pour les appareils mobiles (iOS particulièrement)
+            if (window.innerWidth <= 768) {
+                // Limitation plus stricte pour les mobiles
+                modalBody.style.maxHeight = 'calc(70vh - 60px)';
+            } else {
+                // Pour les écrans plus grands, adapter la hauteur selon le contenu
+                const contentHeight = noteDetailContent.offsetHeight + 100; // Ajouter de l'espace pour les méta-informations
+                modalBody.style.maxHeight = `min(calc(85vh - 60px), ${contentHeight}px)`;
+            }
+            
+            // Empêcher le défilement du corps
+            document.body.style.overflow = 'hidden';
+            
+            // Scroll en haut du contenu du modal
+            modalBody.scrollTop = 0;
+        }
+        
+        function closeNoteModal() {
+            const noteModal = document.getElementById('noteModal');
+            
+            // Animer la fermeture
+            noteModal.classList.add('closing');
+            
+            setTimeout(() => {
+                noteModal.classList.remove('show');
+                noteModal.classList.remove('closing');
+                
+                // Restaurer le défilement
+                document.body.style.overflow = 'auto';
+            }, 300);
+        }
+        
+        // Initialisation des gestionnaires d'événements du modal de note
+        document.addEventListener('DOMContentLoaded', function() {
+            const noteModal = document.getElementById('noteModal');
+            if (noteModal) {
+                noteModal.addEventListener('click', function(event) {
+                    if (event.target === this) {
+                        closeNoteModal();
+                    }
+                });
+            }
+        });
+        
+        function changeFont(fontName) {
             // Retirer toutes les classes de font
             document.body.classList.remove(
                 'font-default', 'font-serif', 'font-mono', 'font-cursive', 'font-elegant',
@@ -2189,29 +2892,72 @@
             
             // Vérifier l'authentification au chargement de la page
             if (isAuthenticated()) {
-                // Si déjà authentifié, afficher quand même l'écran de chargement
+                // Si déjà authentifié, définir un utilisateur par défaut si pas défini
+                if (!sessionStorage.getItem('currentUser')) {
+                    sessionStorage.setItem('currentUser', 'Benjamin'); // Par défaut Benjamin
+                }
+                
+                // Préparer l'indicateur d'utilisateur (même s'il n'est pas affiché maintenant)
+                const currentUser = sessionStorage.getItem('currentUser');
+                const userIndicator = document.getElementById('connectedUserIndicator');
+                if (userIndicator) {
+                    // Choisir une icône appropriée selon l'utilisateur
+                    const userIcon = currentUser === 'Benjamin' ? 
+                        '<i class="fas fa-user-circle" style="margin-right: 8px;"></i>' : 
+                        '<i class="fas fa-heart" style="margin-right: 8px;"></i>';
+                    
+                    // Mise en forme améliorée avec icône
+                    userIndicator.innerHTML = `${userIcon}Connecté en tant que <strong>${currentUser}</strong>`;
+                    userIndicator.classList.remove('user-benjamin', 'user-sanaa');
+                }
+                
+                // Si déjà authentifié, masquer l'écran de verrouillage et afficher l'écran de chargement
+                const lockScreen = document.getElementById('lockScreen');
+                const loadingScreen = document.getElementById('loadingScreen');
+                const mainContent = document.getElementById('mainContent');
+                
                 lockScreen.style.display = 'none';
+                lockScreen.classList.add('hidden');
+                
                 // Réactiver le bounce scroll si déjà authentifié
                 togglePasswordScreenMode(false);
+                
+                loadingScreen.style.display = 'flex';
                 loadingScreen.classList.add('show');
                 
                 setTimeout(() => {
                     loadingScreen.classList.add('fade-out');
                     setTimeout(() => {
                         loadingScreen.style.display = 'none';
+                        loadingScreen.classList.remove('show', 'fade-out');
                         mainContent.classList.add('show');
                         document.body.style.overflow = 'auto';
                         
                         // Afficher les boutons fixes
                         const themeButton = document.getElementById('themeButton');
                         const settingsButton = document.getElementById('settingsButton');
+                        const logoutButton = document.getElementById('logoutButton');
                         const kissButton = document.getElementById('kissButton');
                         
-                        if (themeButton) themeButton.style.display = 'flex';
-                        if (settingsButton) settingsButton.style.display = 'flex';
+                        if (themeButton) themeButton.classList.remove('hidden');
+                        if (settingsButton) settingsButton.classList.remove('hidden');
+                        if (logoutButton) logoutButton.classList.remove('hidden');
                         if (kissButton) kissButton.classList.add('visible');
                     }, 400);
                 }, 2000); // Même durée que l'écran de chargement normal
+            } else {
+                // Si pas authentifié, s'assurer que l'écran de verrouillage est affiché
+                const lockScreen = document.getElementById('lockScreen');
+                const loadingScreen = document.getElementById('loadingScreen');
+                const mainContent = document.getElementById('mainContent');
+                
+                lockScreen.style.display = 'flex';
+                lockScreen.classList.remove('hidden', 'fade-out');
+                loadingScreen.style.display = 'none';
+                loadingScreen.classList.remove('show', 'fade-out');
+                mainContent.classList.remove('show');
+                document.body.style.overflow = 'hidden';
+                togglePasswordScreenMode(true);
             }
         });document.addEventListener('DOMContentLoaded', function() {
             const themeModal = document.getElementById('themeModal');
@@ -2233,7 +2979,24 @@
                 });
             }
         });        
-
     </script>
+    <!-- Modal pour afficher les détails d'une note -->
+    <div class="note-modal" id="noteModal">
+        <div class="note-modal-content">
+            <div class="note-modal-header">
+                <h3>Détails de la note</h3>
+                <button class="note-modal-close" onclick="closeNoteModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="note-modal-body">
+                <div id="noteDetailContent" class="note-detail-content"></div>
+                <div class="note-detail-meta">
+                    <span id="noteDetailDate" class="note-detail-date"></span>
+                    <span id="noteDetailAuthor" class="note-detail-author"></span>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
