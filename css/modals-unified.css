@@ -487,8 +487,8 @@
     .sticker-modal-content {
         margin: 15px;
         padding: 20px 15px;
-        max-height: 90vh;
-        width: calc(100% - 30px);
+        max-height: 80vh;
+        width: calc(100% - 60px);
     }
 
     .themes-grid,
