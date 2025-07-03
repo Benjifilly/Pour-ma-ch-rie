@@ -329,6 +329,43 @@
         .logout-button
         {
             display: flex;
+            position: fixed;
+            top: calc(40px + env(safe-area-inset-top, 0px));
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Positionnement avec espacement égal */
+        .theme-button {
+            left: 20px; /* Premier bouton à gauche */
+        }
+        
+        .settings-button {
+            left: 80px; /* Deuxième bouton, 60px après le premier */
+        }
+        
+        .logout-button {
+            left: 140px; /* Troisième bouton, 60px après le deuxième */
+        }
+
+        .theme-button:hover,
+        .settings-button:hover,
+        .logout-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
         }
 
         .theme-button.hidden,
@@ -337,6 +374,50 @@
         {
             opacity: 0;
             visibility: hidden;
+        }
+        
+        /* Adaptation pour mobile */
+        @media (max-width: 768px) {
+            .theme-button, 
+            .settings-button, 
+            .logout-button {
+                width: 45px;
+                height: 45px;
+            }
+
+            .theme-button {
+                left: 15px;
+            }
+
+            .settings-button {
+                left: 70px; /* 55px après le premier */
+            }
+
+            .logout-button {
+                left: 125px; /* 55px après le deuxième */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .theme-button, 
+            .settings-button, 
+            .logout-button {
+                width: 40px;
+                height: 40px;
+                font-size: 1.1rem;
+            }
+
+            .theme-button {
+                left: 10px;
+            }
+
+            .settings-button {
+                left: 60px; /* 50px après le premier */
+            }
+
+            .logout-button {
+                left: 110px; /* 50px après le deuxième */
+            }
         }
 
         .container {
@@ -1608,52 +1689,6 @@
                 width: fit-content !important;
                 position: static !important;
                 left: auto !important;
-            }
-        }
-
-        /* Styles pour le bouton logout */
-        .logout-button {
-            position: fixed;
-            top: calc(40px + env(safe-area-inset-top, 0px));
-            left: 140px; /* Positionnement après les boutons thème et paramètres (20px + 50px + 10px + 50px + 10px) */
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            color: white;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .logout-button:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.1);
-        }
-
-        @media (max-width: 768px) {
-            .logout-button {
-                width: 45px;
-                height: 45px;
-                font-size: 1rem;
-                left: 130px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .logout-button {
-                width: 40px;
-                height: 40px;
-                font-size: 0.9rem;
-                left: 115px;
             }
         }
     </style>

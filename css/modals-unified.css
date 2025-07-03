@@ -428,8 +428,8 @@
     .sticker-modal-content {
         padding: 25px 20px;
         margin: 20px;
-        max-height: 85vh;
-        width: calc(100% - 40px);
+        max-height: 60vh;
+        width: calc(100% - 60px);
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
     }
