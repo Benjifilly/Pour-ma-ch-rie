@@ -1121,35 +1121,6 @@
             }
         }
         
-        /* Styles pour l'indicateur d'utilisateur connecté */
-        .connected-user-indicator {
-            background: linear-gradient(135deg, rgba(127, 0, 255, 0.15) 0%, rgba(73, 58, 217, 0.25) 100%);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 25px;
-            padding: 10px 18px;
-            margin-top: 20px;
-            font-size: 1rem;
-            color: white;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            display: inline-block;
-            font-weight: 500;
-            letter-spacing: 0.2px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 300px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .user-status-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-            padding: 0 15px;
-        }
-
         .delete-note {
             background: rgba(255, 69, 58, 0.8);
             border: none;
@@ -1644,7 +1615,7 @@
                 width: 40px;
                 height: 40px;
                 font-size: 0.9rem;
-                left: 120px;
+                left: 115px;
             }
         }
     </style>
@@ -1997,32 +1968,34 @@
             const lockScreen = document.getElementById('lockScreen');
             const loadingScreen = document.getElementById('loadingScreen');
             const mainContent = document.getElementById('mainContent');
-            
+
             // S'assurer que l'écran de chargement est dans un état propre
             loadingScreen.classList.remove('show', 'fade-out');
             loadingScreen.style.display = 'none';
-            
-            // Masquer l'écran de verrouillage
+
+            // Réinitialiser l'opacité pour permettre l'animation fade-out
+            lockScreen.style.opacity = '';
+            // Masquer l'écran de verrouillage avec animation
             lockScreen.classList.add('fade-out');
 
             setTimeout(() => {
                 lockScreen.classList.add('hidden');
                 lockScreen.style.display = 'none';
-                
+
                 // Réactiver le bounce scroll quand on quitte l'écran de mot de passe
                 togglePasswordScreenMode(false);
-                
+
                 // Afficher l'écran de chargement
                 loadingScreen.style.display = 'flex';
                 loadingScreen.classList.add('show');
 
                 setTimeout(() => {
                     loadingScreen.classList.add('fade-out');
-                    
+
                     setTimeout(() => {
                         loadingScreen.style.display = 'none';
                         loadingScreen.classList.remove('show', 'fade-out');
-                        
+
                         // Afficher le contenu principal
                         mainContent.classList.add('show');
                         document.body.style.overflow = 'auto';
@@ -2037,9 +2010,50 @@
 
                         const kissButton = document.getElementById('kissButton');
                         kissButton.classList.add('visible');
+
+                        // Afficher la notification utilisateur connecté
+                        const currentUser = sessionStorage.getItem('currentUser');
+                        if (currentUser === 'Benjamin') {
+                            showNotification('Connecté en tant que Benjamin', 'success');
+                        } else if (currentUser === 'Sanaa') {
+                            showNotification('Connecté en tant que Sanaa', 'success');
+                        }
                     }, 400);
                 }, 2000);
             }, 600);
+        }
+        // Système de notifications glassy inspiré de date-planner
+        function showNotification(message, type = 'success') {
+            // Supprimer toute notification existante
+            const oldNotif = document.querySelector('.notification');
+            if (oldNotif) oldNotif.remove();
+
+            const notif = document.createElement('div');
+            notif.className = `notification ${type}`;
+            notif.innerHTML = `
+                <span>${message}</span>
+                <button class="close-notification" title="Fermer" aria-label="Fermer la notification">&times;</button>
+            `;
+            document.body.appendChild(notif);
+
+            // Animation d'entrée
+            setTimeout(() => {
+                notif.classList.add('show');
+            }, 10);
+
+            // Fermeture manuelle
+            notif.querySelector('.close-notification').onclick = () => {
+                notif.classList.add('hide');
+                setTimeout(() => notif.remove(), 600);
+            };
+
+            // Fermeture auto après 3s
+            setTimeout(() => {
+                if (document.body.contains(notif)) {
+                    notif.classList.add('hide');
+                    setTimeout(() => notif.remove(), 600);
+                }
+            }, 3000);
         }
 
         document.addEventListener('keydown', (e) => {
@@ -2064,7 +2078,8 @@
             siteCard.style.cursor = 'pointer';
 
             siteCard.innerHTML = `
-                <div class="card-image">                    ${imageUrl ? `
+                <div class="card-image">                    
+                    ${imageUrl ? `
                         <img src="${imageUrl}" alt="${title}">
                         <button class="preview-button" onclick="openImageModal('${imageUrl}', '${title}'); event.preventDefault(); event.stopPropagation();"><i class="fas fa-eye" style="color: white;"></i></button>
                     ` : '<span class="placeholder-icon">🌸</span>'}
@@ -2652,48 +2667,52 @@
             sessionStorage.removeItem('isAuthenticated');
             sessionStorage.removeItem('authTime');
             sessionStorage.removeItem('currentUser');
-            
+
             // Réinitialiser l'écran de mot de passe
             enteredPasscode = '';
             updatePasscodeDots();
-            
+
             // Activer le mode écran de mot de passe
             togglePasswordScreenMode(true);
-            
+
             // Masquer les boutons fixes
             const themeButton = document.getElementById('themeButton');
             const settingsButton = document.getElementById('settingsButton');
             const logoutButton = document.getElementById('logoutButton');
             const kissButton = document.getElementById('kissButton');
-            
+
             if (themeButton) themeButton.classList.add('hidden');
             if (settingsButton) settingsButton.classList.add('hidden');
             if (logoutButton) logoutButton.classList.add('hidden');
-            if (kissButton) kissButton.classList.remove('visible');
-            
+
             // Réinitialiser complètement l'état de la page
             let mainContent = document.getElementById('mainContent');
             let lockScreen = document.getElementById('lockScreen');
             let loadingScreen = document.getElementById('loadingScreen');
-            
+
             // Masquer le contenu principal et l'écran de chargement
             mainContent.classList.remove('show');
             loadingScreen.classList.remove('show', 'fade-out');
             loadingScreen.style.display = 'none';
-            
+
             // Réinitialiser le body
             document.body.style.overflow = 'hidden';
-            
-            // Afficher l'écran de verrouillage avec un délai
+
+            // Supprimer toute notification visible
+            const oldNotif = document.querySelector('.notification');
+            if (oldNotif) oldNotif.remove();
+
+            // Animation de retour à l'écran de verrouillage
+            lockScreen.style.opacity = '0';
+            lockScreen.classList.remove('hidden', 'fade-out');
+            lockScreen.style.display = 'flex';
+
             setTimeout(() => {
-                lockScreen.style.display = 'flex';
-                lockScreen.classList.remove('hidden', 'fade-out');
-                
-                // S'assurer que l'écran de verrouillage est entièrement visible
-                setTimeout(() => {
-                    lockScreen.style.opacity = '1';
-                }, 50);
-            }, 300);
+                lockScreen.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                lockScreen.style.opacity = '1';
+                // Masquer le bouton secret après l'animation (pour garder la synchro)
+                // if (kissButton) kissButton.classList.remove('visible');
+            }, 30);
         }
         
         // Fonctions pour le modal de détail des notes

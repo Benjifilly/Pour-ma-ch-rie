@@ -1,3 +1,11 @@
+/* ===== Indicateur d'utilisateur connecté GLOBAL ===== */
+.user-status-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    padding: 0 15px;
+}
+
 /* ================================
    MODALS UNIFIÉS - TOUS LES APPS
    ================================ */

@@ -702,16 +702,18 @@
                 position: relative; /* Changé de fixed à relative */
                 overflow-x: hidden; /* Empêche seulement le scroll horizontal */
                 -webkit-overflow-scrolling: touch; /* Scroll fluide sur iOS */
-                touch-action: pan-y; /* Permet le scroll vertical */
+                touch-action: manipulation; /* Optimisé pour les interactions tactiles */
+                overscroll-behavior-y: auto; /* Activer le bounce effect sur iOS */
             }
 
             .main-content {
                 -webkit-overflow-scrolling: touch;
-                overscroll-behavior: none;
+                overscroll-behavior: auto; /* Permettre le bounce effect sur iOS */
             }
             
             .chat-messages {
                 -webkit-overflow-scrolling: touch; /* Scroll fluide dans le chat */
+                overscroll-behavior: auto; /* Activer le bounce effect dans le chat */
             }
             
             /* Espace supplémentaire spécifique à iOS */
@@ -844,6 +846,9 @@
             <div class="settings-modal-header">
                 <h3>Paramètres</h3>
                 <p>Dis-moi si t'en veux d'autres 😽</p>
+            </div>
+            <div class="user-status-container">
+                <div id="connectedUserIndicator" class="connected-user-indicator"></div>
             </div>
             <div class="fonts-grid">
                 <div class="font-option active" id="font-option-default" onclick="changeFont('default')">
@@ -1051,16 +1056,47 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
         async function initializePuter() {
             try {
                 if (typeof puter !== 'undefined') {
-                    puterAI = puter.ai;
-                    console.log('Puter.js initialisé avec succès');
-                    updateChatStatus('online');
-                    console.log('True'); // Pour vérifier dans la console
-                    return true;
+                    // Vérification supplémentaire pour les nouveaux appareils
+                    if (puter.ai) {
+                        puterAI = puter.ai;
+                        console.log('Puter.js initialisé avec succès');
+                        updateChatStatus('online');
+                        return true;
+                    } else {
+                        // Tentative de rechargement du script si l'objet puter existe mais pas puter.ai
+                        console.warn('Puter.js chargé mais puter.ai non disponible, tentative de rechargement');
+                        await loadPuterScript();
+                        
+                        // Nouvelle vérification après le rechargement
+                        if (typeof puter !== 'undefined' && puter.ai) {
+                            puterAI = puter.ai;
+                            console.log('Puter.js rechargé avec succès');
+                            updateChatStatus('online');
+                            return true;
+                        } else {
+                            console.error('Échec du rechargement de Puter.js');
+                            updateChatStatus('offline');
+                            addMessage("Erreur: Ben-Bot ne peut pas fonctionner car l'API Puter n'est pas disponible. Vérifie ta connexion et rafraîchis la page.");
+                            return false;
+                        }
+                    }
                 } else {
-                    console.error('Puter.js non disponible');
-                    updateChatStatus('offline');
-                    addMessage("Erreur: Ben-Bot ne peut pas fonctionner car Puter.js n'est pas disponible. Vérifie ta connexion et rafraîchis la page.");
-                    return false;
+                    // Si puter n'est pas défini, essayons de le charger
+                    console.warn('Puter.js non disponible, tentative de chargement');
+                    await loadPuterScript();
+                    
+                    // Vérification après le chargement
+                    if (typeof puter !== 'undefined' && puter.ai) {
+                        puterAI = puter.ai;
+                        console.log('Puter.js chargé avec succès');
+                        updateChatStatus('online');
+                        return true;
+                    } else {
+                        console.error('Échec du chargement de Puter.js');
+                        updateChatStatus('offline');
+                        addMessage("Erreur: Ben-Bot ne peut pas fonctionner car Puter.js n'est pas disponible. Vérifie ta connexion et rafraîchis la page.");
+                        return false;
+                    }
                 }
             } catch (error) {
                 console.error('Erreur initialisation Puter:', error);
@@ -1069,6 +1105,21 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
                 addMessage("Erreur: Ben-Bot ne peut pas fonctionner car une erreur s'est produite lors de l'initialisation de Puter.js. Vérifie ta connexion et rafraîchis la page.");
                 return false;
             }
+        }
+        
+        // Fonction pour charger dynamiquement le script Puter.js
+        function loadPuterScript() {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://js.puter.com/v2/';
+                script.async = true;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+                
+                // Résoudre après un délai même si le script n'a pas signalé de chargement
+                setTimeout(resolve, 3000);
+            });
         }
 
         function updateChatStatus(status) {
@@ -1479,9 +1530,17 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
             }
         });         
         
+        // Initialisation de Puter immédiatement et encore une fois après un délai
+        initializePuter();
+        
         setTimeout(() => {
             chatInput.focus();
-            initializePuter();
+            // Vérifier si l'initialisation a échoué la première fois
+            if (!puterAI) {
+                console.log("Nouvelle tentative d'initialisation de Puter.js après délai");
+                initializePuter();
+            }
+            
             const stickerModal = document.getElementById('stickerModal');
             if (stickerModal) {
                 stickerModal.addEventListener('click', function(event) {
@@ -1506,6 +1565,20 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
 
         function openSettingsModal() {
             document.getElementById('settingsModal').classList.add('show');
+            
+            // Afficher l'utilisateur connecté
+            const currentUser = sessionStorage.getItem('currentUser') || 'Benjamin';
+            const userIndicator = document.getElementById('connectedUserIndicator');
+            
+            if (userIndicator) {
+                // Choisir une icône appropriée selon l'utilisateur
+                const userIcon = currentUser === 'Benjamin' ? 
+                    '<i class="fas fa-user-circle" style="margin-right: 8px;"></i>' : 
+                    '<i class="fas fa-heart" style="margin-right: 8px;"></i>';
+                
+                // Mise en forme améliorée avec icône
+                userIndicator.innerHTML = `${userIcon}Connecté en tant que <strong>${currentUser}</strong>`;
+            }
         }
 
         function closeSettingsModal() {
