@@ -227,10 +227,6 @@
             will-change: transform;
             backface-visibility: hidden;
             -webkit-backface-visibility: hidden;
-            -webkit-perspective: 1000;
-            perspective: 1000;
-            -webkit-transform-style: preserve-3d;
-            transform-style: preserve-3d;
         }
 
         .loading-text {
@@ -259,14 +255,14 @@
         @-webkit-keyframes SpinContinuous {
             0% {
                 opacity: 0.5;
-                transform: rotate(0deg);
+                -webkit-transform: rotate(0deg);
             }
             50% {
                 opacity: 1;
             }
             100% {
                 opacity: 0.5;
-                transform: rotate(360deg);
+                -webkit-transform: rotate(360deg);
             }
         }
 
@@ -1791,6 +1787,23 @@
             <p>bulubulubulu</p>  
         </div>
     </div>
+    </div>
+    <div class="note-modal" id="noteModal">
+        <div class="note-modal-content">
+            <div class="note-modal-header">
+                <h3>Détails de la note</h3>
+                <button class="note-modal-close" onclick="closeNoteModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="note-modal-body">
+                <div id="noteDetailContent" class="note-detail-content"></div>
+                <div class="note-detail-meta">
+                    <span id="noteDetailDate" class="note-detail-date"></span>
+                    <span id="noteDetailAuthor" class="note-detail-author"></span>
+                </div>
+            </div>
+        </div>
     </div>    
     <div class="image-modal" id="imageModal">
         <div class="modal-content">
@@ -2067,10 +2080,6 @@
                 
                 // Force un repaint avant d'ajouter la classe show pour activer l'animation
                 setTimeout(() => {
-                    // Forcer le redémarrage des animations de la fleur
-                    const loadingIcons = loadingScreen.querySelectorAll('.loading-icon');
-                    loadingIcons.forEach(icon => forceAnimationRestart(icon));
-                    
                     loadingScreen.classList.add('show');
                 }, 10);
 
@@ -2223,10 +2232,6 @@
 
             navigationLoadingScreen.style.display = 'flex';
             requestAnimationFrame(() => {
-                // Forcer le redémarrage des animations de la fleur
-                const loadingIcons = navigationLoadingScreen.querySelectorAll('.loading-icon');
-                loadingIcons.forEach(icon => forceAnimationRestart(icon));
-                
                 navigationLoadingScreen.classList.add('show');
 
                 setTimeout(() => {
@@ -2751,27 +2756,6 @@
         }
 
         // Fonction de déconnexion
-        // Fonction pour forcer le redémarrage d'une animation CSS
-        function forceAnimationRestart(element) {
-            if (!element) return;
-            // Sauvegarde des classes d'animation
-            const animations = {
-                animation: element.style.animation,
-                webkitAnimation: element.style.webkitAnimation
-            };
-            
-            // Désactiver l'animation
-            element.style.animation = 'none';
-            element.style.webkitAnimation = 'none';
-            
-            // Forcer un reflow
-            void element.offsetWidth;
-            
-            // Réactiver l'animation
-            element.style.animation = animations.animation;
-            element.style.webkitAnimation = animations.webkitAnimation;
-        }
-        
         function logout() {
             // Effacer toutes les données de session
             sessionStorage.removeItem('isAuthenticated');
