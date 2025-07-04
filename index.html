@@ -2355,6 +2355,14 @@
             "25 Juin 2025"
         );
 
+        addSite(
+            "Puissance 4", 
+            "Qui va gagner ? Toi ou moi ? 😽",
+            "images/ben_qui_fixe.png", 
+            "puissance4.html", 
+            "4 Juillet 2025"
+        );
+
         const CONFIG = {
             api: {
                 key: atob("JDJhJDEwJHQwV1RjSnJ1a2o2Vi5JTS9FR0tnenU5THdKU2FpRXRTTFhEUmZ2QWo3Li95NVJkRXhXQnpT"),
@@ -2672,14 +2680,35 @@
         });
 
         function openThemeModal() {
-            const themeModal = document.getElementById('themeModal');
-            themeModal.classList.add('show');
+            const modal = document.getElementById('themeModal');
+            const content = modal.querySelector('.theme-modal-content');
+            
+            modal.style.display = 'flex';
+            modal.classList.remove('closing');
+            content.classList.remove('animate-out');
+            
+            requestAnimationFrame(() => {
+                modal.classList.add('show');
+                content.classList.add('animate-in');
+            });
         }
 
         function closeThemeModal() {
-            const themeModal = document.getElementById('themeModal');
-            themeModal.classList.remove('show');
-        }        function changeTheme(themeName) {
+            const modal = document.getElementById('themeModal');
+            const content = modal.querySelector('.theme-modal-content');
+            
+            modal.classList.add('closing');
+            content.classList.remove('animate-in');
+            content.classList.add('animate-out');
+            
+            setTimeout(() => {
+                modal.classList.remove('show', 'closing');
+                modal.style.display = 'none';
+                content.classList.remove('animate-out');
+            }, 300);
+        }
+        
+        function changeTheme(themeName) {
             document.body.classList.remove(
                 'theme-default', 'theme-yellow', 'theme-green', 'theme-pink', 
                 'theme-red', 'theme-beige', 'theme-lavender', 'theme-peach', 'theme-mint'
@@ -2728,7 +2757,8 @@
 
         // Fonctions pour les paramètres
         function openSettingsModal() {
-            const settingsModal = document.getElementById('settingsModal');
+            const modal = document.getElementById('settingsModal');
+            const content = modal.querySelector('.settings-modal-content');
             
             // Afficher l'utilisateur connecté
             const currentUser = sessionStorage.getItem('currentUser') || 'Benjamin';
@@ -2747,12 +2777,29 @@
                 userIndicator.classList.remove('user-benjamin', 'user-sanaa');
             }
             
-            settingsModal.classList.add('show');
+            modal.style.display = 'flex';
+            modal.classList.remove('closing');
+            content.classList.remove('animate-out');
+            
+            requestAnimationFrame(() => {
+                modal.classList.add('show');
+                content.classList.add('animate-in');
+            });
         }
 
         function closeSettingsModal() {
-            const settingsModal = document.getElementById('settingsModal');
-            settingsModal.classList.remove('show');
+            const modal = document.getElementById('settingsModal');
+            const content = modal.querySelector('.settings-modal-content');
+            
+            modal.classList.add('closing');
+            content.classList.remove('animate-in');
+            content.classList.add('animate-out');
+            
+            setTimeout(() => {
+                modal.classList.remove('show', 'closing');
+                modal.style.display = 'none';
+                content.classList.remove('animate-out');
+            }, 300);
         }
 
         // Fonction de déconnexion

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Template Page</title>
+    <link rel="icon" href="images/ben_gene2.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Kalam:wght@300;400;700&family=Dancing+Script:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/themes-settings.css">
+    <link rel="stylesheet" href="css/modals-unified.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--main-font);
+            background: var(--theme-gradient);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Style du bouton de retour */
+        .back-button {
+            position: fixed;
+            top: calc(40px + env(safe-area-inset-top, 0px));
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            transform: scale(1.1);
+        }
+
+        .back-button i {
+            font-size: 1.2rem;
+        }
+
+        /* Media queries pour les appareils mobiles */
+        @media (max-width: 767px) {
+            .back-button {
+                top: calc(15px + env(safe-area-inset-top, 0px));
+                right: 15px;
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+
+            .theme-button {
+                top: calc(15px + env(safe-area-inset-top, 0px));
+                left: 15px;
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+
+            .settings-button {
+                top: calc(15px + env(safe-area-inset-top, 0px));
+                left: 70px;
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Bouton de retour -->
+    <a href="javascript:history.back()" class="back-button" id="backButton" title="Retour">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+
+    <!-- Bouton de thème -->
+    <button class="theme-button" id="themeButton" onclick="openThemeModal()" title="Changer le thème">
+        <i class="fas fa-palette"></i>
+    </button>
+
+    <!-- Bouton de paramètres -->
+    <button class="settings-button" id="settingsButton" onclick="openSettingsModal()" title="Paramètres">
+        <i class="fas fa-cog"></i>
+    </button>
+
+    <div class="container">
+        <!-- Contenu principal de la page ici -->
+    </div>
+
+    <!-- Modal pour les thèmes -->
+    <div class="theme-modal" id="themeModal">
+        <div class="theme-modal-content">
+            <div class="theme-modal-header">
+                <h3>Choisir un thème</h3>
+                <p>Si tu veux changer les couleurs demande moi 😽</p>
+            </div>
+            <div class="themes-grid">
+                <div class="theme-option" onclick="changeTheme('default')">
+                    <div class="theme-circle gradient active" id="theme-circle-default" style="--theme-color-1: #667eea; --theme-color-2: #764ba2;"></div>
+                    <span class="theme-name">Violet</span>
+                </div>
+                <div class="theme-option" onclick="changeTheme('yellow')">
+                    <div class="theme-circle gradient" id="theme-circle-yellow" style="--theme-color-1: #ffd54f; --theme-color-2: #ffb300;"></div>
+                    <span class="theme-name">Jaune</span>
+                </div>
+                <div class="theme-option" onclick="changeTheme('green')">
+                    <div class="theme-circle gradient" id="theme-circle-green" style="--theme-color-1: #81c784; --theme-color-2: #4caf50;"></div>
+                    <span class="theme-name">Vert</span>
+                </div>
+                <div class="theme-option" onclick="changeTheme('pink')">
+                    <div class="theme-circle gradient" id="theme-circle-pink" style="--theme-color-1: #f48fb1; --theme-color-2: #e91e63;"></div>
+                    <span class="theme-name">Rose</span>
+                </div>
+                <div class="theme-option" onclick="changeTheme('red')">
+                    <div class="theme-circle gradient" id="theme-circle-red" style="--theme-color-1: #ef5350; --theme-color-2: #d32f2f;"></div>
+                    <span class="theme-name">Rouge</span>
+                </div>
+                <div class="theme-option" onclick="changeTheme('beige')">
+                    <div class="theme-circle gradient" id="theme-circle-beige" style="--theme-color-1: #dcc9a3; --theme-color-2: #8d6e63;"></div>
+                    <span class="theme-name">Beige</span>
+                </div>
+                <div class="theme-option" onclick="changeTheme('lavender')">
+                    <div class="theme-circle gradient" id="theme-circle-lavender" style="--theme-color-1: #ce93d8; --theme-color-2: #9c27b0;"></div>
+                    <span class="theme-name">Lavande</span>
+                </div>
+                <div class="theme-option" onclick="changeTheme('peach')">
+                    <div class="theme-circle gradient" id="theme-circle-peach" style="--theme-color-1: #ffb74d; --theme-color-2: #ff9800;"></div>
+                    <span class="theme-name">Pêche</span>
+                </div>
+                <div class="theme-option" onclick="changeTheme('mint')">
+                    <div class="theme-circle gradient" id="theme-circle-mint" style="--theme-color-1: #4db6ac; --theme-color-2: #00796b;"></div>
+                    <span class="theme-name">Menthe</span>
+                </div>
+            </div>            
+            <button class="close-theme-modal-btn" onclick="closeThemeModal()">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Modal des paramètres -->
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-modal-content">
+            <div class="settings-modal-header">
+                <h3>Paramètres</h3>
+                <p>Dis-moi si t'en veux d'autres 😽</p>
+            </div>
+            <div class="user-status-container">
+                <div id="connectedUserIndicator" class="connected-user-indicator"></div>
+            </div>
+            <div class="fonts-grid">
+                <div class="font-option active" id="font-option-default" onclick="changeFont('default')">
+                    <div class="font-preview" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">Abc</div>
+                    <span class="font-name">Système</span>
+                </div>
+                <div class="font-option" id="font-option-serif" onclick="changeFont('serif')">
+                    <div class="font-preview" style="font-family: Georgia, 'Times New Roman', Times, serif;">Abc</div>
+                    <span class="font-name">Serif</span>
+                </div>
+                <div class="font-option" id="font-option-mono" onclick="changeFont('mono')">
+                    <div class="font-preview" style="font-family: 'Courier New', Courier, monospace;">Abc</div>
+                    <span class="font-name">Mono</span>
+                </div>
+                <div class="font-option" id="font-option-cursive" onclick="changeFont('cursive')">
+                    <div class="font-preview" style="font-family: 'Comic Sans MS', cursive, sans-serif;">Abc</div>
+                    <span class="font-name">Amusant</span>
+                </div>
+                <div class="font-option" id="font-option-elegant" onclick="changeFont('elegant')">
+                    <div class="font-preview" style="font-family: 'Playfair Display', Georgia, serif;">Abc</div>
+                    <span class="font-name">Élégant</span>
+                </div>
+                <div class="font-option" id="font-option-modern" onclick="changeFont('modern')">
+                    <div class="font-preview" style="font-family: 'Inter', 'Segoe UI', sans-serif;">Abc</div>
+                    <span class="font-name">Moderne</span>
+                </div>
+                <div class="font-option" id="font-option-handwriting" onclick="changeFont('handwriting')">
+                    <div class="font-preview" style="font-family: 'Kalam', cursive, sans-serif;">Abc</div>
+                    <span class="font-name">Manuscrit</span>
+                </div>
+                <div class="font-option" id="font-option-romantic" onclick="changeFont('romantic')">
+                    <div class="font-preview" style="font-family: 'Dancing Script', cursive, sans-serif;">Abc</div>
+                    <span class="font-name">Romantique</span>
+                </div>
+                <div class="font-option" id="font-option-minimal" onclick="changeFont('minimal')">
+                    <div class="font-preview" style="font-family: 'Poppins', sans-serif;">Abc</div>
+                    <span class="font-name">Minimal</span>
+                </div>
+                <div class="font-option" id="font-option-retro" onclick="changeFont('retro')">
+                    <div class="font-preview" style="font-family: 'Orbitron', monospace;">Abc</div>
+                    <span class="font-name">Rétro</span>
+                </div>
+            </div>
+            <button class="close-settings-modal-btn" onclick="closeSettingsModal()">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Scripts JavaScript -->
+    <script>
+        // Initialisation au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Appliquer le thème sauvegardé
+            const savedTheme = localStorage.getItem('selectedTheme') || 'default';
+            document.body.classList.add(`theme-${savedTheme}`);
+            
+            // Marquer le cercle du thème actif
+            const activeThemeCircle = document.getElementById(`theme-circle-${savedTheme}`);
+            if (activeThemeCircle) {
+                document.querySelectorAll('.theme-circle').forEach(circle => {
+                    circle.classList.remove('active');
+                });
+                activeThemeCircle.classList.add('active');
+            }
+            
+            // Appliquer la police enregistrée
+            const savedFont = localStorage.getItem('selectedFont') || 'default';
+            document.body.classList.add(`font-${savedFont}`);
+            
+            // Marquer l'option de police active
+            const activeFontOption = document.getElementById(`font-option-${savedFont}`);
+            if (activeFontOption) {
+                document.querySelectorAll('.font-option').forEach(option => {
+                    option.classList.remove('active');
+                });
+                activeFontOption.classList.add('active');
+            }
+
+            // Afficher l'utilisateur connecté
+            const currentUser = sessionStorage.getItem('currentUser') || 'Benjamin';
+            const userIndicator = document.getElementById('connectedUserIndicator');
+            
+            if (userIndicator) {
+                // Choisir une icône appropriée selon l'utilisateur
+                const userIcon = currentUser === 'Benjamin' ? 
+                    '<i class="fas fa-user-circle" style="margin-right: 8px;"></i>' : 
+                    '<i class="fas fa-heart" style="margin-right: 8px;"></i>';
+                
+                // Mise en forme améliorée avec icône
+                userIndicator.innerHTML = `${userIcon}Connecté en tant que <strong>${currentUser}</strong>`;
+            }
+        });
+
+        // Fonctions pour le modal de thème
+        function openThemeModal() {
+            const modal = document.getElementById('themeModal');
+            const content = modal.querySelector('.theme-modal-content');
+            
+            modal.style.display = 'flex';
+            modal.classList.remove('closing');
+            content.classList.remove('animate-out');
+            
+            requestAnimationFrame(() => {
+                modal.classList.add('show');
+                content.classList.add('animate-in');
+            });
+        }
+
+        function closeThemeModal() {
+            const modal = document.getElementById('themeModal');
+            const content = modal.querySelector('.theme-modal-content');
+            
+            modal.classList.add('closing');
+            content.classList.remove('animate-in');
+            content.classList.add('animate-out');
+            
+            setTimeout(() => {
+                modal.classList.remove('show', 'closing');
+                modal.style.display = 'none';
+                content.classList.remove('animate-out');
+            }, 300);
+        }
+
+        function changeTheme(themeName) {
+            document.body.classList.remove(
+                'theme-default', 'theme-yellow', 'theme-green', 'theme-pink', 
+                'theme-red', 'theme-beige', 'theme-lavender', 'theme-peach', 'theme-mint'
+            );
+
+            document.body.classList.add(`theme-${themeName}`);
+
+            document.querySelectorAll('.theme-circle').forEach(circle => {
+                circle.classList.remove('active');
+            });
+            const targetCircle = document.getElementById(`theme-circle-${themeName}`);
+            if (targetCircle) {
+                targetCircle.classList.add('active');
+            }
+
+            // Utiliser le système de sauvegarde global
+            localStorage.setItem('selectedTheme', themeName);
+            localStorage.setItem('selectedTheme_timestamp', Date.now().toString());
+
+            closeThemeModal();
+        }
+
+        // Fonctions pour le modal de paramètres
+        function openSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            const content = modal.querySelector('.settings-modal-content');
+            
+            // Afficher l'utilisateur connecté
+            const currentUser = sessionStorage.getItem('currentUser') || 'Benjamin';
+            const userIndicator = document.getElementById('connectedUserIndicator');
+            
+            if (userIndicator) {
+                // Choisir une icône appropriée selon l'utilisateur
+                const userIcon = currentUser === 'Benjamin' ? 
+                    '<i class="fas fa-user-circle" style="margin-right: 8px;"></i>' : 
+                    '<i class="fas fa-heart" style="margin-right: 8px;"></i>';
+                
+                // Mise en forme améliorée avec icône
+                userIndicator.innerHTML = `${userIcon}Connecté en tant que <strong>${currentUser}</strong>`;
+            }
+            
+            modal.style.display = 'flex';
+            modal.classList.remove('closing');
+            content.classList.remove('animate-out');
+            
+            requestAnimationFrame(() => {
+                modal.classList.add('show');
+                content.classList.add('animate-in');
+            });
+        }
+
+        function closeSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            const content = modal.querySelector('.settings-modal-content');
+            
+            modal.classList.add('closing');
+            content.classList.remove('animate-in');
+            content.classList.add('animate-out');
+            
+            setTimeout(() => {
+                modal.classList.remove('show', 'closing');
+                modal.style.display = 'none';
+                content.classList.remove('animate-out');
+            }, 300);
+        }
+
+        function changeFont(fontName) {
+            // Supprimer toutes les classes de police
+            document.body.classList.remove(
+                'font-default', 'font-serif', 'font-mono', 'font-cursive',
+                'font-elegant', 'font-modern', 'font-handwriting', 'font-romantic',
+                'font-minimal', 'font-retro'
+            );
+            
+            // Ajouter la nouvelle classe de police
+            document.body.classList.add(`font-${fontName}`);
+            
+            // Mise à jour de l'état actif dans l'interface
+            document.querySelectorAll('.font-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            
+            const fontOption = document.getElementById(`font-option-${fontName}`);
+            if (fontOption) {
+                fontOption.classList.add('active');
+            }
+            
+            // Sauvegarder la préférence
+            localStorage.setItem('selectedFont', fontName);
+            localStorage.setItem('selectedFont_timestamp', Date.now().toString());
+        }
+
+        // Fermer les modaux lorsqu'on clique en dehors
+        window.addEventListener('click', function(event) {
+            const themeModal = document.getElementById('themeModal');
+            const settingsModal = document.getElementById('settingsModal');
+            
+            if (event.target === themeModal) {
+                closeThemeModal();
+            }
+            
+            if (event.target === settingsModal) {
+                closeSettingsModal();
+            }
+        });
+
+        // Gestion des touches clavier pour fermer les modaux
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeThemeModal();
+                closeSettingsModal();
+            }
+        });
+    </script>
+</body>
+</html>
