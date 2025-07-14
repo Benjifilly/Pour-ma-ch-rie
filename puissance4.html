@@ -250,6 +250,10 @@
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
         }
 
+        .game-cell.last-move {
+            box-shadow: 0 0 0 2px white;
+        }
+
         .game-cell.red {
             background: linear-gradient(135deg, #ff4757, #ff3838);
             border-color: #ff3838;
@@ -601,6 +605,167 @@
             color: #00bcd4;
         }
 
+        /* ===== Modal de confirmation ===== */
+        .confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .confirmation-modal.show {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .confirmation-modal.closing {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.55, 0.055, 0.675, 0.19);
+        }
+
+        .confirmation-modal-content {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 35px 30px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+            transform: scale(0.8) translateY(80px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            text-align: center;
+        }
+
+        .confirmation-modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.6), 
+                transparent
+            );
+            z-index: 1;
+        }
+
+        .confirmation-modal-content::after {
+            content: '';
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            right: 1px;
+            bottom: 1px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 23px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .confirmation-modal.show .confirmation-modal-content {
+            transform: scale(1) translateY(0);
+            animation: modalEnter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .confirmation-modal.closing .confirmation-modal-content {
+            transform: scale(0.7) translateY(-40px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.55, 0.055, 0.675, 0.19);
+        }
+
+        .confirmation-modal-header {
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .confirmation-icon {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+        }
+
+        .confirmation-title {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .confirmation-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .confirmation-button {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .confirmation-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .confirmation-button.danger {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        .confirmation-button.danger:hover {
+            background: rgba(239, 68, 68, 0.5);
+            border-color: rgba(239, 68, 68, 0.7);
+        }
+
         /* Responsive pour mobile */
         @media (max-width: 768px) {
             .victory-modal-content {
@@ -643,6 +808,36 @@
             }
 
             .victory-button {
+                width: 100%;
+                max-width: 250px;
+                justify-content: center;
+            }
+
+            /* Modal de confirmation responsive */
+            .confirmation-modal-content {
+                padding: 25px 20px;
+                margin: 20px;
+                width: calc(100% - 60px);
+            }
+
+            .confirmation-icon {
+                font-size: 3rem;
+            }
+
+            .confirmation-title {
+                font-size: 1.5rem;
+            }
+
+            .confirmation-subtitle {
+                font-size: 0.9rem;
+            }
+
+            .confirmation-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .confirmation-button {
                 width: 100%;
                 max-width: 250px;
                 justify-content: center;
@@ -931,6 +1126,26 @@
         </div>
     </div>
 
+    <!-- Modal de confirmation de réinitialisation -->
+    <div class="confirmation-modal" id="confirmationModal">
+        <div class="confirmation-modal-content">
+            <div class="confirmation-modal-header">
+                <div class="confirmation-icon">⚠️</div>
+                <div class="confirmation-title">Confirmer la réinitialisation</div>
+                <div class="confirmation-subtitle">Cette action va remettre tous les scores à zéro. Êtes-vous sûr de vouloir continuer ?</div>
+            </div>
+            
+            <div class="confirmation-buttons">
+                <button class="confirmation-button danger" onclick="confirmReset()">
+                    <i class="fas fa-trash"></i> Oui, réinitialiser
+                </button>
+                <button class="confirmation-button" onclick="closeConfirmationModal()">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
@@ -1209,7 +1424,9 @@
         function highlightWinningCells() {
             gameState.winningCells.forEach(({row, col}) => {
                 const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-                cell.classList.add('winning');
+                setTimeout(() => {
+                    cell.classList.add('winning');
+                }, 300);
             });
         }
 
@@ -1221,12 +1438,19 @@
                     const value = gameState.board[row][col];
                     
                     // Réinitialiser les classes
-                    cell.classList.remove('red', 'yellow', 'occupied', 'winning');
+                    cell.classList.remove('red', 'yellow', 'occupied', 'winning', 'last-move');
                     
                     if (value === 1) {
                         cell.classList.add('red', 'occupied');
                     } else if (value === 2) {
                         cell.classList.add('yellow', 'occupied');
+                    }
+                    
+                    // Appliquer le contour sur le dernier pion joué
+                    if (gameState.lastMove && 
+                        row === gameState.lastMove.row && 
+                        col === gameState.lastMove.col) {
+                        cell.classList.add('last-move');
                     }
                 }
             }
@@ -1351,14 +1575,44 @@
             showNotification(`Nouvelle partie commencée ! ${firstPlayer} commence `, 'success');
         }
 
-        // Réinitialiser le jeu
+        // Réinitialiser le jeu (affiche le modal de confirmation)
         function resetGame() {
-            gameState.scores = { benjamin: 0, sanaa: 0, draws: 0 };
-            document.getElementById('benjaminScore').textContent = '0';
-            document.getElementById('sanaaScore').textContent = '0';
-            document.getElementById('drawScore').textContent = '0';
-            startNewGame();
-            showNotification('Jeu réinitialisé !', 'info');
+            showConfirmationModal();
+        }
+
+        // Fonctions pour le modal de confirmation
+        function showConfirmationModal() {
+            const modal = document.getElementById('confirmationModal');
+            
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 50);
+        }
+
+        function closeConfirmationModal() {
+            const modal = document.getElementById('confirmationModal');
+            
+            modal.classList.add('closing');
+            setTimeout(() => {
+                modal.classList.remove('show', 'closing');
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        function confirmReset() {
+            // Fermer le modal
+            closeConfirmationModal();
+            
+            // Réinitialiser après une petite pause
+            setTimeout(() => {
+                gameState.scores = { benjamin: 0, sanaa: 0, draws: 0 };
+                document.getElementById('benjaminScore').textContent = '0';
+                document.getElementById('sanaaScore').textContent = '0';
+                document.getElementById('drawScore').textContent = '0';
+                startNewGame();
+                showNotification('Scores réinitialisés !', 'info');
+            }, 200);
         }
 
         // Sauvegarder le jeu sur Supabase
@@ -1429,7 +1683,6 @@
                         filter: `id=eq.${GAME_ID}`
                     },
                     (payload) => {
-                        console.log('Changement détecté:', payload);
                         if (payload.new && payload.new.game_state) {
                             const previousGameState = { ...gameState };
                             
@@ -1453,6 +1706,14 @@
                     }
                 )
                 .subscribe();
+
+            // Surveiller l'état de la connexion
+            setTimeout(() => {
+                if (subscription.state !== 'SUBSCRIBED') {
+                    console.log('Reconnexion...');
+                    setupRealTimeSubscription();
+                }
+            }, 10000);
 
             return subscription;
         }
@@ -1682,6 +1943,7 @@
             const themeModal = document.getElementById('themeModal');
             const settingsModal = document.getElementById('settingsModal');
             const victoryModal = document.getElementById('victoryModal');
+            const confirmationModal = document.getElementById('confirmationModal');
             
             if (event.target === themeModal) {
                 closeThemeModal();
@@ -1694,6 +1956,10 @@
             if (event.target === victoryModal) {
                 closeVictoryModal();
             }
+            
+            if (event.target === confirmationModal) {
+                closeConfirmationModal();
+            }
         });
 
         // Gestion des touches clavier pour fermer les modaux
@@ -1702,6 +1968,7 @@
                 closeThemeModal();
                 closeSettingsModal();
                 closeVictoryModal();
+                closeConfirmationModal();
             }
         });
     </script>
