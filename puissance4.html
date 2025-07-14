@@ -370,8 +370,295 @@
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
+        /* Modal de victoire/défaite */
+        .victory-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .victory-modal.show {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .victory-modal.closing {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.55, 0.055, 0.675, 0.19);
+        }
+
+        .victory-modal-content {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 35px 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+            transform: scale(0.8) translateY(80px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            text-align: center;
+        }
+
+        .victory-modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.6), 
+                transparent
+            );
+            z-index: 1;
+        }
+
+        .victory-modal-content::after {
+            content: '';
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            right: 1px;
+            bottom: 1px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 23px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .victory-modal.show .victory-modal-content {
+            transform: scale(1) translateY(0);
+            animation: modalEnter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .victory-modal.closing .victory-modal-content {
+            transform: scale(0.7) translateY(-40px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.55, 0.055, 0.675, 0.19);
+        }
+
+        .victory-modal-header {
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .victory-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: victoryBounce 2s ease-in-out infinite;
+        }
+
+        .victory-title {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .victory-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            font-weight: 300;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+
+        .victory-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .victory-stat {
+            text-align: center;
+        }
+
+        .victory-stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.95);
+            display: block;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .victory-stat-label {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        .victory-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .victory-button {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .victory-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .victory-button.primary {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: rgba(76, 175, 80, 0.5);
+        }
+
+        .victory-button.primary:hover {
+            background: rgba(76, 175, 80, 0.5);
+            border-color: rgba(76, 175, 80, 0.7);
+        }
+
+        @keyframes victoryBounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.1); }
+        }
+
+        /* Styles spécifiques pour victoire Benjamin */
+        .victory-modal.benjamin .victory-icon {
+            color: #ff4757;
+        }
+
+        .victory-modal.benjamin .victory-title {
+            color: #ff4757;
+        }
+
+        /* Styles spécifiques pour victoire Sanaa */
+        .victory-modal.sanaa .victory-icon {
+            color: #ffd700;
+        }
+
+        .victory-modal.sanaa .victory-title {
+            color: #ffd700;
+        }
+
+        /* Style pour égalité */
+        .victory-modal.draw .victory-icon {
+            color: #00bcd4;
+        }
+
+        .victory-modal.draw .victory-title {
+            color: #00bcd4;
+        }
+
         /* Responsive pour mobile */
         @media (max-width: 768px) {
+            .victory-modal-content {
+                padding: 25px 20px;
+                margin: 20px;
+                max-height: 60vh;
+                width: calc(100% - 60px);
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .victory-modal-content::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .victory-modal-content::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.4);
+            }
+
+            .victory-icon {
+                font-size: 3rem;
+            }
+
+            .victory-title {
+                font-size: 2rem;
+            }
+
+            .victory-subtitle {
+                font-size: 0.9rem;
+            }
+
+            .victory-stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .victory-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .victory-button {
+                width: 100%;
+                max-width: 250px;
+                justify-content: center;
+            }
+
+            @keyframes modalEnter {
+                0% {
+                    transform: scale(0.9) translateY(50px);
+                    opacity: 0;
+                }
+                100% {
+                    transform: scale(1) translateY(0);
+                    opacity: 1;
+                }
+            }
+
             .game-header {
                 margin: 80px 0 20px;
                 padding: 15px;
@@ -504,6 +791,41 @@
         </div>
     </div>
 
+    <!-- Modal de victoire/défaite -->
+    <div class="victory-modal" id="victoryModal">
+        <div class="victory-modal-content">
+            <div class="victory-modal-header">
+                <div class="victory-icon" id="victoryIcon">🏆</div>
+                <div class="victory-title" id="victoryTitle">Victoire !</div>
+                <div class="victory-subtitle" id="victorySubtitle">Félicitations pour cette belle partie !</div>
+            </div>
+            
+            <div class="victory-stats">
+                <div class="victory-stat">
+                    <span class="victory-stat-value" id="victoryBenjaminScore">0</span>
+                    <div class="victory-stat-label">Benjamin 🔴</div>
+                </div>
+                <div class="victory-stat">
+                    <span class="victory-stat-value" id="victorySanaaScore">0</span>
+                    <div class="victory-stat-label">Sanaa 🟡</div>
+                </div>
+                <div class="victory-stat">
+                    <span class="victory-stat-value" id="victoryDrawScore">0</span>
+                    <div class="victory-stat-label">Égalités</div>
+                </div>
+            </div>
+
+            <div class="victory-buttons">
+                <button class="victory-button primary" onclick="startNewGameFromModal()">
+                    <i class="fas fa-play"></i> Nouvelle Partie
+                </button>
+                <button class="victory-button" onclick="closeVictoryModal()">
+                    <i class="fas fa-times"></i> Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal pour les thèmes -->
     <div class="theme-modal" id="themeModal">
         <div class="theme-modal-content">
@@ -610,14 +932,16 @@
     </div>
 
     <!-- Scripts JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Configuration de l'API avec les nouvelles clés
-        const CONFIG = {
-            api: {
-                key: "$2a$10$qlJUnJT.rIRNr6cljWh68OfZ7fGQ5UeFmQwPy9f5jmKb6XdhyThY.",
-                binId: "686842e58a456b7966bb7685"
-            }
-        };
+        // Configuration Supabase - REMPLACEZ par vos vraies valeurs
+        const SUPABASE_URL = 'https://ocdloxagawjkokiheuiu.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jZGxveGFnYXdqa29raWhldWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1MTM1NTQsImV4cCI6MjA2ODA4OTU1NH0.OFC4QyrCKtyY_2JA2I5MnI8JjmuFBYHuJH7nO1Vyu5o';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // ID unique pour cette session de jeu (UUID valide)
+        const GAME_ID = '550e8400-e29b-41d4-a716-446655440000';
 
         // Variables du jeu
         let gameState = {
@@ -683,7 +1007,7 @@
         function initializeGame() {
             createBoard();
             loadGameFromServer();
-            startPolling();
+            setupRealTimeSubscription(); // Remplace le polling par du temps réel
         }
 
         // Créer le plateau de jeu
@@ -791,16 +1115,13 @@
                 highlightWinningCells();
                 updateScores();
                 updateGameStatus();
-                showNotification(
-                    gameState.currentPlayer === 1 ? 'Benjamin gagne ! 🔴' : 'Sanaa gagne ! 🟡',
-                    'success'
-                );
+                showVictoryModal(); // Remplace showNotification
             } else if (checkDraw()) {
                 gameState.gameActive = false;
                 gameState.winner = 0; // Égalité
                 updateScores();
                 updateGameStatus();
-                showNotification('Égalité ! 🤝', 'info');
+                showVictoryModal(); // Remplace showNotification
             } else {
                 // Changer de joueur
                 gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
@@ -1038,50 +1359,49 @@
             showNotification('Jeu réinitialisé !', 'info');
         }
 
-        // Sauvegarder le jeu sur le serveur
+        // Sauvegarder le jeu sur Supabase
         async function saveGameToServer() {
             try {
-                const response = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.api.binId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': CONFIG.api.key
-                    },
-                    body: JSON.stringify({
-                        gameState: gameState,
-                        lastUpdate: new Date().toISOString(),
-                        lastPlayer: currentUser
-                    })
-                });
+                const { data, error } = await supabase
+                    .from('puissance4_games')
+                    .upsert({
+                        id: GAME_ID,
+                        game_state: gameState,
+                        last_update: new Date().toISOString(),
+                        last_player: currentUser
+                    });
 
-                if (!response.ok) {
-                    throw new Error('Erreur de sauvegarde');
+                if (error) {
+                    throw error;
                 }
+                
+                console.log('Jeu sauvegardé avec succès');
             } catch (error) {
                 console.error('Erreur lors de la sauvegarde:', error);
                 showNotification('Erreur de synchronisation', 'error');
             }
         }
 
-        // Charger le jeu depuis le serveur
+        // Charger le jeu depuis Supabase
         async function loadGameFromServer() {
             try {
-                const response = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.api.binId}/latest`, {
-                    headers: {
-                        'X-Master-Key': CONFIG.api.key
-                    }
-                });
+                const { data, error } = await supabase
+                    .from('puissance4_games')
+                    .select('*')
+                    .eq('id', GAME_ID)
+                    .single();
 
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.record.gameState) {
-                        gameState = data.record.gameState;
-                        updateBoard();
-                        updateGameStatus();
-                        document.getElementById('benjaminScore').textContent = gameState.scores.benjamin;
-                        document.getElementById('sanaaScore').textContent = gameState.scores.sanaa;
-                        document.getElementById('drawScore').textContent = gameState.scores.draws;
-                    }
+                if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
+                    throw error;
+                }
+
+                if (data && data.game_state) {
+                    gameState = data.game_state;
+                    updateBoard();
+                    updateGameStatus();
+                    document.getElementById('benjaminScore').textContent = gameState.scores.benjamin;
+                    document.getElementById('sanaaScore').textContent = gameState.scores.sanaa;
+                    document.getElementById('drawScore').textContent = gameState.scores.draws;
                 } else {
                     // Première fois - initialiser le jeu
                     startNewGame();
@@ -1089,30 +1409,126 @@
             } catch (error) {
                 console.error('Erreur lors du chargement:', error);
                 showNotification('Erreur de connexion', 'error');
+                // Initialiser un nouveau jeu en cas d'erreur
+                startNewGame();
             }
         }
 
-        // Polling pour les mises à jour
-        function startPolling() {
-            if (pollInterval) {
-                clearInterval(pollInterval);
+        // Écouter les changements en temps réel
+        function setupRealTimeSubscription() {
+            const subscription = supabase
+                .channel('puissance4-changes')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: '*',
+                        schema: 'public',
+                        table: 'puissance4_games',
+                        filter: `id=eq.${GAME_ID}`
+                    },
+                    (payload) => {
+                        console.log('Changement détecté:', payload);
+                        if (payload.new && payload.new.game_state) {
+                            // Ne pas recharger si c'est nous qui avons fait le changement
+                            if (payload.new.last_player !== currentUser) {
+                                gameState = payload.new.game_state;
+                                updateBoard();
+                                updateGameStatus();
+                                document.getElementById('benjaminScore').textContent = gameState.scores.benjamin;
+                                document.getElementById('sanaaScore').textContent = gameState.scores.sanaa;
+                                document.getElementById('drawScore').textContent = gameState.scores.draws;
+                            }
+                        }
+                    }
+                )
+                .subscribe();
+
+            return subscription;
+        }
+
+        function getRandomMessage(type) {
+            const messages = {
+                benjamin: [
+                    "Pouahhhh trop fort !!",
+                    "Hahaha bravo beau gosse",
+                    "Easy peasy",
+                    "Compliqué de le battre pas vrai ?",
+                    "Hehehe",
+
+                ],
+                sanaa: [
+                    "Pffff que de la chance...",
+                    "Mouaissss pas mal",
+                    "En vrai je rigole bien joué 😔"
+                ],
+                draw: [
+                    "On est trop forts palala",
+                    "Connéctés",
+                    "Marions nous"
+                ]
+            };
+            return messages[type][Math.floor(Math.random() * messages[type].length)];
+        }
+
+        // Fonctions pour le modal de victoire
+        function showVictoryModal() {
+            const modal = document.getElementById('victoryModal');
+            const icon = document.getElementById('victoryIcon');
+            const title = document.getElementById('victoryTitle');
+            const subtitle = document.getElementById('victorySubtitle');
+            
+            // Réinitialiser les classes
+            modal.classList.remove('benjamin', 'sanaa', 'draw');
+            
+            // Mettre à jour les scores dans le modal
+            document.getElementById('victoryBenjaminScore').textContent = gameState.scores.benjamin;
+            document.getElementById('victorySanaaScore').textContent = gameState.scores.sanaa;
+            document.getElementById('victoryDrawScore').textContent = gameState.scores.draws;
+            
+            // Configuration selon le résultat
+            if (gameState.winner === 1) {
+                modal.classList.add('benjamin');
+                icon.textContent = '🔴';
+                title.textContent = 'Benjamin a gagné !';
+                subtitle.textContent = getRandomMessage('benjamin');
+            } else if (gameState.winner === 2) {
+                modal.classList.add('sanaa');
+                icon.textContent = '🟡';
+                title.textContent = 'Sanaa a gagné !';
+                subtitle.textContent = getRandomMessage('sanaa');
+            } else {
+                modal.classList.add('draw');
+                icon.textContent = '🤝';
+                title.textContent = 'Égalité !';
+                subtitle.textContent = getRandomMessage('draw');
             }
             
-            pollInterval = setInterval(() => {
-                loadGameFromServer();
-            }, 2000); // Vérifier toutes les 2 secondes
+            // Afficher le modal avec animation
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 50);
         }
 
-        // Arrêter le polling quand on quitte la page
-        window.addEventListener('beforeunload', () => {
-            if (pollInterval) {
-                clearInterval(pollInterval);
-            }
-        });
+        function closeVictoryModal() {
+            const modal = document.getElementById('victoryModal');
+            
+            modal.classList.add('closing');
+            setTimeout(() => {
+                modal.classList.remove('show', 'closing');
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        function startNewGameFromModal() {
+            closeVictoryModal();
+            setTimeout(() => {
+                startNewGame();
+            }, 400);
+        }
 
         // Système de notifications
         function showNotification(message, type = 'info') {
-            // Supprimer toute notification existante
             const oldNotif = document.querySelector('.notification');
             if (oldNotif) oldNotif.remove();
 
@@ -1254,6 +1670,7 @@
         window.addEventListener('click', function(event) {
             const themeModal = document.getElementById('themeModal');
             const settingsModal = document.getElementById('settingsModal');
+            const victoryModal = document.getElementById('victoryModal');
             
             if (event.target === themeModal) {
                 closeThemeModal();
@@ -1262,6 +1679,10 @@
             if (event.target === settingsModal) {
                 closeSettingsModal();
             }
+            
+            if (event.target === victoryModal) {
+                closeVictoryModal();
+            }
         });
 
         // Gestion des touches clavier pour fermer les modaux
@@ -1269,6 +1690,7 @@
             if (event.key === 'Escape') {
                 closeThemeModal();
                 closeSettingsModal();
+                closeVictoryModal();
             }
         });
     </script>
