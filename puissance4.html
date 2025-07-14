@@ -1426,12 +1426,12 @@
                 const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
                 setTimeout(() => {
                     cell.classList.add('winning');
-                }, 300);
+                }, 600);
             });
         }
 
         // Mettre à jour l'affichage du plateau
-        function updateBoard() {
+        function updateBoard(animateLastMove = false) {
             for (let row = 0; row < 6; row++) {
                 for (let col = 0; col < 7; col++) {
                     const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
@@ -1451,6 +1451,14 @@
                         row === gameState.lastMove.row && 
                         col === gameState.lastMove.col) {
                         cell.classList.add('last-move');
+                        
+                        // Animer le dernier pion si demandé (pour l'adversaire)
+                        if (animateLastMove) {
+                            cell.classList.add('dropping');
+                            setTimeout(() => {
+                                cell.classList.remove('dropping');
+                            }, 500);
+                        }
                     }
                 }
             }
@@ -1599,7 +1607,6 @@
                 modal.style.display = 'none';
             }, 300);
         }
-
         function confirmReset() {
             // Fermer le modal
             closeConfirmationModal();
@@ -1688,8 +1695,16 @@
                             
                             // Ne pas recharger si c'est nous qui avons fait le changement
                             if (payload.new.last_player !== currentUser) {
+                                const previousLastMove = gameState.lastMove;
                                 gameState = payload.new.game_state;
-                                updateBoard();
+                                
+                                // Vérifier s'il y a un nouveau coup à animer
+                                const shouldAnimate = gameState.lastMove && 
+                                    (!previousLastMove || 
+                                     previousLastMove.row !== gameState.lastMove.row || 
+                                     previousLastMove.col !== gameState.lastMove.col);
+                                
+                                updateBoard(shouldAnimate);
                                 updateGameStatus();
                                 document.getElementById('benjaminScore').textContent = gameState.scores.benjamin;
                                 document.getElementById('sanaaScore').textContent = gameState.scores.sanaa;
