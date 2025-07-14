@@ -266,7 +266,7 @@
 
         @keyframes winningPulse {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
+            50% { transform: scale(1.05); }
         }
 
         .game-cell.dropping {
@@ -1336,7 +1336,7 @@
         // Démarrer une nouvelle partie
         function startNewGame() {
             gameState.board = Array(6).fill().map(() => Array(7).fill(0));
-            gameState.currentPlayer = 1;
+            gameState.currentPlayer = Math.random() < 0.5 ? 1 : 2; // Choix aléatoire du premier joueur
             gameState.gameActive = true;
             gameState.winner = null;
             gameState.winningCells = [];
@@ -1346,7 +1346,9 @@
             updateBoard();
             updateGameStatus();
             saveGameToServer();
-            showNotification('Nouvelle partie commencée !', 'success');
+            
+            const firstPlayer = gameState.currentPlayer === 1 ? 'Benjamin' : 'Sanaa';
+            showNotification(`Nouvelle partie commencée ! ${firstPlayer} commence `, 'success');
         }
 
         // Réinitialiser le jeu
@@ -1429,6 +1431,8 @@
                     (payload) => {
                         console.log('Changement détecté:', payload);
                         if (payload.new && payload.new.game_state) {
+                            const previousGameState = { ...gameState };
+                            
                             // Ne pas recharger si c'est nous qui avons fait le changement
                             if (payload.new.last_player !== currentUser) {
                                 gameState = payload.new.game_state;
@@ -1437,6 +1441,13 @@
                                 document.getElementById('benjaminScore').textContent = gameState.scores.benjamin;
                                 document.getElementById('sanaaScore').textContent = gameState.scores.sanaa;
                                 document.getElementById('drawScore').textContent = gameState.scores.draws;
+                                
+                                // Vérifier si le jeu vient de se terminer et afficher le modal
+                                if (!gameState.gameActive && previousGameState.gameActive) {
+                                    setTimeout(() => {
+                                        showVictoryModal();
+                                    }, 800); // Délai pour laisser l'animation du dernier pion se terminer
+                                }
                             }
                         }
                     }
