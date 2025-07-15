@@ -288,6 +288,20 @@
                 flex-direction: column;
                 gap: 10px;
             }
+            
+            .date-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .date-status-container {
+                align-self: flex-start;
+            }
+            
+            .section-subtitle {
+                font-size: 1.1rem;
+                padding: 12px 16px;
+            }
         }
 
         /* Animation de pulsation pour les boutons importants */
@@ -593,6 +607,61 @@
             gap: 15px;
             margin-top: 20px;
         }
+        
+        .dates-section {
+            margin-bottom: 40px;
+        }
+        
+        .dates-section:last-child {
+            margin-bottom: 20px;
+        }
+        
+        .section-subtitle {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-subtitle i {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+        
+        .no-dates {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+        }
+        
+        .no-dates i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            opacity: 0.6;
+        }
+        
+        .no-dates h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+        
+        .no-dates p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
 
         .date-card {
             background: rgba(255, 255, 255, 0.12);
@@ -615,18 +684,6 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
-        .date-card.confirmed::before {
-            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
-        }
-
-        .date-card.pending::before {
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-        }
-
-        .date-card.cancelled::before {
-            background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
-        }
-
         .date-card:hover {
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
@@ -636,18 +693,77 @@
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 15px;
+            gap: 15px;
+        }
+        
+        .date-main-info {
+            flex: 1;
+        }
+        
+        .date-status-container {
+            flex-shrink: 0;
         }
 
         .date-title {
             font-size: 1.2rem;
             font-weight: 600;
             color: var(--text-primary);
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+        }
+        
+        .date-time-info {
+            margin-bottom: 10px;
+        }
+        
+        .date-relative-time {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        
+        .date-exact-time {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            opacity: 0.8;
+        }
+        
+        .date-details {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .date-location,
+        .date-proposer {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .date-location i,
+        .date-proposer i {
+            width: 14px;
+            text-align: center;
+            opacity: 0.7;
         }
 
         .date-info {
             color: var(--text-secondary);
             font-size: 0.9rem;
+        }
+        
+        .date-description {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            border-left: 3px solid rgba(255, 255, 255, 0.2);
         }
 
         .date-status {
@@ -1460,7 +1576,46 @@
             background: linear-gradient(135deg, #ff5252, #d32f2f);
             box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
         }
+
+        /* Styles pour le message spécial anniversaire */
+        .special-anniversary {
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            text-align: center;
+            margin: 8px 0;
+            box-shadow: 0 4px 15px rgba(255, 20, 147, 0.3);
+        }
+
+        .anniversary-date {
+            border: 2px solid #ff69b4;
+            box-shadow: 0 8px 30px rgba(255, 105, 180, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .anniversary-date .date-header {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Canvas pour les particules */
+        .anniversary-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
     </style>
+    
+    <!-- Canvas Confetti pour les explosions -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     
     <!-- EmailJS pour les notifications par email -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
@@ -2100,10 +2255,30 @@
                 return true;
             });
 
-            // Trier par date (plus récent en premier)
-            filteredDates.sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
+            // Séparer les dates futures et passées
+            const futureDates = [];
+            const pastDates = [];
+            
+            filteredDates.forEach(date => {
+                const dateTime = new Date(`${date.date}T${date.time}`);
+                if (dateTime >= now || date.status === 'archived') {
+                    if (date.status === 'archived') {
+                        pastDates.push(date);
+                    } else {
+                        futureDates.push(date);
+                    }
+                } else {
+                    pastDates.push(date);
+                }
+            });
+            
+            // Trier les dates futures par ordre chronologique (plus proches en premier)
+            futureDates.sort((a, b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
+            
+            // Trier les dates passées par ordre anti-chronologique (plus récentes en premier)
+            pastDates.sort((a, b) => new Date(`${b.date}T${b.time}`) - new Date(`${a.date}T${a.time}`));
 
-            if (filteredDates.length === 0) {
+            if (futureDates.length === 0 && pastDates.length === 0) {
                 container.innerHTML = `
                     <div class="no-dates">
                         <i class="fas fa-calendar-heart"></i>
@@ -2114,11 +2289,39 @@
                 return;
             }
 
-            container.innerHTML = `
-                <div class="dates-grid">
-                    ${filteredDates.map(date => createDateCard(date)).join('')}
-                </div>
-            `;
+            let html = '';
+            
+            // Afficher les dates futures
+            if (futureDates.length > 0) {
+                html += `
+                    <div class="dates-section">
+                        <h3 class="section-subtitle">
+                            <i class="fas fa-calendar-plus"></i>
+                            Rendez-vous à venir (${futureDates.length})
+                        </h3>
+                        <div class="dates-grid">
+                            ${futureDates.map(date => createDateCard(date)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Afficher les dates passées si on affiche tout ou les archives
+            if (pastDates.length > 0 && (statusFilter === 'all' || statusFilter === 'archived')) {
+                html += `
+                    <div class="dates-section">
+                        <h3 class="section-subtitle">
+                            <i class="fas fa-history"></i>
+                            Rendez-vous passés (${pastDates.length})
+                        </h3>
+                        <div class="dates-grid">
+                            ${pastDates.map(date => createDateCard(date)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
         }
 
         // Créer une carte de rendez-vous
@@ -2134,6 +2337,63 @@
                 month: 'long',
                 day: 'numeric'
             });
+            
+            // Calculer le temps relatif
+            const dateTime = new Date(`${date.date}T${date.time}`);
+            const now = new Date();
+            
+            // Créer des dates sans l'heure pour comparer seulement les jours
+            const dateOnly = new Date(date.date);
+            const todayOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            const diffTime = dateOnly - todayOnly;
+            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+            
+            let relativeTime = '';
+            if (diffDays === 0) {
+                relativeTime = "Aujourd'hui";
+            } else if (diffDays === 1) {
+                relativeTime = "Demain";
+            } else if (diffDays === -1) {
+                relativeTime = "Hier";
+            } else if (diffDays > 1) {
+                // Calculer les semaines et mois pour un affichage plus riche
+                const weeks = Math.floor(diffDays / 7);
+                const remainingDays = diffDays % 7;
+                const months = diffDays / 30.44; // Moyenne de jours par mois
+                
+                relativeTime = `Dans ${diffDays} jours`;
+                
+                // Ajouter les semaines si >= 7 jours
+                if (diffDays >= 7) {
+                    const weeksDecimal = (diffDays / 7).toFixed(1);
+                    relativeTime += ` / Dans ${weeksDecimal} semaines`;
+                }
+                
+                // Ajouter les mois si >= 30 jours
+                if (diffDays >= 30) {
+                    const monthsDecimal = months.toFixed(1);
+                    relativeTime += ` / Dans ${monthsDecimal} mois`;
+                }
+            } else if (diffDays < -1) {
+                const absDays = Math.abs(diffDays);
+                const weeks = Math.floor(absDays / 7);
+                const months = absDays / 30.44;
+                
+                relativeTime = `Il y a ${absDays} jours`;
+                
+                // Ajouter les semaines si >= 7 jours
+                if (absDays >= 7) {
+                    const weeksDecimal = (absDays / 7).toFixed(1);
+                    relativeTime += ` / Il y a ${weeksDecimal} semaines`;
+                }
+                
+                // Ajouter les mois si >= 30 jours
+                if (absDays >= 30) {
+                    const monthsDecimal = months.toFixed(1);
+                    relativeTime += ` / Il y a ${monthsDecimal} mois`;
+                }
+            }
 
             const categoryEmoji = {
                 restaurant: '🍽️',
@@ -2150,22 +2410,32 @@
             const proposerEmoji = date.proposedBy === 'ben' ? '👨' : '👩';
             const proposerName = date.proposedBy === 'ben' ? 'Ben' : 'Sanaa';
 
-            return `
-                <div class="date-card ${date.status}" data-date-id="${date.id}">
+            // Vérifier si c'est le 21 décembre (jour où on s'est mis ensemble)
+            const isSpecialDay = date.date.includes('-12-21');
+            const specialMessage = isSpecialDay ? 
+                '<div class="special-anniversary">✨ Le jour où on s\'est mis ensemble ! ✨</div>' : '';
+
+            const cardHTML = `
+                <div class="date-card ${date.status} ${isSpecialDay ? 'anniversary-date' : ''}" data-date-id="${date.id}">
                     <div class="date-header">
-                        <div>
+                        <div class="date-main-info">
                             <h3 class="date-title">${categoryEmoji[date.category]} ${date.title}</h3>
-                            <div class="date-info">
-                                <div><i class="fas fa-calendar"></i> ${formattedDate}</div>
-                                <div><i class="fas fa-clock"></i> ${date.time}</div>
-                                <div><i class="fas fa-map-marker-alt"></i> ${date.location}</div>
-                                <div><i class="fas fa-user"></i> Proposé par ${proposerEmoji} ${proposerName}</div>
+                            ${specialMessage}
+                            <div class="date-time-info">
+                                <div class="date-relative-time">${relativeTime}</div>
+                                <div class="date-exact-time">${formattedDate} à ${date.time}</div>
+                            </div>
+                            <div class="date-details">
+                                <div class="date-location"><i class="fas fa-map-marker-alt"></i> ${date.location}</div>
+                                <div class="date-proposer"><i class="fas fa-user"></i> Proposé par ${proposerEmoji} ${proposerName}</div>
                             </div>
                         </div>
-                        <span class="date-status status-${date.status}">${getStatusText(date.status)}</span>
+                        <div class="date-status-container">
+                            <span class="date-status status-${date.status}">${getStatusText(date.status)}</span>
+                        </div>
                     </div>
                     
-                    ${date.description ? `<p class="date-description">${date.description}</p>` : ''}
+                    ${date.description ? `<div class="date-description">${date.description}</div>` : ''}
                     
                     <div class="date-actions">
                         ${getActionButtons(date)}
@@ -2177,6 +2447,18 @@
                     </div>
                 </div>
             `;
+            
+            // Ajouter les particules aléatoires après le rendu si c'est un jour spécial
+            if (isSpecialDay) {
+                setTimeout(() => {
+                    const card = document.querySelector(`[data-date-id="${date.id}"]`);
+                    if (card && card.classList.contains('anniversary-date')) {
+                        createRandomParticles(card);
+                    }
+                }, 100);
+            }
+            
+            return cardHTML;
         }
 
         // Obtenir le texte du statut
@@ -2299,17 +2581,138 @@
             }
         }
 
+        // Fonction pour créer des particules aléatoires
+        function createRandomParticles(container) {
+            const canvas = document.createElement('canvas');
+            canvas.className = 'anniversary-particles';
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+            
+            const ctx = canvas.getContext('2d');
+            const particles = [];
+            const colors = ['#ff69b4', '#ff1493', '#ffc0cb', '#ff91a4', '#ffb6c1'];
+            
+            // Créer des particules
+            for (let i = 0; i < 25; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 2 + 1.5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speed: Math.random() * 2 + 1,
+                    opacity: Math.random() * 0.8 + 0.2
+                });
+            }
+            
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                particles.forEach(particle => {
+                    particle.y += particle.speed;
+                    
+                    // Remettre la particule en haut quand elle sort
+                    if (particle.y > canvas.height + 10) {
+                        particle.y = -10;
+                        particle.x = Math.random() * canvas.width;
+                        particle.speed = Math.random() * 2 + 1;
+                        particle.opacity = Math.random() * 0.8 + 0.2;
+                    }
+                    
+                    // Dessiner la particule comme un petit carré
+                    ctx.globalAlpha = particle.opacity;
+                    ctx.fillStyle = particle.color;
+                    ctx.fillRect(particle.x - particle.size/2, particle.y - particle.size/2, particle.size, particle.size);
+                });
+                
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+            container.appendChild(canvas);
+        }
+
+        // Fonction pour déclencher l'explosion de confettis rose
+        function triggerPinkConfetti() {
+            // Explosion principale au centre
+            confetti({
+                particleCount: 100,
+                angle: 90,
+                spread: 80,
+                origin: { x: 0.5, y: 0.6 },
+                colors: ['#ff69b4', '#ff1493', '#ffc0cb', '#ff91a4', '#ffb6c1'],
+                shapes: ['circle', 'square'],
+                scalar: 1.2,
+                gravity: 0.8,
+                drift: 0.1,
+                startVelocity: 45
+            });
+
+            // Explosion secondaire à gauche
+            setTimeout(() => {
+                confetti({
+                    particleCount: 70,
+                    angle: 60,
+                    spread: 60,
+                    origin: { x: 0.2, y: 0.7 },
+                    colors: ['#ff69b4', '#ff1493', '#ffc0cb'],
+                    shapes: ['circle'],
+                    scalar: 0.8,
+                    gravity: 0.9,
+                    startVelocity: 35
+                });
+            }, 200);
+
+            // Explosion secondaire à droite
+            setTimeout(() => {
+                confetti({
+                    particleCount: 70,
+                    angle: 120,
+                    spread: 60,
+                    origin: { x: 0.8, y: 0.7 },
+                    colors: ['#ff69b4', '#ff1493', '#ffc0cb'],
+                    shapes: ['circle'],
+                    scalar: 0.8,
+                    gravity: 0.9,
+                    startVelocity: 35
+                });
+            }, 400);
+
+            // Pluie de confettis finale
+            setTimeout(() => {
+                confetti({
+                    particleCount: 150,
+                    angle: 90,
+                    spread: 120,
+                    origin: { x: 0.5, y: 0.3 },
+                    colors: ['#ff69b4', '#ff1493', '#ffc0cb', '#ff91a4', '#ffb6c1'],
+                    shapes: ['circle', 'square'],
+                    scalar: 0.6,
+                    gravity: 0.6,
+                    drift: 0.2,
+                    startVelocity: 25
+                });
+            }, 600);
+        }
+
         // Confirmer un rendez-vous
         async function confirmDate(dateId) {
             const dateIndex = datesData.findIndex(d => d.id === dateId);
             if (dateIndex !== -1) {
                 const originalStatus = datesData[dateIndex].status;
+                const isSpecialDate = datesData[dateIndex].date.includes('-12-21');
                 
                 try {
                     datesData[dateIndex].status = 'confirmed';
                     lastDatesHash = JSON.stringify(datesData);
                     await saveDatesToOnline();
                     displayDates();
+                    
+                    // Déclencher l'explosion de confettis si c'est le 21 décembre
+                    if (isSpecialDate) {
+                        setTimeout(() => {
+                            triggerPinkConfetti();
+                        }, 300);
+                    }
                     
                     // Envoyer une notification par email pour la confirmation
                     if (typeof notifyUserByEmail === 'function') {

@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Kalam:wght@300;400;700&family=Dancing+Script:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="config.js"></script>
+    <script src="https://js.puter.com/v2/"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@9.1.2/marked.min.js"></script>  
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
@@ -20,160 +20,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-html.min.js"></script>
     
     <style>
-        /* Styles pour les paramètres IA */
-        .settings-section {
-            margin: 20px 0;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.12);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-        }
-
-        .settings-section h4 {
-            margin-top: 0;
-            margin-bottom: 20px;
-            color: white;
-            font-size: 1.2rem;
-            font-weight: 500;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .settings-group {
-            margin-bottom: 22px;
-            position: relative;
-        }
-
-        .settings-group:last-child {
-            margin-bottom: 0;
-        }
-
-        .settings-group label {
-            display: block;
-            margin-bottom: 12px;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1rem;
-            font-weight: 500;
-        }
-
-        /* Style personnalisé pour les sliders */
-        .settings-group input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 85%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            outline: none;
-            opacity: 0.9;
-            transition: opacity 0.2s, background 0.2s;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) inset;
-            vertical-align: middle;
-        }
-        
-        .settings-group input[type="range"]:hover {
-            opacity: 1;
-            background: rgba(255, 255, 255, 0.25);
-        }
-        
-        .settings-group input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: white;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .settings-group input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: white;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: none;
-        }
-        
-        .settings-group input[type="range"]::-webkit-slider-thumb:hover,
-        .settings-group input[type="range"]::-webkit-slider-thumb:active {
-            transform: scale(1.1);
-            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3), 0 2px 10px rgba(0, 0, 0, 0.4);
-        }
-        
-        .settings-group input[type="range"]::-moz-range-thumb:hover,
-        .settings-group input[type="range"]::-moz-range-thumb:active {
-            transform: scale(1.1);
-            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3), 0 2px 10px rgba(0, 0, 0, 0.4);
-        }
-
-        .settings-group span {
-            display: inline-block;
-            min-width: 15%;
-            text-align: center;
-            color: white;
-            font-weight: 600;
-            margin-left: 10px;
-            background: rgba(255, 255, 255, 0.15);
-            padding: 4px 8px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-        
-        .settings-group input[type="range"]:focus + span {
-            background: rgba(255, 255, 255, 0.25);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-        
-        .slider-container {
-            display: flex;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.08);
-            padding: 12px 15px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) inset;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-        
-        .slider-container input[type="range"] {
-            width: 80%;
-            flex-grow: 1;
-        }
-        
-        .slider-container:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.25);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) inset;
-        }
-        
-        .value-updated {
-            animation: pulse 0.3s ease-out;
-            background: rgba(255, 255, 255, 0.3) !important;
-        }
-        
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-                background: rgba(255, 255, 255, 0.15);
-            }
-            50% {
-                transform: scale(1.1);
-                background: rgba(255, 255, 255, 0.4);
-            }
-            100% {
-                transform: scale(1);
-                background: rgba(255, 255, 255, 0.15);
-            }
-        }
 
         html {
             margin: 0;
@@ -914,7 +760,7 @@
                 <div class="chat-messages" id="chatMessages">
                     <div class="message bot">
                         <div class="message-bubble">
-                            Coucouu mon coeur, ça va ? 
+                            Coucouu mon coeur, ça va ?
                         </div>
                         <div class="message-time">Il y a longtemps... :(</div>
                     </div>                     
@@ -1005,25 +851,6 @@
             <div class="user-status-container">
                 <div id="connectedUserIndicator" class="connected-user-indicator"></div>
             </div>
-            
-            <div class="settings-section">
-                <h4>Paramètres IA</h4>
-                <div class="settings-group">
-                    <label for="max-tokens">Nombre maximum de tokens:</label>
-                    <div class="slider-container">
-                        <input type="range" id="max-tokens" min="500" max="128000" step="100" value="1000" oninput="updateTokenValue(this.value)">
-                        <span id="max-tokens-value">1000</span>
-                    </div>
-                </div>
-                <div class="settings-group">
-                    <label for="temperature">Température:</label>
-                    <div class="slider-container">
-                        <input type="range" id="temperature" min="0.1" max="1.0" step="0.1" value="0.7" oninput="updateTemperatureValue(this.value)">
-                        <span id="temperature-value">0.7</span>
-                    </div>
-                </div>
-            </div>
-            
             <div class="fonts-grid">
                 <div class="font-option active" id="font-option-default" onclick="changeFont('default')">
                     <div class="font-preview" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">Abc</div>
@@ -1071,23 +898,14 @@
     </div>    <script>
         const chatMessages = document.getElementById('chatMessages');
         const chatInput = document.getElementById('chatInput');
-        const sendButton = document.getElementById('sendButton');        
-        let conversationHistory = []; // Historique local de la session
-        let openRouterAI = null;
-
-        // Configuration OpenRouter depuis le fichier config.js
-        const OPENROUTER_API_KEY = typeof CONFIG !== 'undefined' ? CONFIG.OPENROUTER_API_KEY : 'sk-or-v1-YOUR_API_KEY_HERE';
-        const OPENROUTER_API_URL = typeof CONFIG !== 'undefined' ? CONFIG.OPENROUTER_API_URL : 'https://openrouter.ai/api/v1/chat/completions';
-        const MODEL = typeof CONFIG !== 'undefined' ? CONFIG.MODEL : 'anthropic/claude-3.5-sonnet';
-        window.MAX_TOKENS = typeof CONFIG !== 'undefined' ? CONFIG.MAX_TOKENS : 1000; // Variable globale pour permettre la modification
-        window.TEMPERATURE = typeof CONFIG !== 'undefined' ? CONFIG.TEMPERATURE : 0.7; // Variable globale pour permettre la modification
-        const APP_NAME = typeof CONFIG !== 'undefined' ? CONFIG.APP_NAME : 'Ben-Bot';
+        const sendButton = document.getElementById('sendButton');        let conversationHistory = []; // Historique local de la session
+        let puterAI = null;
 
         const benjaminPersonality = `
 Tu es Benjamin (Ben), le copain attentionné de Sanaa.
 
 ██ RÈGLE EMOJIS ██
-- Mets **uniquement** ces emojis : ['\\u{1F63D}', '\\u{1F622}', '\\u{1F621}', '\\u{1F63E}', '\\u{1F480}', '\\u{2639}\\u{FE0F}', '\\u{1F614}']
+- Mets **uniquement** ces emojis (par leur code Unicode) : ['\\u{1F63D}', '\\u{1F622}', '\\u{1F621}', '\\u{1F63E}', '\\u{1F480}', '\\u{2639}\\u{FE0F}', '\\u{1F614}']
 - **Max 1 emoji** par messages et très rarement.
 - Place l’emoji **en fin de phrase** seulement
 - Ajoute un emoji **seulement** si le message exprime une émotion forte (joie, tristesse, colère…)
@@ -1236,51 +1054,73 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
             });
         }
 
-        async function initializeOpenRouter() {
+        async function initializePuter() {
             try {
-                // Vérifier si la clé API est configurée
-                if (OPENROUTER_API_KEY === 'sk-or-v1-YOUR_API_KEY_HERE' || !OPENROUTER_API_KEY) {
-                    console.error('Clé API OpenRouter non configurée');
-                    updateChatStatus('offline');
-                    addMessage("Erreur: Ben-Bot ne peut pas fonctionner car la clé API OpenRouter n'est pas configurée. Modifiez le fichier config.js avec votre clé API.");
-                    return false;
-                }
-                
-                // Test de connexion avec OpenRouter
-                const testResponse = await fetch(OPENROUTER_API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-                        'Content-Type': 'application/json',
-                        'HTTP-Referer': window.location.origin,
-                        'X-Title': APP_NAME
-                    },
-                    body: JSON.stringify({
-                        model: MODEL,
-                        messages: [{ role: 'user', content: 'test' }],
-                        max_tokens: 1
-                    })
-                });
-
-                if (testResponse.ok || testResponse.status === 400) {
-                    // 400 est OK car c'est juste un test de connexion
-                    openRouterAI = true;
-                    console.log('OpenRouter initialisé avec succès');
-                    updateChatStatus('online');
-                    return true;
+                if (typeof puter !== 'undefined') {
+                    // Vérification supplémentaire pour les nouveaux appareils
+                    if (puter.ai) {
+                        puterAI = puter.ai;
+                        console.log('Puter.js initialisé avec succès');
+                        updateChatStatus('online');
+                        return true;
+                    } else {
+                        // Tentative de rechargement du script si l'objet puter existe mais pas puter.ai
+                        console.warn('Puter.js chargé mais puter.ai non disponible, tentative de rechargement');
+                        await loadPuterScript();
+                        
+                        // Nouvelle vérification après le rechargement
+                        if (typeof puter !== 'undefined' && puter.ai) {
+                            puterAI = puter.ai;
+                            console.log('Puter.js rechargé avec succès');
+                            updateChatStatus('online');
+                            return true;
+                        } else {
+                            console.error('Échec du rechargement de Puter.js');
+                            updateChatStatus('offline');
+                            addMessage("Erreur: Ben-Bot ne peut pas fonctionner car l'API Puter n'est pas disponible. Vérifie ta connexion et rafraîchis la page.");
+                            return false;
+                        }
+                    }
                 } else {
-                    console.error('Échec de la connexion à OpenRouter:', testResponse.status);
-                    updateChatStatus('offline');
-                    addMessage("Erreur: Ben-Bot ne peut pas se connecter à OpenRouter. Vérifie ta connexion et rafraîchis la page.");
-                    return false;
+                    // Si puter n'est pas défini, essayons de le charger
+                    console.warn('Puter.js non disponible, tentative de chargement');
+                    await loadPuterScript();
+                    
+                    // Vérification après le chargement
+                    if (typeof puter !== 'undefined' && puter.ai) {
+                        puterAI = puter.ai;
+                        console.log('Puter.js chargé avec succès');
+                        updateChatStatus('online');
+                        return true;
+                    } else {
+                        console.error('Échec du chargement de Puter.js');
+                        updateChatStatus('offline');
+                        addMessage("Erreur: Ben-Bot ne peut pas fonctionner car Puter.js n'est pas disponible. Vérifie ta connexion et rafraîchis la page.");
+                        return false;
+                    }
                 }
             } catch (error) {
-                console.error('Erreur initialisation OpenRouter:', error);
-                openRouterAI = null;
+                console.error('Erreur initialisation Puter:', error);
+                puterAI = null;
                 updateChatStatus('offline');
-                addMessage("Erreur: Ben-Bot ne peut pas fonctionner car une erreur s'est produite lors de l'initialisation d'OpenRouter. Vérifie ta connexion et rafraîchis la page.");
+                addMessage("Erreur: Ben-Bot ne peut pas fonctionner car une erreur s'est produite lors de l'initialisation de Puter.js. Vérifie ta connexion et rafraîchis la page.");
                 return false;
             }
+        }
+        
+        // Fonction pour charger dynamiquement le script Puter.js
+        function loadPuterScript() {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://js.puter.com/v2/';
+                script.async = true;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+                
+                // Résoudre après un délai même si le script n'a pas signalé de chargement
+                setTimeout(resolve, 3000);
+            });
         }
 
         function updateChatStatus(status) {
@@ -1303,8 +1143,6 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
                 const processed = processMarkdownAndStickers(content);
                 processedContent = processed.text;
                 stickerContent = processed.stickers;
-            } else {
-                processedContent = content;
             }
             
             messageDiv.innerHTML = `
@@ -1485,10 +1323,10 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
                 });
             }
         });            async function displayStreamingResponse(userMessage) {
-            if (!openRouterAI) {
-                const response = "ERREUR: Ben-Bot ne fonctionne pas car OpenRouter n'est pas correctement configuré. Vérifie ta connexion et rafraîchis la page.";
+            if (!puterAI) {
+                const response = "ERREUR: Ben-Bot ne fonctionne pas car Puter.js n'est pas correctement chargé. Vérifie ta connexion et rafraîchis la page.";
                 addMessage(response);
-                console.error("* Load failed - OpenRouter non disponible");
+                console.error("* Load failed - puterAI non disponible");
                 return response;
             }
 
@@ -1506,7 +1344,7 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
                     context += `\nSanaa vient de dire: "${userMessage}"\nRéponds en tant que Benjamin:`;
 
                     // Garder l'indicateur de frappe pendant 1 seconde supplémentaire avant de commencer le streaming
-                    setTimeout(async () => {
+                    setTimeout(() => {
                         hideTyping();
                         
                         const messageDiv = document.createElement('div');
@@ -1527,66 +1365,42 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
                         const streamingStickers = document.getElementById('streamingStickers');
                         let fullResponse = '';
 
-                        // Démarrer le streaming avec OpenRouter
-                        try {
-                            const response = await fetch(OPENROUTER_API_URL, {
-                                method: 'POST',
-                                headers: {
-                                    'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-                                    'Content-Type': 'application/json',
-                                    'HTTP-Referer': window.location.origin,
-                                    'X-Title': APP_NAME
-                                },
-                                body: JSON.stringify({
-                                    model: MODEL,
-                                    messages: [
-                                        {
-                                            role: 'system',
-                                            content: context
-                                        }
-                                    ],
-                                    stream: true,
-                                    max_tokens: MAX_TOKENS,
-                                    temperature: TEMPERATURE
-                                })
-                            });
+                        // Démarrer le streaming
+                        (async () => {
+                            try {
+                                // Vérifier une dernière fois que puterAI est disponible
+                                if (!puterAI) {
+                                    throw new Error("puterAI n'est pas disponible");
+                                }
+                                
+                                const stream = await puterAI.chat([
+                                    {
+                                        role: 'system',
+                                        content: context
+                                    }
+                                ], {
+                                    model: 'gpt-4o-mini',
+                                    stream: true
+                                });
 
-                            if (!response.ok) {
-                                throw new Error(`HTTP error! status: ${response.status}`);
-                            }
-
-                            const reader = response.body.getReader();
-                            const decoder = new TextDecoder();
-
-                            while (true) {
-                                const { done, value } = await reader.read();
-                                if (done) break;
-
-                                const chunk = decoder.decode(value, { stream: true });
-                                const lines = chunk.split('\n').filter(line => line.trim());
-
-                                for (const line of lines) {
-                                    if (line.startsWith('data: ')) {
-                                        const data = line.slice(6);
-                                        if (data === '[DONE]') break;
-
-                                        try {
-                                            const parsed = JSON.parse(data);
-                                            const content = parsed.choices?.[0]?.delta?.content;
-                                            if (content) {
-                                                fullResponse += content;
-                                                // Appliquer le traitement des stickers en temps réel pendant le streaming
-                                                const processed = processMarkdownAndStickers(fullResponse);
-                                                streamingBubble.innerHTML = processed.text;
-                                                streamingStickers.innerHTML = processed.stickers;
-                                                chatMessages.scrollTop = chatMessages.scrollHeight;
-                                                console.log('Streaming chunk:', content);
-                                            }
-                                        } catch (parseError) {
-                                            console.log('Chunk non-JSON ignoré:', data);
-                                        }
+                                for await (const chunk of stream) {
+                                    if (chunk.text) {
+                                        fullResponse += chunk.text;
+                                        // Appliquer le traitement des stickers en temps réel pendant le streaming
+                                        const processed = processMarkdownAndStickers(fullResponse);
+                                        streamingBubble.innerHTML = processed.text;
+                                        streamingStickers.innerHTML = processed.stickers;
+                                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                                        console.log('Streaming chunk:', chunk.text);
                                     }
                                 }
+
+                            } catch (streamError) {
+                                console.error('Erreur de streaming:', streamError);
+                                // Pas de tentative de fallback, afficher directement un message d'erreur
+                                fullResponse = "ERREUR: Ben-Bot ne peut pas répondre car Puter.js a rencontré une erreur lors du streaming. Message d'erreur: " + streamError.message;
+                                streamingBubble.innerHTML = fullResponse;
+                                throw streamError;
                             }
 
                             console.log('Full response final:', fullResponse);
@@ -1611,22 +1425,25 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
                                 if (messageDiv) {
                                     addCopyButtonsToCodeBlocks(messageDiv);
                                 }
-                            }, 50);
-
-                            // Résoudre la promesse avec la réponse finale
+                            }, 50);                            // Résoudre la promesse avec la réponse finale
                             resolve(fullResponse);
-
-                        } catch (streamError) {
-                            console.error('Erreur de streaming:', streamError);
-                            fullResponse = "ERREUR: Ben-Bot ne peut pas répondre car OpenRouter a rencontré une erreur lors du streaming. Message d'erreur: " + streamError.message;
-                            streamingBubble.innerHTML = fullResponse;
-                            reject(streamError);
-                        }
+                        })().catch(error => {
+                            console.error('Erreur dans le streaming:', error);
+                            hideTyping();
+                            const errorResponse = "ERREUR: Ben-Bot ne peut pas répondre car Puter.js a rencontré une erreur. Message d'erreur: " + error.message;
+                            // Mettre à jour le message déjà créé
+                            if (streamingBubble) {
+                                streamingBubble.textContent = errorResponse;
+                            } else {
+                                addMessage(errorResponse);
+                            }
+                            reject(error);
+                        });
                     }, 1000); // Attendre 1 seconde avant de masquer l'indicateur
 
                 } catch (error) {
                     console.error('Erreur streaming complète:', error);
-                    const errorResponse = "ERREUR: Ben-Bot ne peut pas répondre car OpenRouter a rencontré une erreur. Message d'erreur: " + error.message;
+                    const errorResponse = "ERREUR: Ben-Bot ne peut pas répondre car Puter.js a rencontré une erreur. Message d'erreur: " + error.message;
                     hideTyping();
                     addMessage(errorResponse);
                     reject(errorResponse);
@@ -1635,12 +1452,11 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
         }
 
         async function getBenResponse(userMessage) {
-            if (!openRouterAI) {
-                return "ERREUR: Ben-Bot ne peut pas fonctionner car OpenRouter n'est pas disponible. Vérifie ta connexion et rafraîchis la page.";
+            if (!puterAI) {
+                return "ERREUR: Ben-Bot ne peut pas fonctionner car Puter.js n'est pas disponible. Vérifie ta connexion et rafraîchis la page.";
             }
 
-            try {
-                let context = benjaminPersonality + '\n\nHistorique de conversation:\n';
+            try {                let context = benjaminPersonality + '\n\nHistorique de conversation:\n';
                 
                 const recentHistory = conversationHistory.slice(-30);
                 recentHistory.forEach(exchange => {
@@ -1651,51 +1467,32 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
                     }
                 });
                 
-                context += `\nSanaa vient de dire: "${userMessage}"\nRéponds en tant que Benjamin`;
-
-                const response = await fetch(OPENROUTER_API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-                        'Content-Type': 'application/json',
-                        'HTTP-Referer': window.location.origin,
-                        'X-Title': APP_NAME
-                    },
-                    body: JSON.stringify({
-                        model: MODEL,
-                        messages: [
-                            {
-                                role: 'system',
-                                content: context
-                            }
-                        ],
-                        max_tokens: MAX_TOKENS,
-                        temperature: TEMPERATURE
-                    })
+                context += `\nSanaa vient de dire: "${userMessage}"\nRéponds en tant que Benjamin`;                
+                const response = await puterAI.chat([
+                    {
+                        role: 'system',
+                        content: context
+                    }
+                ], {
+                    model: 'gpt-4o-mini',
+                    stream: false
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                const botResponse = data.choices?.[0]?.message?.content || "Je t'aime ma chérie";
+                const botResponse = response.message?.content || "Je t'aime ma chérie";
                 
                 conversationHistory.push({
                     user: userMessage,
                     bot: botResponse,
                     timestamp: new Date().toISOString()
-                });
-
-                if (conversationHistory.length > 20) {
+                });                if (conversationHistory.length > 20) {
                     conversationHistory = conversationHistory.slice(-20);
                 }
 
                 return botResponse;
                   
             } catch (error) {
-                console.error('Erreur OpenRouter:', error);
-                return "ERREUR: Ben-Bot ne peut pas répondre car OpenRouter a rencontré une erreur. Message d'erreur: " + error.message;
+                console.error('Erreur Puter.js:', error);
+                return "ERREUR: Ben-Bot ne peut pas répondre car Puter.js a rencontré une erreur. Message d'erreur: " + error.message;
             }
         }        async function sendMessage() {
             const content = chatInput.value.trim();
@@ -1711,17 +1508,17 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
                 // Attendre au moins 1.5 secondes pour que l'utilisateur voie l'indicateur
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 
-                if (openRouterAI) {
+                if (puterAI) {
                     await displayStreamingResponse(content);
                 } else {
                     hideTyping();
-                    addMessage("ERREUR: Ben-Bot ne peut pas fonctionner car OpenRouter n'est pas disponible. Vérifie ta connexion et rafraîchis la page.");
+                    addMessage("ERREUR: Ben-Bot ne peut pas fonctionner car Puter.js n'est pas disponible. Vérifie ta connexion et rafraîchis la page.");
                 }
                 
             } catch (error) {
                 console.error('Erreur lors de l\'envoi:', error);
                 hideTyping();
-                addMessage("ERREUR: Ben-Bot ne peut pas traiter cette requête car OpenRouter a rencontré une erreur. Vérifie ta connexion et rafraîchis la page.");
+                addMessage("ERREUR: Ben-Bot ne peut pas traiter cette requête car Puter.js a rencontré une erreur. Vérifie ta connexion et rafraîchis la page.");
             } finally {
                 sendButton.disabled = false;
                 chatInput.focus();
@@ -1734,15 +1531,15 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
             }
         });         
         
-        // Initialisation d'OpenRouter immédiatement et encore une fois après un délai
-        initializeOpenRouter();
+        // Initialisation de Puter immédiatement et encore une fois après un délai
+        initializePuter();
         
         setTimeout(() => {
             chatInput.focus();
             // Vérifier si l'initialisation a échoué la première fois
-            if (!openRouterAI) {
-                console.log("Nouvelle tentative d'initialisation d'OpenRouter après délai");
-                initializeOpenRouter();
+            if (!puterAI) {
+                console.log("Nouvelle tentative d'initialisation de Puter.js après délai");
+                initializePuter();
             }
             
             const stickerModal = document.getElementById('stickerModal');
@@ -1769,25 +1566,6 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
 
         function openSettingsModal() {
             document.getElementById('settingsModal').classList.add('show');
-            
-            // Charger les valeurs actuelles des paramètres IA
-            const savedMaxTokens = localStorage.getItem('maxTokens') || MAX_TOKENS.toString();
-            const savedTemperature = localStorage.getItem('temperature') || TEMPERATURE.toString();
-            
-            const maxTokensSlider = document.getElementById('max-tokens');
-            const temperatureSlider = document.getElementById('temperature');
-            const maxTokensValue = document.getElementById('max-tokens-value');
-            const temperatureValue = document.getElementById('temperature-value');
-            
-            if (maxTokensSlider && maxTokensValue) {
-                maxTokensSlider.value = savedMaxTokens;
-                maxTokensValue.textContent = savedMaxTokens;
-            }
-            
-            if (temperatureSlider && temperatureValue) {
-                temperatureSlider.value = savedTemperature;
-                temperatureValue.textContent = savedTemperature;
-            }
             
             // Afficher l'utilisateur connecté
             const currentUser = sessionStorage.getItem('currentUser') || 'Benjamin';
@@ -1828,27 +1606,7 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
             localStorage.setItem(key, value);
             
             localStorage.setItem(key + '_timestamp', Date.now().toString());
-        }
-
-        function updateTokenValue(value) {
-            const valueElement = document.getElementById('max-tokens-value');
-            valueElement.textContent = value;
-            valueElement.classList.add('value-updated');
-            setTimeout(() => {
-                valueElement.classList.remove('value-updated');
-            }, 300);
-            saveGlobalSetting('maxTokens', value);
-        }
-
-        function updateTemperatureValue(value) {
-            const valueElement = document.getElementById('temperature-value');
-            valueElement.textContent = value;
-            valueElement.classList.add('value-updated');
-            setTimeout(() => {
-                valueElement.classList.remove('value-updated');
-            }, 300);
-            saveGlobalSetting('temperature', value);
-        }
+        }        
         
         function loadGlobalSettings() {
             // Charger le thème
@@ -1877,29 +1635,6 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
             const targetOption = document.getElementById(`font-option-${savedFont}`);
             if (targetOption) {
                 targetOption.classList.add('active');
-            }
-            
-            // Charger les paramètres IA
-            const savedMaxTokens = localStorage.getItem('maxTokens');
-            if (savedMaxTokens) {
-                window.MAX_TOKENS = parseInt(savedMaxTokens);
-                // Mettre à jour l'interface
-                const maxTokensInput = document.getElementById('max-tokens');
-                if (maxTokensInput) {
-                    maxTokensInput.value = savedMaxTokens;
-                    document.getElementById('max-tokens-value').textContent = savedMaxTokens;
-                }
-            }
-            
-            const savedTemperature = localStorage.getItem('temperature');
-            if (savedTemperature) {
-                window.TEMPERATURE = parseFloat(savedTemperature);
-                // Mettre à jour l'interface
-                const temperatureInput = document.getElementById('temperature');
-                if (temperatureInput) {
-                    temperatureInput.value = savedTemperature;
-                    document.getElementById('temperature-value').textContent = savedTemperature;
-                }
             }
         }       
          // Écouter les changements de localStorage pour synchronisation en temps réel
