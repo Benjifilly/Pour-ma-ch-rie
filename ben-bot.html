@@ -13,11 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked@9.1.2/marked.min.js"></script>  
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-html.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
     
     <style>
         /* Styles pour les paramètres IA */
@@ -125,6 +121,74 @@
             border-radius: 8px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
+        }
+
+        /* Style pour les champs de saisie */
+        .settings-group input[type="text"],
+        .settings-group input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) inset;
+        }
+
+        .settings-group input[type="text"]:focus,
+        .settings-group input[type="password"]:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) inset, 0 0 0 2px rgba(255, 255, 255, 0.1);
+        }
+
+        .settings-group input[type="text"]:hover,
+        .settings-group input[type="password"]:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .settings-group input[type="text"]::placeholder,
+        .settings-group input[type="password"]::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Style pour le lien API */
+        .api-key-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .api-key-container input {
+            flex: 1;
+        }
+
+        .api-key-link {
+            color: #4ade80;
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .api-key-link:hover {
+            background: rgba(74, 222, 128, 0.2);
+            border-color: rgba(74, 222, 128, 0.5);
+        }
+
+        .api-key-link i {
+            font-size: 0.8rem;
         }
         
         .settings-group input[type="range"]:focus + span {
@@ -889,6 +953,87 @@
             padding-left: env(safe-area-inset-left);
             padding-right: env(safe-area-inset-right);        
         }
+
+        /* Overlay d'erreur pour clé API manquante */
+        .api-error-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .api-error-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .api-error-content {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            color: white;
+            max-width: 400px;
+            margin: 0 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .api-error-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #ff6b6b;
+            animation: pulse 2s infinite;
+        }
+
+        .api-error-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .api-error-text {
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .api-error-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 25px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .api-error-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
     </style>
     <link rel="stylesheet" href="css/themes-settings.css">
     <link rel="stylesheet" href="css/modals-unified.css">
@@ -943,6 +1088,22 @@
                     <button class="send-button" id="sendButton" onclick="sendMessage()">
                         <i class="fas fa-paper-plane"></i>
                     </button>
+                </div>
+                
+                <!-- Overlay d'erreur pour clé API manquante -->
+                <div class="api-error-overlay" id="apiErrorOverlay">
+                    <div class="api-error-content">
+                        <div class="api-error-icon">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <div class="api-error-title">Clé API manquante</div>
+                        <div class="api-error-text">
+                            Aucune clé API n'est configurée. Va dans les paramètres pour ajouter ta clé API OpenRouter ou crée-en une nouvelle.
+                        </div>
+                        <button class="api-error-button" onclick="openSettingsModal(); hideApiErrorOverlay()">
+                            Ouvrir les paramètres
+                        </button>
+                    </div>
                 </div>
             </div>        
         </div>
@@ -1008,6 +1169,17 @@
             
             <div class="settings-section">
                 <h4>Paramètres IA</h4>
+                <div class="settings-group">
+                    <label for="api-key">Clé API :</label>
+                    <div class="api-key-container">
+                        <input type="password" id="api-key" placeholder="Entrez votre clé API OpenAI" 
+                               oninput="updateApiKey(this.value)">
+                        <a href="https://openrouter.ai/settings/keys" target="_blank" class="api-key-link" title="Créer une clé API OpenRouter">
+                            <i class="fas fa-external-link-alt"></i>
+                            Créer clé API
+                        </a>
+                    </div>
+                </div>
                 <div class="settings-group">
                     <label for="max-tokens">Nombre maximum de tokens:</label>
                     <div class="slider-container">
@@ -1236,55 +1408,72 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
             });
         }
 
+        let lastInitAttempt = 0;
+        const INIT_COOLDOWN = 10000; // 10 secondes entre les tentatives
+
         async function initializeOpenRouter() {
             try {
-                // Vérifier si la clé API est configurée
-                if (OPENROUTER_API_KEY === 'sk-or-v1-YOUR_API_KEY_HERE' || !OPENROUTER_API_KEY) {
+                // Vérifier si on doit attendre avant la prochaine tentative
+                const now = Date.now();
+                if (now - lastInitAttempt < INIT_COOLDOWN) {
+                    console.log('Attente avant prochaine tentative d\'initialisation OpenRouter...');
+                    return false;
+                }
+                lastInitAttempt = now;
+
+                // Vérifier si la clé API est configurée (priorité localStorage puis config)
+                const savedApiKey = localStorage.getItem('apiKey');
+                const apiKeyToUse = savedApiKey && savedApiKey.trim() !== '' ? savedApiKey : OPENROUTER_API_KEY;
+                
+                if (apiKeyToUse === 'sk-or-v1-YOUR_API_KEY_HERE' || !apiKeyToUse || apiKeyToUse.trim() === '') {
                     console.error('Clé API OpenRouter non configurée');
                     updateChatStatus('offline');
-                    addMessage("Erreur: Ben-Bot ne peut pas fonctionner car la clé API OpenRouter n'est pas configurée. Modifiez le fichier config.js avec votre clé API.");
+                    showApiErrorOverlay();
                     return false;
                 }
                 
-                // Test de connexion avec OpenRouter
-                const testResponse = await fetch(OPENROUTER_API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-                        'Content-Type': 'application/json',
-                        'HTTP-Referer': window.location.origin,
-                        'X-Title': APP_NAME
-                    },
-                    body: JSON.stringify({
-                        model: MODEL,
-                        messages: [{ role: 'user', content: 'test' }],
-                        max_tokens: 1
-                    })
-                });
-
-                if (testResponse.ok || testResponse.status === 400) {
-                    // 400 est OK car c'est juste un test de connexion
-                    openRouterAI = true;
-                    console.log('OpenRouter initialisé avec succès');
+                // Masquer l'overlay si la clé API est configurée
+                hideApiErrorOverlay();
+                
+                // Si OpenRouter est déjà initialisé, ne pas refaire le test
+                if (openRouterAI === true) {
+                    console.log('OpenRouter déjà initialisé');
                     updateChatStatus('online');
                     return true;
-                } else {
-                    console.error('Échec de la connexion à OpenRouter:', testResponse.status);
-                    updateChatStatus('offline');
-                    addMessage("Erreur: Ben-Bot ne peut pas se connecter à OpenRouter. Vérifie ta connexion et rafraîchis la page.");
-                    return false;
                 }
+                
+                console.log('Test de connexion OpenRouter...');
+                
+                // Test de connexion simplifié (pas de vraie requête)
+                openRouterAI = true;
+                console.log('OpenRouter initialisé avec succès');
+                updateChatStatus('online');
+                return true;
+                
             } catch (error) {
                 console.error('Erreur initialisation OpenRouter:', error);
                 openRouterAI = null;
                 updateChatStatus('offline');
-                addMessage("Erreur: Ben-Bot ne peut pas fonctionner car une erreur s'est produite lors de l'initialisation d'OpenRouter. Vérifie ta connexion et rafraîchis la page.");
                 return false;
             }
         }
 
         function updateChatStatus(status) {
             console.log('Status Ben-Bot:', status);
+        }
+
+        function showApiErrorOverlay() {
+            const overlay = document.getElementById('apiErrorOverlay');
+            if (overlay) {
+                overlay.classList.add('show');
+            }
+        }
+
+        function hideApiErrorOverlay() {
+            const overlay = document.getElementById('apiErrorOverlay');
+            if (overlay) {
+                overlay.classList.remove('show');
+            }
         }        function addMessage(content, isUser = false) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
@@ -1529,10 +1718,14 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
 
                         // Démarrer le streaming avec OpenRouter
                         try {
+                            // Utiliser la clé API sauvegardée ou celle du config
+                            const savedApiKey = localStorage.getItem('apiKey');
+                            const apiKeyToUse = savedApiKey && savedApiKey.trim() !== '' ? savedApiKey : OPENROUTER_API_KEY;
+                            
                             const response = await fetch(OPENROUTER_API_URL, {
                                 method: 'POST',
                                 headers: {
-                                    'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                                    'Authorization': `Bearer ${apiKeyToUse}`,
                                     'Content-Type': 'application/json',
                                     'HTTP-Referer': window.location.origin,
                                     'X-Title': APP_NAME
@@ -1653,10 +1846,14 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
                 
                 context += `\nSanaa vient de dire: "${userMessage}"\nRéponds en tant que Benjamin`;
 
+                // Utiliser la clé API sauvegardée ou celle du config
+                const savedApiKey = localStorage.getItem('apiKey');
+                const apiKeyToUse = savedApiKey && savedApiKey.trim() !== '' ? savedApiKey : OPENROUTER_API_KEY;
+
                 const response = await fetch(OPENROUTER_API_URL, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                        'Authorization': `Bearer ${apiKeyToUse}`,
                         'Content-Type': 'application/json',
                         'HTTP-Referer': window.location.origin,
                         'X-Title': APP_NAME
@@ -1701,6 +1898,15 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
             const content = chatInput.value.trim();
             if (!content) return;
 
+            // Vérifier si la clé API est configurée
+            const savedApiKey = localStorage.getItem('apiKey');
+            const apiKeyToUse = savedApiKey && savedApiKey.trim() !== '' ? savedApiKey : OPENROUTER_API_KEY;
+            
+            if (apiKeyToUse === 'sk-or-v1-YOUR_API_KEY_HERE' || !apiKeyToUse || apiKeyToUse.trim() === '') {
+                showApiErrorOverlay();
+                return;
+            }
+
             addMessage(content, true);
             chatInput.value = '';
             sendButton.disabled = true;
@@ -1734,12 +1940,12 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
             }
         });         
         
-        // Initialisation d'OpenRouter immédiatement et encore une fois après un délai
+        // Initialisation d'OpenRouter
         initializeOpenRouter();
         
         setTimeout(() => {
             chatInput.focus();
-            // Vérifier si l'initialisation a échoué la première fois
+            // Vérifier si l'initialisation a échoué la première fois (avec rate limiting)
             if (!openRouterAI) {
                 console.log("Nouvelle tentative d'initialisation d'OpenRouter après délai");
                 initializeOpenRouter();
@@ -1773,11 +1979,13 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
             // Charger les valeurs actuelles des paramètres IA
             const savedMaxTokens = localStorage.getItem('maxTokens') || MAX_TOKENS.toString();
             const savedTemperature = localStorage.getItem('temperature') || TEMPERATURE.toString();
+            const savedApiKey = localStorage.getItem('apiKey') || '';
             
             const maxTokensSlider = document.getElementById('max-tokens');
             const temperatureSlider = document.getElementById('temperature');
             const maxTokensValue = document.getElementById('max-tokens-value');
             const temperatureValue = document.getElementById('temperature-value');
+            const apiKeyInput = document.getElementById('api-key');
             
             if (maxTokensSlider && maxTokensValue) {
                 maxTokensSlider.value = savedMaxTokens;
@@ -1787,6 +1995,10 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
             if (temperatureSlider && temperatureValue) {
                 temperatureSlider.value = savedTemperature;
                 temperatureValue.textContent = savedTemperature;
+            }
+
+            if (apiKeyInput) {
+                apiKeyInput.value = savedApiKey;
             }
             
             // Afficher l'utilisateur connecté
@@ -1848,6 +2060,21 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
                 valueElement.classList.remove('value-updated');
             }, 300);
             saveGlobalSetting('temperature', value);
+        }
+
+        function updateApiKey(value) {
+            saveGlobalSetting('apiKey', value);
+            
+            // Vérifier si la clé API est valide et masquer l'overlay
+            if (value && value.trim() !== '') {
+                hideApiErrorOverlay();
+                // Réinitialiser OpenRouter avec la nouvelle clé (forcer la réinitialisation)
+                openRouterAI = false;
+                lastInitAttempt = 0; // Réinitialiser le délai
+                initializeOpenRouter();
+            } else {
+                showApiErrorOverlay();
+            }
         }
         
         function loadGlobalSettings() {
