@@ -228,6 +228,11 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .game-status:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .game-board-container {
@@ -1715,6 +1720,10 @@
             benjaminCard.classList.remove('active');
             sanaaCard.classList.remove('active');
             
+            // Retirer les anciens événements de clic
+            statusElement.onclick = null;
+            statusElement.style.cursor = 'default';
+            
             if (!gameState.gameActive) {
                 if (gameState.winner === 1) {
                     statusElement.textContent = 'Benjamin gagne ! 🔴';
@@ -1725,6 +1734,13 @@
                 } else {
                     statusElement.textContent = 'Égalité ! 🤝';
                 }
+                
+                // Rendre le statut cliquable pour rouvrir le modal de victoire
+                statusElement.style.cursor = 'pointer';
+                statusElement.title = 'Cliquer pour voir les détails de la victoire';
+                statusElement.onclick = () => {
+                    showVictoryModal();
+                };
             } else {
                 if (gameState.currentPlayer === 1) {
                     statusElement.textContent = 'Au tour de Benjamin 🔴';
