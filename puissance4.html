@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/themes-settings.css">
     <link rel="stylesheet" href="css/modals-unified.css">
+    <link rel="stylesheet" href="css/themes-settings.css">
+    <link rel="stylesheet" href="css/modals-unified.css">
     <style>
         * {
             margin: 0;
@@ -70,6 +72,55 @@
             font-size: 1.2rem;
         }
 
+        /* Indicateur de connexion à la base de données principal */
+        .database-connection-indicator-main {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            opacity: 0.7;
+        }
+
+        .database-connection-indicator-main.connected {
+            background: rgba(76, 175, 80, 0.15);
+            border-color: rgba(76, 175, 80, 0.3);
+            color: rgba(76, 175, 80, 0.9);
+        }
+
+        .database-connection-indicator-main.disconnected {
+            background: rgba(244, 67, 54, 0.15);
+            border-color: rgba(244, 67, 54, 0.3);
+            color: rgba(244, 67, 54, 0.9);
+        }
+
+        .database-connection-indicator-main.checking {
+            background: rgba(255, 193, 7, 0.15);
+            border-color: rgba(255, 193, 7, 0.3);
+            color: rgba(255, 193, 7, 0.9);
+        }
+
+        .database-connection-indicator-main #connectionStatusIcon {
+            font-size: 0.6rem;
+            animation: none;
+        }
+
+        .database-connection-indicator-main.checking #connectionStatusIcon {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
         /* Media queries pour les appareils mobiles */
         @media (max-width: 767px) {
             .back-button {
@@ -94,6 +145,13 @@
                 width: 45px;
                 height: 45px;
                 font-size: 1.1rem;
+            }
+
+            .database-connection-indicator-main {
+                bottom: calc(15px + env(safe-area-inset-bottom, 0px));
+                right: 15px;
+                padding: 6px 10px;
+                font-size: 0.75rem;
             }
         }
 
@@ -766,6 +824,51 @@
             border-color: rgba(239, 68, 68, 0.7);
         }
 
+        .database-connection-indicator {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.85rem;
+            padding: 6px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .database-connection-indicator.connected {
+            background: rgba(76, 175, 80, 0.15);
+            border-color: rgba(76, 175, 80, 0.3);
+            color: rgba(76, 175, 80, 0.9);
+        }
+
+        .database-connection-indicator.disconnected {
+            background: rgba(244, 67, 54, 0.15);
+            border-color: rgba(244, 67, 54, 0.3);
+            color: rgba(244, 67, 54, 0.9);
+        }
+
+        .database-connection-indicator.checking {
+            background: rgba(255, 193, 7, 0.15);
+            border-color: rgba(255, 193, 7, 0.3);
+            color: rgba(255, 193, 7, 0.9);
+        }
+
+        #connectionStatusIcon {
+            font-size: 0.7rem;
+            animation: none;
+        }
+
+        .database-connection-indicator.checking #connectionStatusIcon {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
         /* Responsive pour mobile */
         @media (max-width: 768px) {
             .victory-modal-content {
@@ -869,7 +972,7 @@
             }
 
             .vs-indicator {
-                order: 1;
+                order: 0;
             }
 
             .column-indicator {
@@ -894,8 +997,21 @@
             }
 
             .game-controls {
-                flex-direction: column;
-                align-items: center;
+                flex-direction: row;
+                justify-content: center;
+                gap: 15px;
+            }
+
+            .game-button {
+                width: auto;
+                min-width: 50px;
+                padding: 12px;
+                justify-content: center;
+                font-size: 1.1rem;
+            }
+
+            .game-button .button-text {
+                display: none;
             }
 
             .score-board {
@@ -920,6 +1036,12 @@
     <button class="settings-button" id="settingsButton" onclick="openSettingsModal()" title="Paramètres">
         <i class="fas fa-cog"></i>
     </button>
+
+    <!-- Indicateur de connexion à la base de données -->
+    <div id="databaseConnectionIndicator" class="database-connection-indicator-main">
+        <i class="fas fa-circle" id="connectionStatusIcon"></i>
+        <span id="connectionStatusText">Vérification...</span>
+    </div>
 
     <div class="container">
         <!-- En-tête du jeu -->
@@ -959,10 +1081,10 @@
         <!-- Contrôles du jeu -->
         <div class="game-controls">
             <button class="game-button" id="newGameBtn" onclick="startNewGame()">
-                <i class="fas fa-play"></i> Nouvelle Partie
+                <i class="fas fa-play"></i><span class="button-text"> Nouvelle Partie</span>
             </button>
             <button class="game-button" id="resetBtn" onclick="resetGame()">
-                <i class="fas fa-redo"></i> Recommencer
+                <i class="fas fa-redo"></i><span class="button-text"> Recommencer</span>
             </button>
         </div>
 
@@ -1204,7 +1326,19 @@
 
             // Initialiser le jeu
             currentUser = sessionStorage.getItem('currentUser') || 'Benjamin';
-            updateUserIndicator();
+            
+            // Afficher l'utilisateur connecté
+            const userIndicator = document.getElementById('connectedUserIndicator');
+            if (userIndicator) {
+                // Choisir une icône appropriée selon l'utilisateur
+                const userIcon = currentUser === 'Benjamin' ? 
+                    '<i class="fas fa-user-circle" style="margin-right: 8px;"></i>' : 
+                    '<i class="fas fa-heart" style="margin-right: 8px;"></i>';
+                
+                // Mise en forme améliorée avec icône
+                userIndicator.innerHTML = `${userIcon}Connecté en tant que <strong>${currentUser}</strong>`;
+            }
+            
             initializeGame();
         });
 
@@ -1218,11 +1352,75 @@
             }
         }
 
+        // Fonction pour mettre à jour l'indicateur de connexion à la base de données
+        function updateDatabaseConnectionIndicator(status = 'checking') {
+            const indicator = document.getElementById('databaseConnectionIndicator');
+            const icon = document.getElementById('connectionStatusIcon');
+            const text = document.getElementById('connectionStatusText');
+            
+            if (!indicator || !icon || !text) return;
+            
+            // Réinitialiser les classes
+            indicator.classList.remove('connected', 'disconnected', 'checking');
+            
+            switch (status) {
+                case 'connected':
+                    indicator.classList.add('connected');
+                    icon.className = 'fas fa-circle';
+                    text.textContent = 'DB ✓';
+                    break;
+                case 'disconnected':
+                    indicator.classList.add('disconnected');
+                    icon.className = 'fas fa-circle';
+                    text.textContent = 'DB ✗';
+                    break;
+                case 'checking':
+                default:
+                    indicator.classList.add('checking');
+                    icon.className = 'fas fa-circle';
+                    text.textContent = 'DB...';
+                    break;
+            }
+        }
+
+        // Fonction pour vérifier la connexion à Supabase
+        async function checkDatabaseConnection() {
+            try {
+                updateDatabaseConnectionIndicator('checking');
+                
+                // Test simple de connexion à Supabase
+                const { data, error } = await supabase
+                    .from('puissance4_games')
+                    .select('count')
+                    .limit(1);
+                
+                if (error) {
+                    console.log('Erreur de connexion DB:', error.message);
+                    updateDatabaseConnectionIndicator('disconnected');
+                    return false;
+                } else {
+                    updateDatabaseConnectionIndicator('connected');
+                    return true;
+                }
+            } catch (error) {
+                console.log('Erreur lors du test de connexion:', error);
+                updateDatabaseConnectionIndicator('disconnected');
+                return false;
+            }
+        }
+
         // Initialisation du jeu
         function initializeGame() {
             createBoard();
+            checkDatabaseConnection(); // Vérifier la connexion DB au démarrage
             loadGameFromServer();
             setupRealTimeSubscription(); // Remplace le polling par du temps réel
+            
+            // Force la mise à jour après un court délai pour éviter les bugs visuels
+            setTimeout(() => {
+                updateColumnIndicators();
+                updateGameStatus();
+            }, 100);
         }
 
         // Créer le plateau de jeu
@@ -1480,23 +1678,36 @@
                 // Vérifier si la colonne est pleine
                 const isColumnFull = gameState.board[0][col] !== 0;
                 
-                // Réinitialiser les classes
-                indicator.classList.remove('disabled', 'full');
+                // Réinitialiser complètement tous les styles
+                indicator.classList.remove('disabled', 'full', 'hover-active');
+                indicator.style.cssText = ''; // Reset all inline styles
                 
-                if (!gameState.gameActive || !isMyTurn) {
-                    indicator.classList.add('disabled');
+                if (!gameState.gameActive) {
+                    // Jeu terminé - style neutre
                     indicator.style.cursor = 'not-allowed';
-                    indicator.style.opacity = '0.3';
+                    indicator.style.opacity = '0.5';
+                    indicator.style.background = 'rgba(255, 255, 255, 0.1)';
+                    indicator.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                } else if (!isMyTurn) {
+                    // Pas notre tour - style d'attente
+                    indicator.style.cursor = 'not-allowed';
+                    indicator.style.opacity = '0.4';
+                    indicator.style.background = 'rgba(255, 255, 255, 0.05)';
+                    indicator.style.borderColor = 'rgba(255, 255, 255, 0.1)';
                 } else if (isColumnFull) {
+                    // Colonne pleine - style rouge
                     indicator.classList.add('full');
                     indicator.style.cursor = 'not-allowed';
-                    indicator.style.background = 'rgba(255, 100, 100, 0.3)';
-                    indicator.style.borderColor = 'rgba(255, 100, 100, 0.5)';
+                    indicator.style.opacity = '0.6';
+                    indicator.style.background = 'rgba(255, 100, 100, 0.2)';
+                    indicator.style.borderColor = 'rgba(255, 100, 100, 0.4)';
                 } else {
+                    // Colonne jouable - style actif
                     indicator.style.cursor = 'pointer';
-                    indicator.style.opacity = '0.7';
+                    indicator.style.opacity = '0.8';
                     indicator.style.background = 'rgba(255, 255, 255, 0.2)';
                     indicator.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                    indicator.style.transition = 'all 0.2s ease';
                 }
             });
 
@@ -1505,6 +1716,9 @@
             cells.forEach(cell => {
                 const col = parseInt(cell.dataset.col);
                 const isColumnFull = gameState.board[0][col] !== 0;
+                
+                // Reset des classes hover
+                cell.classList.remove('column-hover');
                 
                 if (!gameState.gameActive || !isMyTurn || isColumnFull) {
                     cell.style.cursor = 'not-allowed';
@@ -1638,9 +1852,11 @@
                     throw error;
                 }
                 
+                updateDatabaseConnectionIndicator('connected');
                 console.log('Jeu sauvegardé avec succès');
             } catch (error) {
                 console.error('Erreur lors de la sauvegarde:', error);
+                updateDatabaseConnectionIndicator('disconnected');
                 showNotification('Erreur de synchronisation', 'error');
             }
         }
@@ -1662,6 +1878,7 @@
                     gameState = data.game_state;
                     updateBoard();
                     updateGameStatus();
+                    updateColumnIndicators(); // Force la mise à jour des indicateurs
                     document.getElementById('benjaminScore').textContent = gameState.scores.benjamin;
                     document.getElementById('sanaaScore').textContent = gameState.scores.sanaa;
                     document.getElementById('drawScore').textContent = gameState.scores.draws;
@@ -1669,8 +1886,11 @@
                     // Première fois - initialiser le jeu
                     startNewGame();
                 }
+                
+                updateDatabaseConnectionIndicator('connected');
             } catch (error) {
                 console.error('Erreur lors du chargement:', error);
+                updateDatabaseConnectionIndicator('disconnected');
                 showNotification('Erreur de connexion', 'error');
                 // Initialiser un nouveau jeu en cas d'erreur
                 startNewGame();
@@ -1736,22 +1956,34 @@
         function getRandomMessage(type) {
             const messages = {
                 benjamin: [
-                    "Pouahhhh trop fort !!",
+                    "Pouahhh trop fort !!",
                     "Hahaha bravo beau gosse",
-                    "Easy peasy",
-                    "Compliqué de le battre pas vrai ?",
-                    "Hehehe",
-
+                    "Easy peasy lemon squeezy",
+                    "Compliqué de me battre, pas vrai ?",
+                    "Héhéhé trop facile",
+                    "Champion du monde !",
+                    "Inarrêtable aujourd'hui",
+                    "Technique parfaite !"
                 ],
                 sanaa: [
-                    "Pffff que de la chance...",
-                    "Mouaissss pas mal",
-                    "En vrai je rigole bien joué 😔"
+                    "Pfffff que de la chance...",
+                    "Mouaisss pas mal du tout",
+                    "En vrai je rigole, bien joué 😔",
+                    "Tu commences à t'améliorer !",
+                    "Impressionnant ma chérie 💕",
+                    "Bravo ma princesse !",
+                    "Tu es trop forte pour moi",
+                    "Victoire bien méritée 👑",
+                    "Ma reine des jeux !",
+                    "Éblouissante performance ✨"
                 ],
                 draw: [
-                    "On est trop forts palala",
-                    "Connéctés",
-                    "Marions nous"
+                    "On est trop forts, pas possible !",
+                    "Connectés mentalement",
+                    "Marions-nous maintenant",
+                    "Parfaite harmonie !",
+                    "Duo de légende",
+                    "Même niveau, même amour"
                 ]
             };
             return messages[type][Math.floor(Math.random() * messages[type].length)];
@@ -1904,7 +2136,19 @@
             const modal = document.getElementById('settingsModal');
             const content = modal.querySelector('.settings-modal-content');
             
-            updateUserIndicator();
+            // Afficher l'utilisateur connecté
+            const currentUser = sessionStorage.getItem('currentUser') || 'Benjamin';
+            const userIndicator = document.getElementById('connectedUserIndicator');
+            
+            if (userIndicator) {
+                // Choisir une icône appropriée selon l'utilisateur
+                const userIcon = currentUser === 'Benjamin' ? 
+                    '<i class="fas fa-user-circle" style="margin-right: 8px;"></i>' : 
+                    '<i class="fas fa-heart" style="margin-right: 8px;"></i>';
+                
+                // Mise en forme améliorée avec icône
+                userIndicator.innerHTML = `${userIcon}Connecté en tant que <strong>${currentUser}</strong>`;
+            }
             
             modal.style.display = 'flex';
             modal.classList.remove('closing');
