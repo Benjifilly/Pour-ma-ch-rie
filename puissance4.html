@@ -297,17 +297,6 @@
             cursor: pointer;
         }
 
-        .game-cell:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
-        }
-
-        .game-cell.column-hover {
-            background: rgba(255, 255, 255, 0.7);
-            border-color: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
-        }
-
         .game-cell.last-move {
             box-shadow: 0 0 0 2px white;
         }
@@ -1015,8 +1004,18 @@
             }
 
             .score-board {
-                flex-direction: column;
+                flex-direction: row;
+                justify-content: space-around;
                 align-items: center;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .score-item {
+                min-width: 90px;
+                padding: 10px;
+                flex: 1;
+                max-width: 120px;
             }
         }
     </style>
@@ -1093,11 +1092,11 @@
             <h3>🏆 Historique des victoires</h3>
             <div class="score-board">
                 <div class="score-item">
-                    <span class="score-label">Benjamin (🔴)</span>
+                    <span class="score-label">Benji 🔴</span>
                     <span class="score-value" id="benjaminScore">0</span>
                 </div>
                 <div class="score-item">
-                    <span class="score-label">Sanaa (🟡)</span>
+                    <span class="score-label">Sanaa 🟡</span>
                     <span class="score-value" id="sanaaScore">0</span>
                 </div>
                 <div class="score-item">
@@ -1454,30 +1453,8 @@
 
         // Gestion du hover sur une colonne
         function handleColumnHover(col, isHovering) {
-            // Vérifier si la colonne est jouable
-            if (!gameState.gameActive || !isMyTurn || gameState.board[0][col] !== 0) {
-                return;
-            }
-
-            // Mettre à jour l'indicateur de colonne
-            const indicator = document.querySelector(`[data-col="${col}"].column-indicator`);
-            if (indicator) {
-                if (isHovering) {
-                    indicator.classList.add('hover-active');
-                } else {
-                    indicator.classList.remove('hover-active');
-                }
-            }
-
-            // Mettre à jour toutes les cellules de la colonne
-            const columnCells = document.querySelectorAll(`[data-col="${col}"].game-cell`);
-            columnCells.forEach(cell => {
-                if (isHovering) {
-                    cell.classList.add('column-hover');
-                } else {
-                    cell.classList.remove('column-hover');
-                }
-            });
+            // Hover désactivé - pas d'effets visuels
+            return;
         }
 
         // Gestion du clic sur une colonne
