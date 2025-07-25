@@ -209,6 +209,22 @@
             transform: scale(1.05);
         }
 
+        .player-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-bottom: 8px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            object-fit: cover;
+        }
+
+        .player-card.active .player-avatar {
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
         .player-name {
             font-weight: 600;
             color: white;
@@ -221,6 +237,16 @@
             font-weight: bold;
             color: white;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .vs-image {
+            max-width: 100px;
+            max-height: 80px;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
         .game-status {
@@ -372,7 +398,6 @@
 
         .game-button:hover {
             background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
         }
 
@@ -380,6 +405,331 @@
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
+        }
+
+        .game-button.muted {
+            background: rgba(255, 87, 87, 0.2);
+            border-color: rgba(255, 87, 87, 0.4);
+        }
+
+        .game-button.muted:hover {
+            background: rgba(255, 87, 87, 0.3);
+            border-color: rgba(255, 87, 87, 0.5);
+        }
+
+        /* Contrôles de volume dans les paramètres */
+        .volume-settings-section {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+        }
+
+        .volume-settings-section h4 {
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .volume-control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .volume-control-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .volume-label {
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+            min-width: 80px;
+        }
+
+        .volume-slider-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .volume-slider {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-slider::-moz-range-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .volume-slider:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .volume-value {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.8rem;
+            min-width: 35px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .volume-value.value-updated {
+            color: rgba(255, 255, 255, 1);
+            animation: valueUpdate 0.3s ease;
+        }
+
+        @keyframes valueUpdate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .volume-mute-btn {
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-width: 70px;
+            justify-content: center;
+        }
+
+        .volume-mute-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .volume-mute-btn.muted {
+            background: rgba(255, 87, 87, 0.2);
+            border-color: rgba(255, 87, 87, 0.4);
+        }
+
+        .volume-mute-btn.muted:hover {
+            background: rgba(255, 87, 87, 0.3);
+            border-color: rgba(255, 87, 87, 0.5);
+        }
+
+        /* Responsive pour les contrôles de volume sur mobile */
+        @media (max-width: 768px) {
+            .volume-settings-section {
+                margin-top: 15px;
+                margin-bottom: 15px;
+                padding: 15px;
+            }
+
+            .volume-settings-section h4 {
+                font-size: 1rem;
+                margin-bottom: 12px;
+            }
+
+            .volume-control-group {
+                gap: 15px;
+            }
+
+            .volume-control-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+
+            .volume-label {
+                min-width: auto;
+                text-align: left;
+                font-size: 0.9rem;
+                margin-bottom: 5px;
+                order: 1;
+            }
+
+            .volume-slider-container {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                gap: 12px;
+                order: 2;
+                width: 100%;
+            }
+
+            .volume-slider {
+                height: 8px;
+                flex: 1;
+                max-width: none;
+                min-width: 0;
+                order: 1;
+            }
+
+            .volume-slider::-webkit-slider-thumb {
+                width: 20px;
+                height: 20px;
+            }
+
+            .volume-slider::-moz-range-thumb {
+                width: 20px;
+                height: 20px;
+            }
+
+            .volume-value {
+                font-size: 0.75rem;
+                min-width: 35px;
+                flex-shrink: 0;
+                order: 2;
+            }
+
+            .volume-mute-btn {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+                min-width: 70px;
+                flex-shrink: 0;
+                order: 3;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .volume-settings-section {
+                padding: 12px;
+            }
+
+            .volume-control-group {
+                gap: 12px;
+            }
+
+            .volume-control-item {
+                gap: 8px;
+                display: flex !important;
+                flex-direction: column !important;
+            }
+
+            .volume-label {
+                order: 1;
+                margin-bottom: 5px;
+            }
+
+            .volume-slider-container {
+                gap: 10px;
+                order: 2;
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                width: 100%;
+            }
+
+            .volume-slider {
+                flex: 1;
+                min-width: 0;
+                order: 1;
+            }
+
+            .volume-value {
+                min-width: 32px;
+                font-size: 0.7rem;
+                order: 2;
+                flex-shrink: 0;
+            }
+
+            .volume-mute-btn {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+                min-width: 60px;
+                order: 3;
+                flex-shrink: 0;
+            }
+
+            /* Styles responsive pour les avatars des joueurs */
+            .players-info {
+                flex-direction: row;
+                gap: 8px;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .player-card:first-child {
+                order: 1;
+            }
+
+            .vs-indicator {
+                order: 2;
+                font-size: 1rem;
+                margin: 0 5px;
+            }
+
+            .player-card:last-child {
+                order: 3;
+            }
+
+            .vs-image {
+                max-width: 50px;
+                max-height: 35px;
+            }
+
+            .player-card {
+                padding: 10px 15px;
+                min-width: 120px;
+                flex: 1;
+                max-width: 140px;
+            }
+
+            .player-avatar {
+                width: 45px;
+                height: 45px;
+                margin-bottom: 4px;
+            }
+
+            .player-name {
+                font-size: 0.85rem;
+            }
         }
 
         .game-history {
@@ -977,11 +1327,35 @@
 
             .players-info {
                 gap: 15px;
-                flex-direction: column;
+                flex-direction: row;
+                justify-content: center;
             }
 
             .vs-indicator {
-                order: 0;
+                order: 1;
+                font-size: 1.1rem;
+            }
+
+            .vs-image {
+                max-width: 70px;
+                max-height: 50px;
+            }
+
+            .player-card {
+                padding: 12px 18px;
+                min-width: 130px;
+                flex: 1;
+                max-width: 150px;
+            }
+
+            .player-avatar {
+                width: 42px;
+                height: 42px;
+                margin-bottom: 5px;
+            }
+
+            .player-name {
+                font-size: 0.9rem;
             }
 
             .column-indicator {
@@ -1037,6 +1411,42 @@
                 flex: 1;
                 max-width: 120px;
             }
+
+            /* Responsive pour le modal des paramètres sur mobile */
+            .settings-modal-content {
+                padding: 20px 15px;
+                margin: 10px;
+                width: calc(100% - 20px);
+                max-height: 85vh;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .fonts-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+
+            .font-option {
+                padding: 8px;
+            }
+
+            .font-preview {
+                font-size: 1.2rem;
+            }
+
+            .font-name {
+                font-size: 0.7rem;
+            }
+
+            .user-status-container {
+                margin: 15px 0;
+            }
+
+            .connected-user-indicator {
+                font-size: 0.85rem;
+                padding: 8px 12px;
+            }
         }
     </style>
 </head>
@@ -1068,10 +1478,14 @@
             <h1>🔴 Puissance 4 🟡</h1>
             <div class="players-info">
                 <div class="player-card" id="benjaminCard">
+                    <img src="images/bAvatar.png" alt="Avatar Benjamin" class="player-avatar" onerror="this.style.display='none'">
                     <div class="player-name">Benjamin 🔴</div>
                 </div>
-                <div class="vs-indicator">VS</div>
+                <div class="vs-indicator">
+                    <img src="images/VS.png" alt="VS" class="vs-image" onerror="this.textContent='VS'">
+                </div>
                 <div class="player-card" id="sanaaCard">
+                    <img src="images/sAvatar.png" alt="Avatar Sanaa" class="player-avatar" onerror="this.style.display='none'">
                     <div class="player-name">Sanaa 🟡</div>
                 </div>
             </div>
@@ -1104,6 +1518,9 @@
             </button>
             <button class="game-button" id="resetBtn" onclick="resetGame()">
                 <i class="fas fa-redo"></i><span class="button-text"> Recommencer</span>
+            </button>
+            <button class="game-button" id="musicBtn" onclick="toggleMusic()" title="Couper/Remettre la musique">
+                <i class="fas fa-volume-up" id="musicIcon"></i><span class="button-text"> Musique</span>
             </button>
         </div>
 
@@ -1221,6 +1638,53 @@
             <div class="user-status-container">
                 <div id="connectedUserIndicator" class="connected-user-indicator"></div>
             </div>
+
+            <!-- Contrôles de volume -->
+            <div class="volume-settings-section">
+                <h4><i class="fas fa-volume-up"></i> Contrôles Audio</h4>
+                
+                <div class="volume-control-group">
+                    <!-- Contrôle musique de fond -->
+                    <div class="volume-control-item">
+                        <div class="volume-label">Musique</div>
+                        <div class="volume-slider-container">
+                            <input type="range" 
+                                   id="musicVolumeSlider" 
+                                   class="volume-slider" 
+                                   min="0" 
+                                   max="100" 
+                                   value="30" 
+                                   oninput="updateMusicVolume(this.value)">
+                            <span id="musicVolumeValue" class="volume-value">30%</span>
+                            <button id="musicMuteBtn" 
+                                    class="volume-mute-btn" 
+                                    onclick="toggleMusicMute()">
+                                <i id="musicMuteIcon" class="fas fa-volume-up"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Contrôle effets sonores -->
+                    <div class="volume-control-item">
+                        <div class="volume-label">Effets</div>
+                        <div class="volume-slider-container">
+                            <input type="range" 
+                                   id="effectsVolumeSlider" 
+                                   class="volume-slider" 
+                                   min="0" 
+                                   max="100" 
+                                   value="50" 
+                                   oninput="updateEffectsVolume(this.value)">
+                            <span id="effectsVolumeValue" class="volume-value">50%</span>
+                            <button id="effectsMuteBtn" 
+                                    class="volume-mute-btn" 
+                                    onclick="toggleEffectsMute()">
+                                <i id="effectsMuteIcon" class="fas fa-volume-up"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="fonts-grid">
                 <div class="font-option active" id="font-option-default" onclick="changeFont('default')">
                     <div class="font-preview" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">Abc</div>
@@ -1299,6 +1763,20 @@
         // ID unique pour cette session de jeu (UUID valide)
         const GAME_ID = '550e8400-e29b-41d4-a716-446655440000';
 
+        // Variables pour la musique de fond
+        let backgroundMusic = null;
+        let isMusicMuted = false;
+        let musicVolume = 30; // Volume par défaut de la musique (30%)
+
+        // Variables pour les effets sonores
+        let soundEffects = {
+            pop: null,
+            winning: null,
+            losing: null
+        };
+        let isEffectsMuted = false;
+        let effectsVolume = 50; // Volume par défaut des effets (50%)
+
         // Variables du jeu
         let gameState = {
             board: Array(6).fill().map(() => Array(7).fill(0)), // 0: vide, 1: Benjamin (rouge), 2: Sanaa (jaune)
@@ -1360,6 +1838,7 @@
             
             initializeGame();
             setupModalClickOutside(); // Initialiser la fermeture des modals au chargement
+            initializeMusic(); // Initialiser la musique de fond
         });
 
         function updateUserIndicator() {
@@ -1382,6 +1861,17 @@
             
             // Réinitialiser les classes
             indicator.classList.remove('connected', 'disconnected', 'checking');
+            
+            // Rendre l'indicateur cliquable pour recharger la partie
+            indicator.style.cursor = 'pointer';
+            indicator.title = 'Cliquer pour recharger la partie';
+            
+            // Ajouter l'événement de clic s'il n'existe pas déjà
+            if (!indicator.onclick) {
+                indicator.onclick = () => {
+                    reloadGameFromServer();
+                };
+            }
             
             switch (status) {
                 case 'connected':
@@ -1426,6 +1916,309 @@
                 console.log('Erreur lors du test de connexion:', error);
                 updateDatabaseConnectionIndicator('disconnected');
                 return false;
+            }
+        }
+
+        // ===== Gestion de la musique de fond =====
+        function initializeMusic() {
+            try {
+                // Créer l'élément audio pour la musique de fond
+                backgroundMusic = new Audio('Son/Tetoma.mp3');
+                backgroundMusic.loop = true;
+                backgroundMusic.volume = musicVolume / 100; // Convertir en pourcentage
+                backgroundMusic.preload = 'auto'; // Précharger la musique
+                
+                // Créer les éléments audio pour les effets sonores
+                soundEffects.pop = new Audio('Son/pop.mp3');
+                soundEffects.winning = new Audio('Son/winning.mp3');
+                soundEffects.losing = new Audio('Son/losing.mp3');
+                
+                // Précharger tous les effets sonores
+                Object.values(soundEffects).forEach(audio => {
+                    if (audio) {
+                        audio.preload = 'auto';
+                        audio.volume = effectsVolume / 100;
+                    }
+                });
+                
+                // Forcer le chargement des fichiers audio
+                const loadPromises = [];
+                
+                // Charger la musique de fond
+                loadPromises.push(new Promise((resolve) => {
+                    backgroundMusic.addEventListener('canplaythrough', resolve, { once: true });
+                    backgroundMusic.addEventListener('error', () => {
+                        console.error('Erreur de chargement de la musique de fond');
+                        resolve();
+                    }, { once: true });
+                    backgroundMusic.load();
+                }));
+                
+                // Charger les effets sonores
+                Object.entries(soundEffects).forEach(([name, audio]) => {
+                    if (audio) {
+                        loadPromises.push(new Promise((resolve) => {
+                            audio.addEventListener('canplaythrough', resolve, { once: true });
+                            audio.addEventListener('error', () => {
+                                console.error(`Erreur de chargement de l'effet sonore: ${name}`);
+                                resolve();
+                            }, { once: true });
+                            audio.load();
+                        }));
+                    }
+                });
+                
+                // Attendre que tous les fichiers soient chargés
+                Promise.all(loadPromises).then(() => {
+                    console.log('Tous les fichiers audio sont chargés et prêts !');
+                });
+                
+                // Récupérer les états sauvegardés depuis localStorage
+                isMusicMuted = localStorage.getItem('musicMuted') === 'true';
+                isEffectsMuted = localStorage.getItem('effectsMuted') === 'true';
+                
+                const savedMusicVolume = localStorage.getItem('musicVolume');
+                if (savedMusicVolume) {
+                    musicVolume = parseInt(savedMusicVolume);
+                    backgroundMusic.volume = isMusicMuted ? 0 : musicVolume / 100;
+                }
+                
+                const savedEffectsVolume = localStorage.getItem('effectsVolume');
+                if (savedEffectsVolume) {
+                    effectsVolume = parseInt(savedEffectsVolume);
+                    Object.values(soundEffects).forEach(audio => {
+                        if (audio) {
+                            audio.volume = isEffectsMuted ? 0 : effectsVolume / 100;
+                        }
+                    });
+                }
+                
+                // Mettre à jour l'interface
+                updateMusicButtonIcon();
+                
+                console.log('Audio initialisé avec succès');
+            } catch (error) {
+                console.error('Erreur lors de l\'initialisation de l\'audio:', error);
+            }
+        }
+
+        function startBackgroundMusic() {
+            if (backgroundMusic && !isMusicMuted) {
+                try {
+                    // Les navigateurs modernes nécessitent une interaction utilisateur pour jouer de l'audio
+                    const playPromise = backgroundMusic.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.log('Musique de fond démarrée');
+                        }).catch(error => {
+                            console.log('Impossible de démarrer la musique automatiquement:', error);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Erreur lors du démarrage de la musique:', error);
+                }
+            }
+        }
+
+        function stopBackgroundMusic() {
+            if (backgroundMusic) {
+                try {
+                    backgroundMusic.pause();
+                    backgroundMusic.currentTime = 0;
+                    console.log('Musique de fond arrêtée');
+                } catch (error) {
+                    console.error('Erreur lors de l\'arrêt de la musique:', error);
+                }
+            }
+        }
+
+        function toggleMusic() {
+            toggleMusicMute(); // Utiliser la nouvelle fonction de mute
+        }
+
+        function updateMusicButtonIcon() {
+            const musicIcon = document.getElementById('musicIcon');
+            const musicBtn = document.getElementById('musicBtn');
+            
+            if (musicIcon && musicBtn) {
+                if (isMusicMuted) {
+                    musicIcon.className = 'fas fa-volume-mute';
+                    musicBtn.classList.add('muted');
+                } else {
+                    musicIcon.className = 'fas fa-volume-up';
+                    musicBtn.classList.remove('muted');
+                }
+            }
+        }
+
+        // ===== Fonctions pour les contrôles de volume =====
+        function updateVolumeControls() {
+            // Mettre à jour les sliders
+            const musicSlider = document.getElementById('musicVolumeSlider');
+            const effectsSlider = document.getElementById('effectsVolumeSlider');
+            const musicValue = document.getElementById('musicVolumeValue');
+            const effectsValue = document.getElementById('effectsVolumeValue');
+            
+            if (musicSlider) musicSlider.value = musicVolume;
+            if (effectsSlider) effectsSlider.value = effectsVolume;
+            if (musicValue) musicValue.textContent = musicVolume + '%';
+            if (effectsValue) effectsValue.textContent = effectsVolume + '%';
+            
+            // Mettre à jour les boutons mute
+            updateMusicMuteButton();
+            updateEffectsMuteButton();
+            
+            // S'assurer que les contrôles sont visibles sur mobile
+            requestAnimationFrame(() => {
+                const volumeSection = document.querySelector('.volume-settings-section');
+                if (volumeSection && window.innerWidth <= 768) {
+                    volumeSection.style.display = 'block';
+                    volumeSection.style.width = '100%';
+                    volumeSection.style.boxSizing = 'border-box';
+                }
+            });
+        }
+
+        function updateMusicVolume(value) {
+            musicVolume = parseInt(value);
+            const musicValue = document.getElementById('musicVolumeValue');
+            if (musicValue) {
+                musicValue.textContent = musicVolume + '%';
+                musicValue.classList.add('value-updated');
+                setTimeout(() => {
+                    musicValue.classList.remove('value-updated');
+                }, 300);
+            }
+            
+            if (backgroundMusic) {
+                backgroundMusic.volume = isMusicMuted ? 0 : musicVolume / 100;
+            }
+            
+            localStorage.setItem('musicVolume', musicVolume.toString());
+        }
+
+        function updateEffectsVolume(value) {
+            effectsVolume = parseInt(value);
+            const effectsValue = document.getElementById('effectsVolumeValue');
+            if (effectsValue) {
+                effectsValue.textContent = effectsVolume + '%';
+                effectsValue.classList.add('value-updated');
+                setTimeout(() => {
+                    effectsValue.classList.remove('value-updated');
+                }, 300);
+            }
+            
+            Object.values(soundEffects).forEach(audio => {
+                if (audio) {
+                    audio.volume = isEffectsMuted ? 0 : effectsVolume / 100;
+                }
+            });
+            
+            localStorage.setItem('effectsVolume', effectsVolume.toString());
+        }
+
+        function toggleMusicMute() {
+            isMusicMuted = !isMusicMuted;
+            localStorage.setItem('musicMuted', isMusicMuted.toString());
+            
+            if (backgroundMusic) {
+                backgroundMusic.volume = isMusicMuted ? 0 : musicVolume / 100;
+                
+                // Si l'utilisateur démute et qu'une partie est en cours, jouer la musique
+                if (!isMusicMuted && gameState.gameActive && backgroundMusic.paused) {
+                    startBackgroundMusic();
+                }
+                // Si l'utilisateur mute, arrêter la musique
+                else if (isMusicMuted && !backgroundMusic.paused) {
+                    backgroundMusic.pause();
+                }
+            }
+            
+            updateMusicMuteButton();
+            updateMusicButtonIcon(); // Mettre à jour aussi le bouton principal
+        }
+
+        function toggleEffectsMute() {
+            isEffectsMuted = !isEffectsMuted;
+            localStorage.setItem('effectsMuted', isEffectsMuted.toString());
+            
+            Object.values(soundEffects).forEach(audio => {
+                if (audio) {
+                    audio.volume = isEffectsMuted ? 0 : effectsVolume / 100;
+                }
+            });
+            
+            updateEffectsMuteButton();
+
+            if (!isEffectsMuted) {
+                playSound('pop');
+            }
+        }
+
+        function updateMusicMuteButton() {
+            const musicMuteBtn = document.getElementById('musicMuteBtn');
+            const musicMuteIcon = document.getElementById('musicMuteIcon');
+            
+            if (musicMuteBtn && musicMuteIcon) {
+                if (isMusicMuted) {
+                    musicMuteBtn.classList.add('muted');
+                    musicMuteIcon.className = 'fas fa-volume-mute';
+                } else {
+                    musicMuteBtn.classList.remove('muted');
+                    musicMuteIcon.className = 'fas fa-volume-up';
+                }
+            }
+        }
+
+        function updateEffectsMuteButton() {
+            const effectsMuteBtn = document.getElementById('effectsMuteBtn');
+            const effectsMuteIcon = document.getElementById('effectsMuteIcon');
+            
+            if (effectsMuteBtn && effectsMuteIcon) {
+                if (isEffectsMuted) {
+                    effectsMuteBtn.classList.add('muted');
+                    effectsMuteIcon.className = 'fas fa-volume-mute';
+                } else {
+                    effectsMuteBtn.classList.remove('muted');
+                    effectsMuteIcon.className = 'fas fa-volume-up';
+                }
+            }
+        }
+
+        function playSound(soundName) {
+            if (!soundEffects[soundName] || isEffectsMuted) {
+                return;
+            }
+            
+            try {
+                const audio = soundEffects[soundName];
+                audio.currentTime = 0;
+                audio.volume = effectsVolume / 100;
+                audio.play().catch(error => {
+                    // Ignore errors silently
+                });
+            } catch (error) {
+                // Ignore errors silently
+            }
+        }
+
+        function playSoundBasedOnResult() {
+            if (!gameState.gameActive) {
+                setTimeout(() => {
+                    if (gameState.winner === 0) {
+                        // Égalité - pas de son spécial
+                        return;
+                    } else if (gameState.winner === 1 && currentUser === 'Benjamin') {
+                        // Benjamin gagne et c'est Benjamin qui joue
+                        playSound('winning');
+                    } else if (gameState.winner === 2 && currentUser === 'Sanaa') {
+                        // Sanaa gagne et c'est Sanaa qui joue
+                        playSound('winning');
+                    } else {
+                        // L'autre joueur gagne - son de défaite
+                        playSound('losing');
+                    }
+                }, 100);
             }
         }
 
@@ -1516,6 +2309,9 @@
             gameState.board[targetRow][col] = gameState.currentPlayer;
             gameState.lastMove = { row: targetRow, col: col, player: gameState.currentPlayer };
             
+            // Jouer le son du pion qui tombe
+            playSound('pop');
+            
             // Animer le pion qui tombe
             animateDroppingPiece(targetRow, col, gameState.currentPlayer);
             
@@ -1526,12 +2322,15 @@
                 highlightWinningCells();
                 updateScores();
                 updateGameStatus();
+                stopBackgroundMusic(); // Arrêter la musique à la fin de la partie
+                playSoundBasedOnResult(); // Jouer le son de victoire/défaite
                 showVictoryModal(); // Remplace showNotification
             } else if (checkDraw()) {
                 gameState.gameActive = false;
                 gameState.winner = 0; // Égalité
                 updateScores();
                 updateGameStatus();
+                stopBackgroundMusic(); // Arrêter la musique à la fin de la partie
                 showVictoryModal(); // Remplace showNotification
             } else {
                 // Changer de joueur
@@ -1802,6 +2601,9 @@
             updateGameStatus();
             saveGameToServer();
             
+            // Démarrer la musique de fond si elle n'est pas coupée
+            startBackgroundMusic();
+            
             const firstPlayer = gameState.currentPlayer === 1 ? 'Benjamin' : 'Sanaa';
             showNotification(`Nouvelle partie commencée ! ${firstPlayer} commence `, 'success');
         }
@@ -1891,6 +2693,11 @@
                     document.getElementById('benjaminScore').textContent = gameState.scores.benjamin;
                     document.getElementById('sanaaScore').textContent = gameState.scores.sanaa;
                     document.getElementById('drawScore').textContent = gameState.scores.draws;
+                    
+                    // Si une partie est en cours, démarrer la musique
+                    if (gameState.gameActive) {
+                        startBackgroundMusic();
+                    }
                 } else {
                     // Première fois - initialiser le jeu
                     startNewGame();
@@ -1903,6 +2710,50 @@
                 showNotification('Erreur de connexion', 'error');
                 // Initialiser un nouveau jeu en cas d'erreur
                 startNewGame();
+            }
+        }
+
+        // Fonction pour recharger manuellement la partie depuis la base de données
+        async function reloadGameFromServer() {
+            showNotification('Rechargement de la partie...', 'info');
+            updateDatabaseConnectionIndicator('checking');
+            
+            try {
+                const { data, error } = await supabase
+                    .from('puissance4_games')
+                    .select('*')
+                    .eq('id', GAME_ID)
+                    .single();
+
+                if (error && error.code !== 'PGRST116') {
+                    throw error;
+                }
+
+                if (data && data.game_state) {
+                    gameState = data.game_state;
+                    updateBoard();
+                    updateGameStatus();
+                    updateColumnIndicators();
+                    document.getElementById('benjaminScore').textContent = gameState.scores.benjamin;
+                    document.getElementById('sanaaScore').textContent = gameState.scores.sanaa;
+                    document.getElementById('drawScore').textContent = gameState.scores.draws;
+                    
+                    // Gérer la musique selon l'état du jeu
+                    if (gameState.gameActive && !backgroundMusic.currentTime) {
+                        startBackgroundMusic();
+                    } else if (!gameState.gameActive && backgroundMusic && !backgroundMusic.paused) {
+                        stopBackgroundMusic();
+                    }
+                    
+                } else {
+                    startNewGame();
+                }
+                
+                updateDatabaseConnectionIndicator('connected');
+            } catch (error) {
+                console.error('Erreur lors du rechargement:', error);
+                updateDatabaseConnectionIndicator('disconnected');
+                showNotification('Erreur lors du rechargement de la partie', 'error');
             }
         }
 
@@ -1933,6 +2784,11 @@
                                      previousLastMove.row !== gameState.lastMove.row || 
                                      previousLastMove.col !== gameState.lastMove.col);
                                 
+                                // Jouer le son "pop" quand l'adversaire joue
+                                if (shouldAnimate) {
+                                    playSound('pop');
+                                }
+                                
                                 updateBoard(shouldAnimate);
                                 updateGameStatus();
                                 document.getElementById('benjaminScore').textContent = gameState.scores.benjamin;
@@ -1941,6 +2797,8 @@
                                 
                                 // Vérifier si le jeu vient de se terminer et afficher le modal
                                 if (!gameState.gameActive && previousGameState.gameActive) {
+                                    // Jouer le son de victoire/défaite quand l'adversaire termine la partie
+                                    playSoundBasedOnResult();
                                     setTimeout(() => {
                                         showVictoryModal();
                                     }, 800); // Délai pour laisser l'animation du dernier pion se terminer
@@ -2158,6 +3016,9 @@
                 // Mise en forme améliorée avec icône
                 userIndicator.innerHTML = `${userIcon}Connecté en tant que <strong>${currentUser}</strong>`;
             }
+            
+            // Mettre à jour les contrôles de volume
+            updateVolumeControls();
             
             modal.style.display = 'flex';
             modal.classList.remove('closing');
