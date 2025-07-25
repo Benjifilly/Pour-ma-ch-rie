@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-touch-fullscreen" content="yes">
     <title>Puissance 4 - Sanaa vs Benjamin 🔴🟡</title>
     <link rel="icon" href="images/ben_gene2.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -444,6 +447,12 @@
             visibility: hidden;
             pointer-events: none;
             transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            /* Amélioration pour iOS */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         .victory-modal.show {
@@ -675,6 +684,12 @@
             visibility: hidden;
             pointer-events: none;
             transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            /* Amélioration pour iOS */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         .confirmation-modal.show {
@@ -1344,6 +1359,7 @@
             }
             
             initializeGame();
+            setupModalClickOutside(); // Initialiser la fermeture des modals au chargement
         });
 
         function updateUserIndicator() {
@@ -2190,29 +2206,53 @@
             localStorage.setItem('selectedFont_timestamp', Date.now().toString());
         }
 
-        // Fermer les modaux lorsqu'on clique en dehors
-        window.addEventListener('click', function(event) {
-            const themeModal = document.getElementById('themeModal');
-            const settingsModal = document.getElementById('settingsModal');
-            const victoryModal = document.getElementById('victoryModal');
-            const confirmationModal = document.getElementById('confirmationModal');
-            
-            if (event.target === themeModal) {
-                closeThemeModal();
-            }
-            
-            if (event.target === settingsModal) {
-                closeSettingsModal();
-            }
-            
-            if (event.target === victoryModal) {
-                closeVictoryModal();
-            }
-            
-            if (event.target === confirmationModal) {
-                closeConfirmationModal();
-            }
-        });
+        // Fermer les modaux lorsqu'on clique en dehors (compatible iOS)
+        function setupModalClickOutside() {
+            const modals = [
+                { element: document.getElementById('themeModal'), closeFunction: closeThemeModal },
+                { element: document.getElementById('settingsModal'), closeFunction: closeSettingsModal },
+                { element: document.getElementById('victoryModal'), closeFunction: closeVictoryModal },
+                { element: document.getElementById('confirmationModal'), closeFunction: closeConfirmationModal }
+            ];
+
+            modals.forEach(modal => {
+                if (modal.element) {
+                    // Variable pour éviter les doubles événements
+                    let touchStarted = false;
+                    
+                    // Événement click (desktop et certains mobiles)
+                    modal.element.addEventListener('click', function(event) {
+                        if (event.target === modal.element && !touchStarted) {
+                            modal.closeFunction();
+                        }
+                    });
+                    
+                    // Événement touchstart pour iOS (iPhone/iPad)
+                    modal.element.addEventListener('touchstart', function(event) {
+                        if (event.target === modal.element) {
+                            touchStarted = true;
+                        }
+                    }, { passive: true });
+                    
+                    // Événement touchend pour iOS (iPhone/iPad) - plus fiable
+                    modal.element.addEventListener('touchend', function(event) {
+                        if (event.target === modal.element && touchStarted) {
+                            event.preventDefault();
+                            modal.closeFunction();
+                        }
+                        touchStarted = false;
+                    }, { passive: false });
+                    
+                    // Reset au cas où touch est annulé
+                    modal.element.addEventListener('touchcancel', function() {
+                        touchStarted = false;
+                    });
+                    
+                    // Ajout de cursor pointer pour indiquer que c'est cliquable
+                    modal.element.style.cursor = 'pointer';
+                }
+            });
+        }
 
         // Gestion des touches clavier pour fermer les modaux
         document.addEventListener('keydown', function(event) {
