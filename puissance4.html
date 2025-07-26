@@ -1903,6 +1903,34 @@
             setupModalClickOutside(); // Initialiser la fermeture des modals au chargement
             initializeMusic(); // Initialiser la musique de fond
             updateVolumeControls(); // Initialiser les contrôles de volume
+            
+            // Correction iOS : Ajouter un listener pour le premier clic utilisateur
+            if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+                document.addEventListener('touchstart', function iOSAudioFix() {
+                    // Forcer l'activation de l'audio sur iOS
+                    if (backgroundMusic) {
+                        backgroundMusic.play().then(() => {
+                            backgroundMusic.pause();
+                            // Appliquer les paramètres sauvegardés
+                            backgroundMusic.volume = isMusicMuted ? 0 : musicVolume / 100;
+                        }).catch(e => console.log('iOS audio activation failed:', e));
+                    }
+                    
+                    // Faire de même pour les effets sonores
+                    Object.values(soundEffects).forEach(audio => {
+                        if (audio) {
+                            audio.play().then(() => {
+                                audio.pause();
+                                audio.currentTime = 0;
+                                audio.volume = isEffectsMuted ? 0 : effectsVolume / 100;
+                            }).catch(e => console.log('iOS effect activation failed:', e));
+                        }
+                    });
+                    
+                    // Supprimer ce listener après la première utilisation
+                    document.removeEventListener('touchstart', iOSAudioFix);
+                }, { once: true });
+            }
         });
 
         function updateUserIndicator() {
@@ -2044,7 +2072,15 @@
                 const savedMusicVolume = localStorage.getItem('musicVolume');
                 if (savedMusicVolume) {
                     musicVolume = parseInt(savedMusicVolume);
-                    backgroundMusic.volume = isMusicMuted ? 0 : musicVolume / 100;
+                    const finalMusicVolume = isMusicMuted ? 0 : musicVolume / 100;
+                    backgroundMusic.volume = finalMusicVolume;
+                    
+                    // Correction iOS : Forcer la mise à jour du volume
+                    if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+                        setTimeout(() => {
+                            backgroundMusic.volume = finalMusicVolume;
+                        }, 100);
+                    }
                 }
                 
                 const savedEffectsVolume = localStorage.getItem('effectsVolume');
@@ -2052,7 +2088,15 @@
                     effectsVolume = parseInt(savedEffectsVolume);
                     Object.values(soundEffects).forEach(audio => {
                         if (audio) {
-                            audio.volume = isEffectsMuted ? 0 : effectsVolume / 100;
+                            const finalEffectsVolume = isEffectsMuted ? 0 : effectsVolume / 100;
+                            audio.volume = finalEffectsVolume;
+                            
+                            // Correction iOS : Forcer la mise à jour du volume
+                            if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+                                setTimeout(() => {
+                                    audio.volume = finalEffectsVolume;
+                                }, 100);
+                            }
                         }
                     });
                 }
@@ -2117,7 +2161,7 @@
 
         // ===== Fonctions pour les contrôles de volume =====
         function updateVolumeControls() {
-            // Mettre à jour les sliders
+            // Mettre à jour les sliders avec les valeurs sauvegardées
             const musicSlider = document.getElementById('musicVolumeSlider');
             const effectsSlider = document.getElementById('effectsVolumeSlider');
             const musicValue = document.getElementById('musicVolumeValue');
@@ -2131,6 +2175,34 @@
             // Mettre à jour les boutons mute
             updateMusicMuteButton();
             updateEffectsMuteButton();
+            
+            // Correction iOS : Appliquer immédiatement les volumes aux éléments audio
+            if (backgroundMusic) {
+                const finalMusicVolume = isMusicMuted ? 0 : musicVolume / 100;
+                backgroundMusic.volume = finalMusicVolume;
+                
+                // Forcer la mise à jour sur iOS
+                if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+                    setTimeout(() => {
+                        backgroundMusic.volume = finalMusicVolume;
+                    }, 50);
+                }
+            }
+            
+            // Appliquer les volumes aux effets sonores
+            Object.values(soundEffects).forEach(audio => {
+                if (audio) {
+                    const finalEffectsVolume = isEffectsMuted ? 0 : effectsVolume / 100;
+                    audio.volume = finalEffectsVolume;
+                    
+                    // Forcer la mise à jour sur iOS
+                    if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+                        setTimeout(() => {
+                            audio.volume = finalEffectsVolume;
+                        }, 50);
+                    }
+                }
+            });
             
             // S'assurer que les contrôles sont visibles sur mobile
             requestAnimationFrame(() => {
@@ -2154,8 +2226,18 @@
                 }, 300);
             }
             
+            // Correction pour iOS : Appliquer le volume même si muté pour iPhone
             if (backgroundMusic) {
-                backgroundMusic.volume = isMusicMuted ? 0 : musicVolume / 100;
+                const finalVolume = isMusicMuted ? 0 : musicVolume / 100;
+                backgroundMusic.volume = finalVolume;
+                
+                // Forcer la mise à jour sur iOS en créant un bref changement
+                if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+                    backgroundMusic.volume = finalVolume === 0 ? 0.001 : finalVolume;
+                    setTimeout(() => {
+                        backgroundMusic.volume = finalVolume;
+                    }, 10);
+                }
             }
             
             localStorage.setItem('musicVolume', musicVolume.toString());
@@ -2172,9 +2254,19 @@
                 }, 300);
             }
             
+            // Correction pour iOS : Mettre à jour tous les effets sonores
             Object.values(soundEffects).forEach(audio => {
                 if (audio) {
-                    audio.volume = isEffectsMuted ? 0 : effectsVolume / 100;
+                    const finalVolume = isEffectsMuted ? 0 : effectsVolume / 100;
+                    audio.volume = finalVolume;
+                    
+                    // Forcer la mise à jour sur iOS
+                    if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+                        audio.volume = finalVolume === 0 ? 0.001 : finalVolume;
+                        setTimeout(() => {
+                            audio.volume = finalVolume;
+                        }, 10);
+                    }
                 }
             });
             
@@ -2186,15 +2278,29 @@
             localStorage.setItem('musicMuted', isMusicMuted.toString());
             
             if (backgroundMusic) {
-                backgroundMusic.volume = isMusicMuted ? 0 : musicVolume / 100;
+                const finalVolume = isMusicMuted ? 0 : musicVolume / 100;
+                backgroundMusic.volume = finalVolume;
                 
-                // Si l'utilisateur démute et qu'une partie est en cours, jouer la musique
-                if (!isMusicMuted && gameState.gameActive && backgroundMusic.paused) {
-                    startBackgroundMusic();
-                }
-                // Si l'utilisateur mute, arrêter la musique
-                else if (isMusicMuted && !backgroundMusic.paused) {
-                    backgroundMusic.pause();
+                // Correction spécifique pour iOS
+                if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+                    if (isMusicMuted) {
+                        // Pour muter sur iOS, on pause ET on met le volume à 0
+                        backgroundMusic.volume = 0;
+                        backgroundMusic.pause();
+                    } else {
+                        // Pour démuter sur iOS, on remet le volume ET on redémarre si nécessaire
+                        backgroundMusic.volume = musicVolume / 100;
+                        if (gameState.gameActive && !gameState.winner) {
+                            backgroundMusic.play().catch(e => console.log('Erreur lecture iOS:', e));
+                        }
+                    }
+                } else {
+                    // Comportement standard pour les autres navigateurs
+                    if (!isMusicMuted && gameState.gameActive && backgroundMusic.paused) {
+                        startBackgroundMusic();
+                    } else if (isMusicMuted && !backgroundMusic.paused) {
+                        backgroundMusic.pause();
+                    }
                 }
             }
             
@@ -2206,16 +2312,29 @@
             isEffectsMuted = !isEffectsMuted;
             localStorage.setItem('effectsMuted', isEffectsMuted.toString());
             
+            // Correction pour iOS : Mise à jour forcée des volumes des effets sonores
             Object.values(soundEffects).forEach(audio => {
                 if (audio) {
-                    audio.volume = isEffectsMuted ? 0 : effectsVolume / 100;
+                    const finalVolume = isEffectsMuted ? 0 : effectsVolume / 100;
+                    audio.volume = finalVolume;
+                    
+                    // Forcer la mise à jour sur iOS
+                    if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+                        audio.volume = finalVolume === 0 ? 0.001 : finalVolume;
+                        setTimeout(() => {
+                            audio.volume = finalVolume;
+                        }, 10);
+                    }
                 }
             });
             
             updateEffectsMuteButton();
 
+            // Jouer un son de test si pas muté (avec délai pour iOS)
             if (!isEffectsMuted) {
-                playSound('pop');
+                setTimeout(() => {
+                    playSound('pop');
+                }, 100);
             }
         }
 
@@ -3252,162 +3371,6 @@
             localStorage.setItem('selectedTheme_timestamp', Date.now().toString());
 
             closeThemeModal();
-        }
-
-        // Fonctions pour les contrôles de volume
-        function updateMusicVolume(value) {
-            musicVolume = parseInt(value);
-            document.getElementById('musicVolumeValue').textContent = value + '%';
-            document.getElementById('musicVolumeValue').classList.add('value-updated');
-            
-            // Mettre à jour le volume de la musique si elle existe
-            if (backgroundMusic) {
-                backgroundMusic.volume = (musicVolume / 100) * (isMusicMuted ? 0 : 1);
-            }
-            
-            // Sauvegarder dans localStorage
-            localStorage.setItem('musicVolume', musicVolume);
-            
-            // Retirer la classe d'animation après un court délai
-            setTimeout(() => {
-                document.getElementById('musicVolumeValue').classList.remove('value-updated');
-            }, 300);
-        }
-
-        function updateEffectsVolume(value) {
-            effectsVolume = parseInt(value);
-            document.getElementById('effectsVolumeValue').textContent = value + '%';
-            document.getElementById('effectsVolumeValue').classList.add('value-updated');
-            
-            // Mettre à jour le volume des effets sonores
-            Object.values(soundEffects).forEach(sound => {
-                if (sound) {
-                    sound.volume = (effectsVolume / 100) * (isEffectsMuted ? 0 : 1);
-                }
-            });
-            
-            // Sauvegarder dans localStorage
-            localStorage.setItem('effectsVolume', effectsVolume);
-            
-            // Retirer la classe d'animation après un court délai
-            setTimeout(() => {
-                document.getElementById('effectsVolumeValue').classList.remove('value-updated');
-            }, 300);
-        }
-
-        function toggleMusicMute() {
-            isMusicMuted = !isMusicMuted;
-            const muteBtn = document.getElementById('musicMuteBtn');
-            const muteIcon = document.getElementById('musicMuteIcon');
-            const muteText = muteBtn.querySelector('span');
-            
-            if (isMusicMuted) {
-                muteBtn.classList.add('muted');
-                muteIcon.className = 'fas fa-volume-mute';
-                if (muteText) muteText.textContent = 'OFF';
-                if (backgroundMusic) {
-                    backgroundMusic.volume = 0;
-                }
-            } else {
-                muteBtn.classList.remove('muted');
-                muteIcon.className = 'fas fa-volume-up';
-                if (muteText) muteText.textContent = 'ON';
-                if (backgroundMusic) {
-                    backgroundMusic.volume = musicVolume / 100;
-                    // Si une partie est en cours et que l'utilisateur démute, jouer la musique
-                    if (gameState.gameActive && !gameState.winner) {
-                        backgroundMusic.play().catch(e => console.log('Erreur lecture auto:', e));
-                    }
-                }
-            }
-            
-            // Sauvegarder dans localStorage
-            localStorage.setItem('isMusicMuted', isMusicMuted);
-            
-            // Mettre à jour le bouton principal de musique aussi
-            updateMusicButton();
-        }
-
-        function toggleEffectsMute() {
-            isEffectsMuted = !isEffectsMuted;
-            const muteBtn = document.getElementById('effectsMuteBtn');
-            const muteIcon = document.getElementById('effectsMuteIcon');
-            const muteText = muteBtn.querySelector('span');
-            
-            if (isEffectsMuted) {
-                muteBtn.classList.add('muted');
-                muteIcon.className = 'fas fa-volume-mute';
-                if (muteText) muteText.textContent = 'OFF';
-                Object.values(soundEffects).forEach(sound => {
-                    if (sound) sound.volume = 0;
-                });
-            } else {
-                muteBtn.classList.remove('muted');
-                muteIcon.className = 'fas fa-volume-up';
-                if (muteText) muteText.textContent = 'ON';
-                Object.values(soundEffects).forEach(sound => {
-                    if (sound) sound.volume = effectsVolume / 100;
-                });
-            }
-            
-            // Sauvegarder dans localStorage
-            localStorage.setItem('isEffectsMuted', isEffectsMuted);
-        }
-
-        function updateVolumeControls() {
-            // Charger les préférences sauvegardées
-            const savedMusicVolume = localStorage.getItem('musicVolume');
-            const savedEffectsVolume = localStorage.getItem('effectsVolume');
-            const savedMusicMuted = localStorage.getItem('isMusicMuted') === 'true';
-            const savedEffectsMuted = localStorage.getItem('isEffectsMuted') === 'true';
-            
-            if (savedMusicVolume !== null) {
-                musicVolume = parseInt(savedMusicVolume);
-                document.getElementById('musicVolumeSlider').value = musicVolume;
-                document.getElementById('musicVolumeValue').textContent = musicVolume + '%';
-            }
-            
-            if (savedEffectsVolume !== null) {
-                effectsVolume = parseInt(savedEffectsVolume);
-                document.getElementById('effectsVolumeSlider').value = effectsVolume;
-                document.getElementById('effectsVolumeValue').textContent = effectsVolume + '%';
-            }
-            
-            isMusicMuted = savedMusicMuted;
-            isEffectsMuted = savedEffectsMuted;
-            
-            // Mettre à jour l'interface
-            const musicMuteBtn = document.getElementById('musicMuteBtn');
-            const musicMuteIcon = document.getElementById('musicMuteIcon');
-            const effectsMuteBtn = document.getElementById('effectsMuteBtn');
-            const effectsMuteIcon = document.getElementById('effectsMuteIcon');
-            
-            if (isMusicMuted) {
-                musicMuteBtn.classList.add('muted');
-                musicMuteIcon.className = 'fas fa-volume-mute';
-                const muteText = musicMuteBtn.querySelector('span');
-                if (muteText) muteText.textContent = 'OFF';
-            }
-            
-            if (isEffectsMuted) {
-                effectsMuteBtn.classList.add('muted');
-                effectsMuteIcon.className = 'fas fa-volume-mute';
-                const muteText = effectsMuteBtn.querySelector('span');
-                if (muteText) muteText.textContent = 'OFF';
-            }
-        }
-
-        function updateMusicButton() {
-            const musicBtn = document.getElementById('musicBtn');
-            const musicIcon = document.getElementById('musicIcon');
-            
-            if (isMusicMuted) {
-                musicBtn.classList.add('muted');
-                musicIcon.className = 'fas fa-volume-mute';
-            } else {
-                musicBtn.classList.remove('muted');
-                musicIcon.className = 'fas fa-volume-up';
-            }
         }
 
         // Fonctions pour le modal de paramètres
