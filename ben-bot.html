@@ -1179,21 +1179,20 @@
         }
 
         .conversation-messages::-webkit-scrollbar {
-            width: 8px;
+            width: 0px;
+            background: transparent;
         }
 
         .conversation-messages::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
+            background: transparent;
         }
 
         .conversation-messages::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
+            background: transparent;
         }
 
         .conversation-messages::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.5);
+            background: transparent;
         }
 
         .modal-message-group {
@@ -2482,6 +2481,28 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
             historyModal.classList.remove('show');
         }
 
+        // Fonction pour formater le nom d'utilisateur
+        function formatUserName(userId) {
+            // Récupérer l'utilisateur actuellement connecté depuis la session
+            const currentUser = sessionStorage.getItem('currentUser') || sessionStorage.getItem('username') || 'Benjamin';
+            
+            // Mapping des usernames vers des noms d'affichage
+            const userDisplayNames = {
+                'benjamin': 'Benji',
+                'benji': 'Benji',
+                'ben': 'Benji',
+                'sanaa': 'Sanaa',
+                'sana': 'Sanaa',
+                'anonymous': 'Utilisateur'
+            };
+            
+            // Convertir en minuscules pour la comparaison
+            const lowerCurrentUser = currentUser.toLowerCase();
+            
+            // Retourner le nom formaté basé sur l'utilisateur connecté
+            return userDisplayNames[lowerCurrentUser] || currentUser;
+        }
+
         async function loadHistoryInModal() {
             const historyList = document.getElementById('historyList');
             historyList.innerHTML = '<div class="no-history">Chargement des conversations...</div>';
@@ -2522,7 +2543,7 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
                                 <div class="conversation-title">${conv.title}</div>
                                 <div class="conversation-preview">${conv.last_message_preview}</div>
                                 <div class="conversation-date">
-                                    <span class="conversation-user">${conv.user_id || 'Utilisateur'}</span>
+                                    <span class="conversation-user">${formatUserName(conv.user_id)}</span>
                                     <span>${formattedDate}</span>
                                 </div>
                                 ${isCurrentConv ? '<div class="current-indicator">Conversation actuelle</div>' : ''}
