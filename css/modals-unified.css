@@ -64,10 +64,11 @@
     -webkit-backdrop-filter: blur(25px);
     border: 2px solid rgba(255, 255, 255, 0.1);
     border-radius: 25px;
-    padding: 35px 30px;
+    padding: 20px 15px;
     max-width: 500px;
-    width: 90%;
+    width: calc(100% - 60px);
     max-height: 80vh;
+    margin: 15px;
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
@@ -401,122 +402,239 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* ===== Barres de défilement ===== */
+/* ===== Barres de défilement masquées sur tous les appareils ===== */
 .theme-modal-content::-webkit-scrollbar,
 .settings-modal-content::-webkit-scrollbar,
 .sticker-modal-content::-webkit-scrollbar {
-    width: 8px;
+    width: 0;
+    display: none;
 }
 
-.theme-modal-content::-webkit-scrollbar-track,
-.settings-modal-content::-webkit-scrollbar-track,
-.sticker-modal-content::-webkit-scrollbar-track {
+.theme-modal-content,
+.settings-modal-content,
+.sticker-modal-content {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+/* ===== Limitation de hauteur pour l'historique ===== */
+.history-content {
+    max-height: calc(80vh - 200px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    -ms-overflow-style: auto;
+}
+
+.history-content::-webkit-scrollbar {
+    width: 6px !important;
+    background: transparent !important;
+}
+
+        .history-content::-webkit-scrollbar-track {
+            background: transparent !important;
+        }
+
+        .history-content::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.6) !important;
+            border-radius: 3px !important;
+        }
+
+        .history-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.8) !important;
+        }
+
+        .history-content::-webkit-scrollbar-corner {
+            background: transparent !important;
+        }
+
+        .history-content::-webkit-scrollbar-button {
+            display: none !important;
+        }.history-list {
+    max-height: calc(80vh - 250px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    -ms-overflow-style: auto;
+}
+
+.history-list::-webkit-scrollbar {
+    width: 6px !important;
+    background: transparent !important;
+}
+
+        .history-list::-webkit-scrollbar-track {
+            background: transparent !important;
+        }
+
+        .history-list::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.6) !important;
+            border-radius: 3px !important;
+        }
+
+        .history-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.8) !important;
+        }
+
+        .history-list::-webkit-scrollbar-corner {
+            background: transparent !important;
+        }
+
+        .history-list::-webkit-scrollbar-button {
+            display: none !important;
+        }/* ===== Scrollbar pour les messages de chat ===== */
+.chat-messages {
+    scrollbar-width: thin;
+    -ms-overflow-style: auto;
+}
+
+.chat-messages::-webkit-scrollbar {
+    width: 6px !important;
+    background: transparent !important;
+}
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent !important;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.6) !important;
+            border-radius: 3px !important;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.8) !important;
+        }
+
+        .chat-messages::-webkit-scrollbar-corner {
+            background: transparent !important;
+        }
+
+        .chat-messages::-webkit-scrollbar-button {
+            display: none !important;
+        }/* ===== Modal de conversation individuelle ===== */
+.conversation-modal-content {
+    max-height: 80vh !important;
+    overflow-y: hidden !important;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.conversation-modal-content::-webkit-scrollbar {
+    width: 0;
+    display: none;
+}
+
+.conversation-messages {
+    max-height: calc(60vh - 150px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    -ms-overflow-style: auto;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    margin: 15px 0 25px 0;
+}
+
+.conversation-messages::-webkit-scrollbar {
+    width: 6px !important;
+    background: transparent !important;
+}
+
+        .conversation-messages::-webkit-scrollbar-track {
+            background: transparent !important;
+        }
+
+        .conversation-messages::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.6) !important;
+            border-radius: 3px !important;
+        }
+
+        .conversation-messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.8) !important;
+        }
+
+        .conversation-messages::-webkit-scrollbar-corner {
+            background: transparent !important;
+        }
+
+        .conversation-messages::-webkit-scrollbar-button {
+            display: none !important;
+        }
+
+/* ===== Responsive pour les modals de conversation sur mobile ===== */
+@media (max-width: 767px) {
+    .conversation-messages {
+        max-height: calc(50vh - 120px) !important;
+        padding: 12px !important;
+        margin: 10px 0 20px 0 !important;
+    }
+}
+
+/* ===== Responsive pour iPhone et très petits écrans ===== */
+@media (max-width: 480px) {
+    .conversation-messages {
+        max-height: calc(45vh - 100px) !important;
+        padding: 10px !important;
+        margin: 8px 0 15px 0 !important;
+    }
+}
+
+/* ===== Support spécifique iOS ===== */
+@supports (-webkit-touch-callout: none) {
+    @media (max-width: 767px) {
+        .conversation-messages {
+            max-height: calc(45vh - 100px) !important;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .conversation-messages {
+            max-height: calc(40vh - 80px) !important;
+        }
+    }
+}/* ===== Boutons dans l'en-tête du modal historique ===== */
+.history-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.history-btn {
+    padding: 8px 16px;
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
-.theme-modal-content::-webkit-scrollbar-thumb,
-.settings-modal-content::-webkit-scrollbar-thumb,
-.sticker-modal-content::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 10px;
+.history-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.theme-modal-content::-webkit-scrollbar-thumb:hover,
-.settings-modal-content::-webkit-scrollbar-thumb:hover,
-.sticker-modal-content::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
+.history-btn.danger {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.history-btn.danger:hover {
+    background: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.5);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 /* ===== Responsive ===== */
-@media (max-width: 768px) {
-    .theme-modal-content,
-    .settings-modal-content,
-    .sticker-modal-content {
-        padding: 25px 20px;
-        margin: 20px;
-        max-height: 60vh;
-        width: calc(100% - 60px);
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .theme-modal-content::-webkit-scrollbar,
-    .settings-modal-content::-webkit-scrollbar,
-    .sticker-modal-content::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .theme-modal-content::-webkit-scrollbar-thumb,
-    .settings-modal-content::-webkit-scrollbar-thumb,
-    .sticker-modal-content::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.4);
-    }
-
-    .themes-grid,
-    .fonts-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
-    }
-
-    .theme-option,
-    .font-option {
-        padding: 12px 8px;
-    }
-
-    .sticker-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-    }
-
-    .connected-user-indicator {
-        font-size: 0.9rem;
-        padding: 8px 15px;
-        max-width: 260px;
-    }
-
-    /* Animations plus douces sur mobile */
-    @keyframes modalEnter {
-        0% {
-            transform: scale(0.9) translateY(50px);
-            opacity: 0;
-        }
-        100% {
-            transform: scale(1) translateY(0);
-            opacity: 1;
-        }
-    }
-}
-
-@media (max-width: 480px) {
-    .theme-modal-content,
-    .settings-modal-content,
-    .sticker-modal-content {
-        margin: 15px;
-        padding: 20px 15px;
-        max-height: 80vh;
-        width: calc(100% - 60px);
-    }
-
-    .themes-grid,
-    .fonts-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
-
-    .theme-modal-header h3,
-    .settings-modal-header h3,
-    .sticker-modal-header h3 {
-        font-size: 1.4rem;
-    }
-
-    .close-theme-modal-btn,
-    .close-settings-modal-btn,
-    .close-modal-btn {
-        padding: 10px 18px;
-        font-size: 0.95rem;
-    }
-}
+/* Comportement unifié sur tous les appareils */
 
 /* ===== Améliorations tactiles pour iOS/Android ===== */
 @supports (-webkit-touch-callout: none) {
