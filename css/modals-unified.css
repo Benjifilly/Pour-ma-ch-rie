@@ -430,9 +430,9 @@
     background: transparent !important;
 }
 
-        .history-content::-webkit-scrollbar-track {
-            background: transparent !important;
-        }
+.history-content::-webkit-scrollbar-track {
+    background: transparent !important;
+}
 
         .history-content::-webkit-scrollbar-thumb {
             background: rgba(0, 0, 0, 0.6) !important;
@@ -449,8 +449,10 @@
 
         .history-content::-webkit-scrollbar-button {
             display: none !important;
-        }.history-list {
-    max-height: calc(70vh - 200px);
+        }
+        
+.history-list {
+    max-height: calc(70vh - 150px);
     overflow-y: auto;
     scrollbar-width: thin;
     -ms-overflow-style: auto;
