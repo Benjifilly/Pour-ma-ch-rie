@@ -524,7 +524,7 @@
 }
 
 .conversation-messages {
-    max-height: calc(60vh - 150px);
+    max-height: calc(80vh - 180px);
     overflow-y: auto;
     scrollbar-width: thin;
     -ms-overflow-style: auto;
@@ -532,6 +532,32 @@
     background: rgba(0, 0, 0, 0.1);
     border-radius: 12px;
     margin: 15px 0 25px 0;
+}
+
+/* ===== Ajustements pour iPhone - Modal de conversation ===== */
+@media screen and (max-width: 667px) {
+    .conversation-modal-content {
+        max-height: 75vh !important;
+    }
+    
+    .conversation-messages {
+        max-height: calc(75vh - 220px) !important;
+        padding: 12px !important;
+        margin: 12px 0 20px 0 !important;
+    }
+}
+
+/* ===== Ajustements spécifiques pour très petits écrans (iPhone SE, etc.) ===== */
+@media screen and (max-width: 400px) {
+    .conversation-modal-content {
+        max-height: 70vh !important;
+    }
+    
+    .conversation-messages {
+        max-height: calc(70vh - 200px) !important;
+        padding: 10px !important;
+        margin: 10px 0 15px 0 !important;
+    }
 }
 
 .conversation-messages::-webkit-scrollbar {
@@ -558,40 +584,7 @@
 
         .conversation-messages::-webkit-scrollbar-button {
             display: none !important;
-        }
-
-/* ===== Responsive pour les modals de conversation sur mobile ===== */
-@media (max-width: 767px) {
-    .conversation-messages {
-        max-height: calc(50vh - 120px) !important;
-        padding: 12px !important;
-        margin: 10px 0 20px 0 !important;
-    }
-}
-
-/* ===== Responsive pour iPhone et très petits écrans ===== */
-@media (max-width: 480px) {
-    .conversation-messages {
-        max-height: calc(45vh - 100px) !important;
-        padding: 10px !important;
-        margin: 8px 0 15px 0 !important;
-    }
-}
-
-/* ===== Support spécifique iOS ===== */
-@supports (-webkit-touch-callout: none) {
-    @media (max-width: 767px) {
-        .conversation-messages {
-            max-height: calc(45vh - 100px) !important;
-        }
-    }
-    
-    @media (max-width: 480px) {
-        .conversation-messages {
-            max-height: calc(40vh - 80px) !important;
-        }
-    }
-}/* ===== Boutons dans l'en-tête du modal historique ===== */
+        }/* ===== Boutons dans l'en-tête du modal historique ===== */
 .history-controls {
     display: flex;
     gap: 10px;
