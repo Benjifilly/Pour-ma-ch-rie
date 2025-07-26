@@ -11,22 +11,69 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <title>Casino 🤑</title>
     <style>
-        /* Forcer le mode paysage */
-        @media screen and (orientation: portrait) {
-            html {
-                transform: rotate(-90deg);
-                transform-origin: left top;
-                width: 100vh;
-                overflow-x: hidden;
-                position: absolute;
-                top: 100%;
-                left: 0;
+        /* Message de rotation pour mode portrait */
+        .rotate-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .rotate-icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+            animation: rotateAnimation 2s ease-in-out infinite;
+            color: #FFD700;
+        }
+
+        .rotate-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .rotate-subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.5;
+            max-width: 300px;
+        }
+
+        @keyframes rotateAnimation {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            50% {
+                transform: rotate(90deg);
+            }
+        }
+
+        /* Afficher le message de rotation seulement en mode portrait sur mobile APRÈS le chargement */
+        @media screen and (orientation: portrait) and (max-width: 667px) {
+            .rotate-message.show-after-loading {
+                display: flex;
             }
             
-            body {
-                height: 100vw;
-                width: 100vh;
-                overflow: hidden;
+            .main-content {
+                display: none !important;
+            }
+        }
+
+        /* En mode paysage, cacher le message de rotation */
+        @media screen and (orientation: landscape) {
+            .rotate-message {
+                display: none !important;
             }
         }
 
@@ -123,6 +170,14 @@
             .casino-icon {
                 width: 160px;
                 height: 160px;
+            }
+        }
+
+        /* Mode portrait sur mobile - logo plus petit */
+        @media screen and (orientation: portrait) and (max-width: 667px) {
+            .casino-icon {
+                width: 120px;
+                height: 120px;
             }
         }
 
@@ -605,6 +660,15 @@
     </style>
 </head>
 <body>
+    <!-- Message de rotation pour mode portrait -->
+    <div class="rotate-message" id="rotateMessage">
+        <div class="rotate-icon">
+            <i class="fas fa-mobile-alt"></i>
+        </div>
+        <div class="rotate-title">Tournez votre téléphone</div>
+        <div class="rotate-subtitle">Cette application est optimisée pour le mode paysage</div>
+    </div>
+
     <!-- Écran de chargement -->
     <div class="loading-screen" id="loadingScreen">
         <!-- Particules de fond -->
@@ -790,6 +854,9 @@
                         loadingScreen.style.display = 'none';
                         mainContent.classList.add('show');
                         
+                        // Vérifier l'orientation après le chargement
+                        handleOrientationChange();
+                        
                         // Démarrer la musique avec interaction utilisateur
                         startBackgroundMusic();
                     }, 300); // Fade rapide
@@ -899,8 +966,9 @@
             const music = document.getElementById('backgroundMusic');
             
             if (volumeSlider && volumeValue && music) {
-                volumeSlider.addEventListener('input', function() {
-                    const volume = this.value / 100;
+                // Fonction pour mettre à jour le volume
+                function updateVolume(value) {
+                    const volume = value / 100;
                     
                     // Pour iOS - forcer le volume avec une approche spécifique
                     if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
@@ -916,13 +984,49 @@
                         setTimeout(() => {
                             music.volume = volume;
                         }, 50);
+                        
+                        // Force supplémentaire pour iOS
+                        setTimeout(() => {
+                            music.volume = volume;
+                        }, 100);
                     } else {
                         // Pour les autres navigateurs
                         music.volume = volume;
                     }
                     
-                    volumeValue.textContent = this.value + '%';
+                    volumeValue.textContent = value + '%';
+                }
+                
+                // Événements pour desktop
+                volumeSlider.addEventListener('input', function() {
+                    updateVolume(this.value);
                 });
+                
+                volumeSlider.addEventListener('change', function() {
+                    updateVolume(this.value);
+                });
+                
+                // Événements tactiles spécifiques pour iOS
+                if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+                    volumeSlider.addEventListener('touchstart', function(e) {
+                        e.preventDefault();
+                        this.focus();
+                    });
+                    
+                    volumeSlider.addEventListener('touchmove', function(e) {
+                        e.preventDefault();
+                        const touch = e.touches[0];
+                        const rect = this.getBoundingClientRect();
+                        const percent = Math.max(0, Math.min(100, ((touch.clientX - rect.left) / rect.width) * 100));
+                        this.value = Math.round(percent);
+                        updateVolume(this.value);
+                    });
+                    
+                    volumeSlider.addEventListener('touchend', function(e) {
+                        e.preventDefault();
+                        updateVolume(this.value);
+                    });
+                }
                 
                 // Définir le volume initial avec force pour iOS
                 const setInitialVolume = () => {
@@ -938,6 +1042,9 @@
                         setTimeout(() => {
                             music.volume = 0.5;
                         }, 200);
+                        setTimeout(() => {
+                            music.volume = 0.5;
+                        }, 300);
                     }
                 };
                 
@@ -952,9 +1059,20 @@
                         if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
                             setTimeout(() => music.volume = currentVolume, 50);
                             setTimeout(() => music.volume = currentVolume, 100);
+                            setTimeout(() => music.volume = currentVolume, 200);
                         }
                     }, 100);
                 });
+                
+                // Forcer le volume à chaque interaction sur iOS
+                if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+                    document.addEventListener('touchstart', function() {
+                        if (music.currentTime > 0) {
+                            const currentVolume = volumeSlider.value / 100;
+                            music.volume = currentVolume;
+                        }
+                    });
+                }
             }
         });
 
@@ -975,27 +1093,40 @@
 
         // Gérer l'orientation pour iPhone
         function handleOrientationChange() {
-            // Forcer le mode paysage sur iOS
-            if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
-                if (window.orientation === 0 || window.orientation === 180) {
-                    // Portrait detected, le CSS forcera le paysage
-                    document.body.style.transform = 'rotate(90deg)';
-                    document.body.style.transformOrigin = 'left top';
-                    document.body.style.width = '100vh';
-                    document.body.style.height = '100vw';
-                    document.body.style.overflow = 'hidden';
-                    document.body.style.position = 'fixed';
-                    document.body.style.top = '100vw';
-                    document.body.style.left = '0';
+            const rotateMessage = document.getElementById('rotateMessage');
+            const mainContent = document.getElementById('mainContent');
+            const loadingScreen = document.getElementById('loadingScreen');
+            
+            // Vérifier si on est sur mobile
+            const isMobile = window.innerWidth <= 667 || navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad');
+            
+            if (isMobile) {
+                // Vérifier l'orientation
+                const isPortrait = window.innerHeight > window.innerWidth;
+                
+                if (isPortrait) {
+                    // Mode portrait : ne montrer le message de rotation QUE si le chargement est terminé
+                    if (loadingComplete && mainContent && mainContent.classList.contains('show')) {
+                        if (rotateMessage) {
+                            rotateMessage.classList.add('show-after-loading');
+                            rotateMessage.style.display = 'flex';
+                        }
+                        // Cacher le contenu principal s'il est visible
+                        if (mainContent) {
+                            mainContent.style.display = 'none';
+                        }
+                    }
+                    // Sinon, laisser l'écran de chargement visible
                 } else {
-                    // Landscape, remettre normal
-                    document.body.style.transform = '';
-                    document.body.style.transformOrigin = '';
-                    document.body.style.width = '';
-                    document.body.style.height = '';
-                    document.body.style.position = '';
-                    document.body.style.top = '';
-                    document.body.style.left = '';
+                    // Mode paysage : cacher le message et afficher le contenu
+                    if (rotateMessage) {
+                        rotateMessage.classList.remove('show-after-loading');
+                        rotateMessage.style.display = 'none';
+                    }
+                    // Réafficher le contenu principal s'il était caché et que le chargement est fini
+                    if (mainContent && mainContent.classList.contains('show')) {
+                        mainContent.style.display = 'flex';
+                    }
                 }
             }
         }
@@ -1007,7 +1138,10 @@
             
             // Gérer l'orientation
             handleOrientationChange();
-            window.addEventListener('orientationchange', handleOrientationChange);
+            window.addEventListener('orientationchange', () => {
+                setTimeout(handleOrientationChange, 100); // Petit délai pour laisser l'orientation se stabiliser
+            });
+            window.addEventListener('resize', handleOrientationChange);
             
             // Démarrer le chargement réel
             startRealLoading();
@@ -1020,7 +1154,10 @@
             
             // Gérer l'orientation
             handleOrientationChange();
-            window.addEventListener('orientationchange', handleOrientationChange);
+            window.addEventListener('orientationchange', () => {
+                setTimeout(handleOrientationChange, 100);
+            });
+            window.addEventListener('resize', handleOrientationChange);
             
             // Démarrer le chargement réel
             setTimeout(() => {
