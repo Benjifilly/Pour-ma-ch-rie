@@ -422,23 +422,7 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .chat-messages::-webkit-scrollbar {
-            width: 8px;
-        }
 
-        .chat-messages::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.5);
-        }
 
         .message {
             margin-bottom: 15px;
@@ -1167,6 +1151,7 @@
         .conversation-modal .sticker-modal-content {
             max-width: 800px;
             max-height: 80vh;
+            overflow-x: hidden;
         }
 
         .conversation-messages {
@@ -1178,22 +1163,7 @@
             border-radius: 12px;
         }
 
-        .conversation-messages::-webkit-scrollbar {
-            width: 0px;
-            background: transparent;
-        }
 
-        .conversation-messages::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .conversation-messages::-webkit-scrollbar-thumb {
-            background: transparent;
-        }
-
-        .conversation-messages::-webkit-scrollbar-thumb:hover {
-            background: transparent;
-        }
 
         .modal-message-group {
             margin-bottom: 20px;
@@ -1570,25 +1540,6 @@
             background: rgba(74, 144, 226, 1);
         }
 
-        /* Custom scrollbar pour l'historique */
-        .history-content::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .history-content::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-
-        .history-content::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-        }
-
-        .history-content::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.5);
-        }
-
         /* Modal de confirmation de chargement */
         .load-modal {
             position: fixed;
@@ -1890,7 +1841,8 @@
             </div>
             <button class="close-settings-modal-btn" onclick="closeSettingsModal()">Fermer</button>
         </div>
-    </div>    <script>
+    </div>    
+    <script>
         const chatMessages = document.getElementById('chatMessages');
         const chatInput = document.getElementById('chatInput');
         const sendButton = document.getElementById('sendButton');        
@@ -3660,8 +3612,6 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
         <div class="sticker-modal-content">
             <div class="sticker-modal-header">
                 <h3>Historique des conversations</h3>
-            </div>
-            <div class="history-content">
                 <div class="history-controls">
                     <button class="history-btn" onclick="refreshHistory()">
                         <i class="fas fa-sync-alt"></i> Charger
@@ -3670,8 +3620,9 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
                         <i class="fas fa-trash"></i> Supprimer
                     </button>
                 </div>
+            </div>
+            <div class="history-content">
                 <div id="historyList" class="history-list">
-                    <!-- L'historique sera chargé ici -->
                 </div>
             </div>
             <div class="sticker-modal-footer">
@@ -3728,7 +3679,8 @@ Tu es Benjamin (Ben), le copain attentionné de Sanaa.
     </div>
 
     <div class="sticker-modal" id="stickerModal">
-        <div class="sticker-modal-content">            <div class="sticker-modal-header">
+        <div class="sticker-modal-content">            
+            <div class="sticker-modal-header">
                 <h3>Choisir un sticker</h3>
             </div>            <div class="sticker-grid">
                 <div class="sticker-item" onclick="sendSticker('Ben-Bot.png', 'Stickers de Ben-Bot (toi en cyborg)')">
