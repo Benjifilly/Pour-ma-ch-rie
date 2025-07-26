@@ -419,7 +419,7 @@
 
 /* ===== Limitation de hauteur pour l'historique ===== */
 .history-content {
-    max-height: calc(80vh - 200px);
+    max-height: calc(70vh - 150px);
     overflow-y: auto;
     scrollbar-width: thin;
     -ms-overflow-style: auto;
@@ -450,7 +450,7 @@
         .history-content::-webkit-scrollbar-button {
             display: none !important;
         }.history-list {
-    max-height: calc(80vh - 250px);
+    max-height: calc(70vh - 200px);
     overflow-y: auto;
     scrollbar-width: thin;
     -ms-overflow-style: auto;
@@ -512,7 +512,7 @@
             display: none !important;
         }/* ===== Modal de conversation individuelle ===== */
 .conversation-modal-content {
-    max-height: 80vh !important;
+    max-height: 90vh !important;
     overflow-y: hidden !important;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -524,7 +524,7 @@
 }
 
 .conversation-messages {
-    max-height: calc(80vh - 180px);
+    max-height: calc(90vh - 180px);
     overflow-y: auto;
     scrollbar-width: thin;
     -ms-overflow-style: auto;
@@ -537,11 +537,11 @@
 /* ===== Ajustements pour iPhone - Modal de conversation ===== */
 @media screen and (max-width: 667px) {
     .conversation-modal-content {
-        max-height: 75vh !important;
+        max-height: 85vh !important;
     }
     
     .conversation-messages {
-        max-height: calc(75vh - 220px) !important;
+        max-height: calc(85vh - 220px) !important;
         padding: 12px !important;
         margin: 12px 0 20px 0 !important;
     }
@@ -550,11 +550,11 @@
 /* ===== Ajustements spécifiques pour très petits écrans (iPhone SE, etc.) ===== */
 @media screen and (max-width: 400px) {
     .conversation-modal-content {
-        max-height: 70vh !important;
+        max-height: 80vh !important;
     }
     
     .conversation-messages {
-        max-height: calc(70vh - 200px) !important;
+        max-height: calc(80vh - 200px) !important;
         padding: 10px !important;
         margin: 10px 0 15px 0 !important;
     }
