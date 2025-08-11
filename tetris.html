@@ -1382,12 +1382,28 @@ function showPause(){
   if(isMobile && pauseAudioRow){ pauseAudioRow.style.display='flex'; updateAudioToggleButtons(); }
   // pause musique sans réinitialiser
   if(audioEl && !audioEl.paused){ try{ audioEl.pause(); audioEl._wasPlaying = true; }catch(e){} }
+  
+  // Ajouter l'écouteur pour fermer en cliquant en dehors du contenu
+  setTimeout(() => {
+    pauseOverlay.addEventListener('click', closePauseOnClickOutside);
+  }, 100);
 }
 function hidePause(){
   pauseOpen = false; pauseOverlay.style.display='none';
   if(isMobile && pauseAudioRow){ pauseAudioRow.style.display='none'; }
   // reprendre musique si elle jouait
   if(audioEl && audioEl._wasPlaying && musicOn){ try{ audioEl.play(); }catch(e){} audioEl._wasPlaying=false; }
+  
+  // Retirer l'écouteur de clic en dehors
+  pauseOverlay.removeEventListener('click', closePauseOnClickOutside);
+}
+
+function closePauseOnClickOutside(event) {
+  // Vérifier si le clic est en dehors du contenu du modal de pause
+  const pauseContent = event.target.closest('div[style*="background:linear-gradient(180deg,#0a1822,#07141b)"]');
+  if (!pauseContent) {
+    hidePause(); // Reprendre le jeu
+  }
 }
 function togglePause(){ if(!running) return; pauseOpen ? hidePause() : showPause(); }
 if(pauseContinueBtn) pauseContinueBtn.addEventListener('click', ()=>{ hidePause(); });
@@ -1942,7 +1958,42 @@ async function fetchPersonalBest(){
 }
 window.fetchPersonalBest = fetchPersonalBest;
 
+// Fonctions d'authentification
+function isAuthenticated() {
+    const authStatus = sessionStorage.getItem('isAuthenticated');
+    const authTime = sessionStorage.getItem('authTime');
+
+    if (!authStatus || authStatus !== 'true') {
+        return false;
+    }
+
+    // Vérifier que l'authentification n'est pas trop ancienne (5 minutes)
+    if (authTime) {
+        const currentTime = new Date().getTime();
+        const timeDiff = currentTime - parseInt(authTime);
+        const minutesDiff = timeDiff / (1000 * 60);
+
+        if (minutesDiff > 5) {
+            sessionStorage.removeItem('isAuthenticated');
+            sessionStorage.removeItem('authTime');
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function redirectToLogin() {
+    window.location.href = 'index.html';
+}
+
 document.addEventListener('DOMContentLoaded', ()=>{
+  // Vérifier l'authentification au chargement de la page
+  if (!isAuthenticated()) {
+    redirectToLogin();
+    return;
+  }
+  
   const lbRefresh = document.getElementById('lbRefreshBtn');
   if(lbRefresh) lbRefresh.addEventListener('click', ()=>fetchLeaderboard());
   const lbBack = document.getElementById('leaderboardBackBtn');
@@ -1950,6 +2001,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
   // lancer récupération du highscore global dès le chargement
   fetchGlobalHighscore();
   fetchPersonalBest();
+  
+  // Initialisation du jeu seulement si authentifié
+  resizeBoard(); 
+  drawBoard(); 
+  renderNext(); 
+  changeAtmosphere(0);
 });
 </script>
 
