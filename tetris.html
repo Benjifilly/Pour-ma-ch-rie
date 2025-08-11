@@ -12,7 +12,21 @@
   <title>Tetris — jeu</title>
   <style>
     :root{ --bg:#071021; --card:#0c1720; --accent:#ffd166; --muted:#98a8b9; color-scheme: dark }
-    html,body{height:100%;margin:0;overflow:hidden;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;background:linear-gradient(180deg,#071020 0%, #071827 70%);color:#e6eef6;transition:background 2s ease-in-out;user-select:none}
+    html,body{height:100%;margin:0;overflow:hidden;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;background:linear-gradient(180deg,#071020 0%, #071827 70%);color:#e6eef6;transition:background 2s ease-in-out;user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none}
+    
+    /* Protection contre zoom et sélection sur iOS */
+    *{-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;user-select:none}
+    input,textarea{-webkit-user-select:auto;user-select:auto}
+    
+    /* Empêcher le zoom sur double-tap */
+    canvas,button,div{touch-action:manipulation}
+    
+    /* Prévenir le zoom sur iOS */
+    @supports (-webkit-touch-callout: none) {
+      html{-webkit-text-size-adjust:100%}
+      body{-webkit-text-size-adjust:100%;touch-action:manipulation}
+      *{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+    }
     
     /* Atmosphères par niveau */
     body.atmosphere-0 { background:linear-gradient(180deg,#071020 0%, #071827 70%) !important; }
@@ -101,6 +115,27 @@
       .mobile-layout{display:block !important}
     }
     
+    /* Media query spécifique iPhone pour le leaderboard */
+    @media screen and (max-width: 480px) and (-webkit-min-device-pixel-ratio: 2) {
+      #tab-leaderboard .panel {
+        max-height: clamp(35vh, 45vh, 55vh) !important;
+      }
+      #tab-leaderboard {
+        min-height: 60vh !important;
+      }
+    }
+    
+    /* Media query pour très petits écrans (iPhone SE, etc.) */
+    @media screen and (max-height: 700px) and (max-width: 400px) {
+      #tab-leaderboard .panel {
+        max-height: clamp(30vh, 40vh, 50vh) !important;
+      }
+      #tab-leaderboard {
+        min-height: 55vh !important;
+        padding: clamp(10px, 2vh, 30px) clamp(8px, 2vw, 20px) !important;
+      }
+    }
+    
     /* Custom scrollbar pour la page d'aide */
     .panel::-webkit-scrollbar { width: 8px; }
     .panel::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 4px; }
@@ -116,6 +151,21 @@
     .tetromino.O{grid-template-columns:repeat(2,8px);grid-template-rows:repeat(2,8px)}
     .tetromino.T,.tetromino.S,.tetromino.Z,.tetromino.J,.tetromino.L{grid-template-columns:repeat(3,8px);grid-template-rows:repeat(2,8px)}
     .block{width:8px;height:8px;border-radius:2px}
+    
+    /* Modal de confirmation pour quitter */
+    .quitConfirmModal{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:5000;opacity:0;visibility:hidden;transition:all 0.3s ease}
+    .quitConfirmModal.show{opacity:1;visibility:visible}
+    .quitConfirmContent{background:linear-gradient(180deg,#0a1822,#07141b);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:clamp(20px,4vh,32px);max-width:400px;width:90vw;text-align:center;transform:scale(0.9);transition:transform 0.3s ease}
+    .quitConfirmModal.show .quitConfirmContent{transform:scale(1)}
+    .quitConfirmTitle{font-size:clamp(18px,4vw,24px);font-weight:700;color:#e4f3fa;margin-bottom:clamp(12px,2vh,16px)}
+    .quitConfirmStats{background:rgba(255,255,255,0.05);border-radius:8px;padding:clamp(12px,2vh,16px);margin:clamp(12px,2vh,16px) 0;font-size:clamp(13px,3vw,15px);color:#b8d4e3}
+    .quitConfirmStats div{margin:4px 0}
+    .quitConfirmActions{display:flex;gap:12px;justify-content:center;margin-top:clamp(16px,3vh,24px)}
+    .quitConfirmBtn{padding:clamp(10px,2vh,12px) clamp(16px,4vw,20px);border:none;border-radius:8px;font-size:clamp(13px,3vw,15px);font-weight:600;cursor:pointer;transition:all 0.2s ease}
+    .quitConfirmBtn.continue{background:linear-gradient(135deg,#064758,#0b6b85);color:#e4f3fa}
+    .quitConfirmBtn.continue:hover{background:linear-gradient(135deg,#075a6d,#0e7ea0);transform:translateY(-1px)}
+    .quitConfirmBtn.quit{background:rgba(255,59,59,0.2);color:#ff6b6b;border:1px solid rgba(255,59,59,0.3)}
+    .quitConfirmBtn.quit:hover{background:rgba(255,59,59,0.3);transform:translateY(-1px)}
   </style>
 </head>
 <body>
@@ -402,15 +452,16 @@
                   Paramètres Mobiles
                 </div>
 
-                <!-- Indicateur de connexion -->
+                <!-- Message pour les paramètres avancés -->
                 <div style="margin-bottom:24px">
                   <div style="font-size:14px;font-weight:700;color:#1FB6FF;margin-bottom:12px;text-align:center">� Connexion</div>
-                  <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:16px;text-align:center">
-                    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px">
-                      <div id="mobileConnectionStatus" style="width:12px;height:12px;border-radius:50%;background:#2BD4A4;box-shadow:0 0 8px rgba(43,212,164,0.4)"></div>
-                      <span style="font-size:13px;color:#fff;font-weight:600">État de la connexion</span>
+                  <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:20px;text-align:center">
+                    <div style="font-size:14px;color:#fff;font-weight:600;margin-bottom:8px">
+                      Connecté en tant que <strong>Benjamin</strong>
                     </div>
-                    <div id="mobileConnectionText" style="font-size:11px;color:#bcd6df">Connecté au serveur</div>
+                    <div style="font-size:12px;color:#bcd6df;font-style:italic">
+                      Que sur ordi chouchou :P
+                    </div>
                   </div>
                 </div>
               </div>
@@ -572,6 +623,25 @@
       <div style="display:flex;gap:clamp(6px,2vw,10px);justify-content:center;width:100%;flex-wrap:wrap">
         <button class="btn btn-lg" id="replayBtn" style="pointer-events:auto;flex:1;min-width:clamp(80px,20vw,120px);font-size:clamp(12px,3vw,14px);padding:clamp(8px,2vh,12px) clamp(12px,3vw,16px)">Rejouer</button>
         <button class="btn btn-lg" id="menuBtnFromGO" style="pointer-events:auto;flex:1;min-width:clamp(80px,20vw,120px);font-size:clamp(12px,3vw,14px);padding:clamp(8px,2vh,12px) clamp(12px,3vw,16px)">Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmation pour quitter -->
+  <div id="quitConfirmModal" class="quitConfirmModal">
+    <div class="quitConfirmContent">
+      <div class="quitConfirmTitle">Quitter la partie ?</div>
+      <div class="quitConfirmStats">
+        <div>Score: <span id="quitScore">0</span></div>
+        <div>Niveau: <span id="quitLevel">1</span></div>
+        <div>Lignes: <span id="quitLines">0</span></div>
+      </div>
+      <div style="font-size:clamp(12px,3vw,14px);color:#8baebb;margin-bottom:clamp(12px,2vh,16px)">
+        Votre résultat sera sauvegardé automatiquement
+      </div>
+      <div class="quitConfirmActions">
+        <button class="quitConfirmBtn continue" id="quitContinue">Continuer</button>
+        <button class="quitConfirmBtn quit" id="quitConfirm">Quitter</button>
       </div>
     </div>
   </div>
@@ -748,20 +818,13 @@ function handleTouchEnd(e) {
 
 // Mobile settings event listeners
 function initMobileSettings() {
-  // Plus de paramètres mobiles complexes - juste l'indicateur de connexion
-  updateMobileConnectionStatus();
+  // Plus de paramètres mobiles complexes - juste un message personnalisé maintenant
+  // Rien à initialiser côté JavaScript
 }
 
 function updateMobileConnectionStatus() {
-  const statusDot = document.getElementById('mobileConnectionStatus');
-  const statusText = document.getElementById('mobileConnectionText');
-  
-  if (statusDot && statusText) {
-    // Simule un état de connexion (peut être lié à votre vraie logique de connexion)
-    statusDot.style.background = '#2BD4A4';
-    statusDot.style.boxShadow = '0 0 8px rgba(43,212,164,0.4)';
-    statusText.textContent = 'Connecté au serveur';
-  }
+  // Cette fonction n'est plus utilisée car on a remplacé l'indicateur par un message statique
+  // Conservée pour éviter les erreurs si appelée ailleurs
 }
 
 // Grid
@@ -1196,7 +1259,18 @@ window.addEventListener('keydown', (e)=>{ if(e.repeat && e.code !== bindings.dow
   // Input capture for remapping
   if(typeof waitingFor === 'string' && waitingFor){ e.preventDefault(); const code = e.code==='Space' ? 'Space' : e.code; bindings[waitingFor] = code; localStorage.setItem('tetris_bindings', JSON.stringify(bindings)); const rf = (window.refreshKeyFields||null); if(rf) rf(); waitingFor = null; return; }
   // In-game
-  if(pauseOpen){ if(e.code==='KeyP' || e.code==='Escape'){ hidePause(); } return; }
+  if(pauseOpen){ 
+    // Si la modal de confirmation est ouverte, la fermer d'abord
+    if(quitConfirmModal.classList.contains('show')) {
+      if(e.code==='KeyP' || e.code==='Escape'){ 
+        hideQuitConfirmModal(); 
+        hidePause(); 
+      }
+    } else {
+      if(e.code==='KeyP' || e.code==='Escape'){ hidePause(); }
+    }
+    return; 
+  }
   if(!running) return;
   if(e.code === bindings.left) movePiece(-1,0);
   else if(e.code === bindings.right) movePiece(1,0);
@@ -1296,7 +1370,58 @@ function closePauseOnClickOutside(event) {
 }
 function togglePause(){ if(!running) return; pauseOpen ? hidePause() : showPause(); }
 if(pauseContinueBtn) pauseContinueBtn.addEventListener('click', ()=>{ hidePause(); });
-if(pauseMenuBtn) pauseMenuBtn.addEventListener('click', ()=>{ hidePause(); showMenu(); });
+if(pauseMenuBtn) pauseMenuBtn.addEventListener('click', ()=>{ showQuitConfirmModal(); });
+
+// Modal de confirmation pour quitter
+const quitConfirmModal = document.getElementById('quitConfirmModal');
+const quitContinueBtn = document.getElementById('quitContinue');
+const quitConfirmBtn = document.getElementById('quitConfirm');
+
+function showQuitConfirmModal() {
+  if (!running) return; // Si le jeu n'est pas en cours, pas besoin de confirmation
+  
+  // Mettre à jour les stats dans la modal
+  document.getElementById('quitScore').textContent = score;
+  document.getElementById('quitLevel').textContent = level + 1;
+  document.getElementById('quitLines').textContent = lines;
+  
+  // Afficher la modal
+  quitConfirmModal.classList.add('show');
+}
+
+function hideQuitConfirmModal() {
+  quitConfirmModal.classList.remove('show');
+}
+
+function saveResultAndQuit() {
+  // Sauvegarder le résultat actuel avant de quitter
+  const finalScore = score;
+  const finalLevel = level;
+  
+  // Soumettre le score au leaderboard (même logique que dans onGameOver)
+  submitScoreToLeaderboard(finalScore, finalLevel).catch(() => {});
+  
+  // Cacher la modal, fermer la pause et aller au menu
+  hideQuitConfirmModal();
+  hidePause();
+  showMenu();
+}
+
+// Event listeners pour la modal de confirmation
+if(quitContinueBtn) quitContinueBtn.addEventListener('click', () => {
+  hideQuitConfirmModal();
+  hidePause(); // Reprendre le jeu
+});
+
+if(quitConfirmBtn) quitConfirmBtn.addEventListener('click', saveResultAndQuit);
+
+// Fermer la modal en cliquant en dehors
+quitConfirmModal.addEventListener('click', (e) => {
+  if (e.target === quitConfirmModal) {
+    hideQuitConfirmModal();
+    hidePause(); // Reprendre le jeu
+  }
+});
 
 function updateAudioToggleButtons(){
   if(toggleMusicBtn) toggleMusicBtn.textContent = 'Musique: ' + (musicOn? 'ON':'OFF');
@@ -1342,7 +1467,14 @@ function showMenuPage(name){
 
 // Primary buttons
 document.getElementById('startGameBtn').addEventListener('click', ()=>{ startGameFromMenu(); });
-document.getElementById('backBtn').addEventListener('click', ()=>{ showMenu(); });
+document.getElementById('backBtn').addEventListener('click', ()=>{ 
+  // Si le jeu est en cours, afficher la modal de confirmation
+  if(running) {
+    showQuitConfirmModal();
+  } else {
+    showMenu();
+  }
+});
 const helpBtn = document.getElementById('helpBtn');
 const settingsBtn = document.getElementById('settingsBtn');
 const helpBackBtn = document.getElementById('helpBackBtn');
