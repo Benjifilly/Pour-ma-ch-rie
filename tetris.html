@@ -1519,14 +1519,18 @@ const menuPages = {
   leaderboard: document.getElementById('tab-leaderboard'),
 };
 function showMenuPage(name){
-  // Masquer toutes les pages du menu
+  // Masquer toutes les pages du menu et retirer la classe active
   Object.values(menuPages).forEach(el=>{
-    if(el) el.style.display='none';
+    if(el) {
+      el.style.display='none';
+      el.classList.remove('active');
+    }
   });
   
-  // Afficher la page demandée
+  // Afficher la page demandée et ajouter la classe active
   if(menuPages[name]){
     menuPages[name].style.display = 'flex';
+    menuPages[name].classList.add('active');
     if(window.refreshTitleLayouts){
       // recalcul initial
       setTimeout(()=>refreshTitleLayouts(),40);
@@ -1674,228 +1678,21 @@ if(duoBackBtn){
   });
 }
 
-// Variables globales pour le mode duo
-let duoConnectionId = null;
-let duoPlayerId = null;
-let duoSubscription = null;
-let duoHandshakeComplete = false;
-
 // Fonction pour nettoyer la connexion duo
 async function cleanupDuoConnection() {
-  if(duoSubscription) {
-    await supabase.removeChannel(duoSubscription);
-    duoSubscription = null;
+  // Cette fonction sera redéfinie dans le module Supabase
+  if(window.supabaseCleanupDuo) {
+    await window.supabaseCleanupDuo();
   }
-  if(duoConnectionId && duoPlayerId) {
-    try {
-      await supabase.from('duo_live').delete().eq('connection_id', duoConnectionId).eq('player_id', duoPlayerId);
-    } catch(e) {
-      console.warn('Erreur cleanup duo:', e);
-    }
-  }
-  duoConnectionId = null;
-  duoPlayerId = null;
-  duoHandshakeComplete = false;
-  window.duoConnectionId = null;
 }
 
 // Fonction principale pour gérer la connexion duo
 async function handleDuoConnection() {
-  try {
-    const user = sessionStorage.getItem('currentUser') || localStorage.getItem('lastUser') || 'Benjamin';
-    duoPlayerId = user;
-    
-    // Générer ou rejoindre une connection
-    duoConnectionId = generateConnectionId();
-    window.duoConnectionId = duoConnectionId;
-    
-    // Insérer notre présence dans duo_live
-    const { error: insertError } = await supabase
-      .from('duo_live')
-      .insert({
-        connection_id: duoConnectionId,
-        player_id: duoPlayerId,
-        status: 'waiting',
-        last_ping: new Date().toISOString()
-      });
-    
-    if(insertError) {
-      console.error('Erreur insertion duo_live:', insertError);
-      return;
-    }
-    
-    // Vérifier combien de joueurs sont connectés
-    await checkPlayerCount();
-    
-    // S'abonner aux changements temps réel
-    duoSubscription = supabase
-      .channel('duo_live_changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'duo_live', filter: `connection_id=eq.${duoConnectionId}` },
-        (payload) => {
-          console.log('Changement duo_live:', payload);
-          handleDuoLiveChange(payload);
-        }
-      )
-      .subscribe();
-      
-  } catch(e) {
-    console.error('Erreur handleDuoConnection:', e);
+  // Cette fonction sera redéfinie dans le module Supabase
+  if(window.supabaseHandleDuo) {
+    await window.supabaseHandleDuo();
   }
 }
-
-// Vérifier le nombre de joueurs connectés
-async function checkPlayerCount() {
-  try {
-    const { data, error } = await supabase
-      .from('duo_live')
-      .select('player_id, status')
-      .eq('connection_id', duoConnectionId)
-      .gte('last_ping', new Date(Date.now() - 30000).toISOString()); // dernières 30 secondes
-    
-    if(error) {
-      console.error('Erreur checkPlayerCount:', error);
-      return;
-    }
-    
-    const playerCount = data.length;
-    const duoWaitCount = document.getElementById('duoWaitCount');
-    
-    if(playerCount === 1) {
-      if(duoWaitCount) duoWaitCount.textContent = 'Joueurs connectés : 1/2';
-    } else if(playerCount === 2) {
-      if(duoWaitCount) duoWaitCount.textContent = 'Joueurs connectés : 2/2';
-      
-      // Attendre 1 seconde puis commencer le handshake
-      setTimeout(() => {
-        startDuoHandshake(data);
-      }, 1000);
-    }
-    
-  } catch(e) {
-    console.error('Erreur checkPlayerCount:', e);
-  }
-}
-
-// Commencer le handshake entre les deux joueurs
-async function startDuoHandshake(players) {
-  try {
-    const duoWaitCount = document.getElementById('duoWaitCount');
-    if(duoWaitCount) duoWaitCount.textContent = 'Connexion :P';
-    
-    // Envoyer signal de handshake
-    const { error } = await supabase
-      .from('duo_live')
-      .update({ 
-        status: 'handshake_sent',
-        last_ping: new Date().toISOString()
-      })
-      .eq('connection_id', duoConnectionId)
-      .eq('player_id', duoPlayerId);
-    
-    if(error) {
-      console.error('Erreur handshake:', error);
-      return;
-    }
-    
-    // Vérifier si les deux joueurs ont envoyé le handshake
-    setTimeout(() => {
-      checkHandshakeComplete();
-    }, 2000);
-    
-  } catch(e) {
-    console.error('Erreur startDuoHandshake:', e);
-  }
-}
-
-// Vérifier si le handshake est complet
-async function checkHandshakeComplete() {
-  try {
-    const { data, error } = await supabase
-      .from('duo_live')
-      .select('player_id, status')
-      .eq('connection_id', duoConnectionId)
-      .eq('status', 'handshake_sent');
-    
-    if(error) {
-      console.error('Erreur checkHandshakeComplete:', error);
-      return;
-    }
-    
-    if(data.length === 2) {
-      // Les deux joueurs ont envoyé le handshake, marquer comme ready
-      await supabase
-        .from('duo_live')
-        .update({ 
-          status: 'ready',
-          last_ping: new Date().toISOString()
-        })
-        .eq('connection_id', duoConnectionId)
-        .eq('player_id', duoPlayerId);
-      
-      duoHandshakeComplete = true;
-      
-      // Lancer le jeu après 1 seconde
-      setTimeout(() => {
-        startDuoGame();
-      }, 1000);
-    }
-    
-  } catch(e) {
-    console.error('Erreur checkHandshakeComplete:', e);
-  }
-}
-
-// Lancer le jeu duo
-function startDuoGame() {
-  console.log('Lancement du jeu duo !');
-  
-  // Masquer l'overlay d'attente
-  document.getElementById('duoWaitOverlay').style.display = 'none';
-  
-  // Démarrer le jeu Tetris
-  resetGame();
-  startGame();
-  showGameScreen();
-  
-  // TODO: Ajouter la logique de synchronisation du jeu duo
-}
-
-// Gérer les changements temps réel de duo_live
-function handleDuoLiveChange(payload) {
-  if(payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
-    // Un joueur s'est connecté ou a changé de statut
-    setTimeout(() => {
-      checkPlayerCount();
-    }, 500);
-  } else if(payload.eventType === 'DELETE') {
-    // Un joueur s'est déconnecté
-    const duoWaitCount = document.getElementById('duoWaitCount');
-    if(duoWaitCount && !duoHandshakeComplete) {
-      duoWaitCount.textContent = 'Joueurs connectés : 1/2';
-    }
-  }
-}
-
-// Générer un ID de connexion unique
-function generateConnectionId() {
-  return 'duo_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-}
-
-// Maintenir la connexion active (ping toutes les 10 secondes)
-setInterval(async () => {
-  if(duoConnectionId && duoPlayerId) {
-    try {
-      await supabase
-        .from('duo_live')
-        .update({ last_ping: new Date().toISOString() })
-        .eq('connection_id', duoConnectionId)
-        .eq('player_id', duoPlayerId);
-    } catch(e) {
-      console.warn('Erreur ping duo:', e);
-    }
-  }
-}, 10000);
 document.getElementById('backBtn').addEventListener('click', ()=>{ 
   // Si le jeu est en cours, afficher la modal de confirmation
   if(running) {
@@ -2235,6 +2032,236 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const SUPA_URL = 'https://ocdloxagawjkokiheuiu.supabase.co';
 const SUPA_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jZGxveGFnYXdqa29raWhldWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1MTM1NTQsImV4cCI6MjA2ODA4OTU1NH0.OFC4QyrCKtyY_2JA2I5MnI8JjmuFBYHuJH7nO1Vyu5o';
 const supabase = createClient(SUPA_URL, SUPA_ANON_KEY);
+
+// ====== FONCTIONS DUO MODE ======
+// Variables globales pour le mode duo
+let duoConnectionId = null;
+let duoPlayerId = null;
+let duoSubscription = null;
+let duoHandshakeComplete = false;
+
+// Fonction pour nettoyer la connexion duo
+async function cleanupDuoConnection() {
+  if(duoSubscription) {
+    await supabase.removeChannel(duoSubscription);
+    duoSubscription = null;
+  }
+  if(duoConnectionId && duoPlayerId) {
+    try {
+      await supabase.from('duo_live').delete().eq('connection_id', duoConnectionId).eq('player_id', duoPlayerId);
+    } catch(e) {
+      console.warn('Erreur cleanup duo:', e);
+    }
+  }
+  duoConnectionId = null;
+  duoPlayerId = null;
+  duoHandshakeComplete = false;
+  window.duoConnectionId = null;
+}
+
+// Fonction principale pour gérer la connexion duo
+async function handleDuoConnection() {
+  try {
+    const user = sessionStorage.getItem('currentUser') || localStorage.getItem('lastUser') || 'Benjamin';
+    duoPlayerId = user;
+    
+    // Générer ou rejoindre une connection
+    duoConnectionId = generateConnectionId();
+    window.duoConnectionId = duoConnectionId;
+    
+    // Insérer notre présence dans duo_live
+    const { error: insertError } = await supabase
+      .from('duo_live')
+      .insert({
+        connection_id: duoConnectionId,
+        player_id: duoPlayerId,
+        status: 'waiting',
+        last_ping: new Date().toISOString()
+      });
+    
+    if(insertError) {
+      console.error('Erreur insertion duo_live:', insertError);
+      return;
+    }
+    
+    // Vérifier combien de joueurs sont connectés
+    await checkPlayerCount();
+    
+    // S'abonner aux changements temps réel
+    duoSubscription = supabase
+      .channel('duo_live_changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'duo_live', filter: `connection_id=eq.${duoConnectionId}` },
+        (payload) => {
+          console.log('Changement duo_live:', payload);
+          handleDuoLiveChange(payload);
+        }
+      )
+      .subscribe();
+      
+  } catch(e) {
+    console.error('Erreur handleDuoConnection:', e);
+  }
+}
+
+// Vérifier le nombre de joueurs connectés
+async function checkPlayerCount() {
+  try {
+    const { data, error } = await supabase
+      .from('duo_live')
+      .select('player_id, status')
+      .eq('connection_id', duoConnectionId)
+      .gte('last_ping', new Date(Date.now() - 30000).toISOString()); // dernières 30 secondes
+    
+    if(error) {
+      console.error('Erreur checkPlayerCount:', error);
+      return;
+    }
+    
+    const playerCount = data.length;
+    const duoWaitCount = document.getElementById('duoWaitCount');
+    
+    if(playerCount === 1) {
+      if(duoWaitCount) duoWaitCount.textContent = 'Joueurs connectés : 1/2';
+    } else if(playerCount === 2) {
+      if(duoWaitCount) duoWaitCount.textContent = 'Joueurs connectés : 2/2';
+      
+      // Attendre 1 seconde puis commencer le handshake
+      setTimeout(() => {
+        startDuoHandshake(data);
+      }, 1000);
+    }
+    
+  } catch(e) {
+    console.error('Erreur checkPlayerCount:', e);
+  }
+}
+
+// Commencer le handshake entre les deux joueurs
+async function startDuoHandshake(players) {
+  try {
+    const duoWaitCount = document.getElementById('duoWaitCount');
+    if(duoWaitCount) duoWaitCount.textContent = 'Connexion :P';
+    
+    // Envoyer signal de handshake
+    const { error } = await supabase
+      .from('duo_live')
+      .update({ 
+        status: 'handshake_sent',
+        last_ping: new Date().toISOString()
+      })
+      .eq('connection_id', duoConnectionId)
+      .eq('player_id', duoPlayerId);
+    
+    if(error) {
+      console.error('Erreur handshake:', error);
+      return;
+    }
+    
+    // Vérifier si les deux joueurs ont envoyé le handshake
+    setTimeout(() => {
+      checkHandshakeComplete();
+    }, 2000);
+    
+  } catch(e) {
+    console.error('Erreur startDuoHandshake:', e);
+  }
+}
+
+// Vérifier si le handshake est complet
+async function checkHandshakeComplete() {
+  try {
+    const { data, error } = await supabase
+      .from('duo_live')
+      .select('player_id, status')
+      .eq('connection_id', duoConnectionId)
+      .eq('status', 'handshake_sent');
+    
+    if(error) {
+      console.error('Erreur checkHandshakeComplete:', error);
+      return;
+    }
+    
+    if(data.length === 2) {
+      // Les deux joueurs ont envoyé le handshake, marquer comme ready
+      await supabase
+        .from('duo_live')
+        .update({ 
+          status: 'ready',
+          last_ping: new Date().toISOString()
+        })
+        .eq('connection_id', duoConnectionId)
+        .eq('player_id', duoPlayerId);
+      
+      duoHandshakeComplete = true;
+      
+      // Lancer le jeu après 1 seconde
+      setTimeout(() => {
+        startDuoGame();
+      }, 1000);
+    }
+    
+  } catch(e) {
+    console.error('Erreur checkHandshakeComplete:', e);
+  }
+}
+
+// Lancer le jeu duo
+function startDuoGame() {
+  console.log('Lancement du jeu duo !');
+  
+  // Masquer l'overlay d'attente
+  document.getElementById('duoWaitOverlay').style.display = 'none';
+  
+  // Démarrer le jeu Tetris
+  window.resetGame();
+  window.startGame();
+  window.showGameScreen();
+  
+  // TODO: Ajouter la logique de synchronisation du jeu duo
+}
+
+// Gérer les changements temps réel de duo_live
+function handleDuoLiveChange(payload) {
+  if(payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+    // Un joueur s'est connecté ou a changé de statut
+    setTimeout(() => {
+      checkPlayerCount();
+    }, 500);
+  } else if(payload.eventType === 'DELETE') {
+    // Un joueur s'est déconnecté
+    const duoWaitCount = document.getElementById('duoWaitCount');
+    if(duoWaitCount && !duoHandshakeComplete) {
+      duoWaitCount.textContent = 'Joueurs connectés : 1/2';
+    }
+  }
+}
+
+// Générer un ID de connexion unique
+function generateConnectionId() {
+  return 'duo_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+// Maintenir la connexion active (ping toutes les 10 secondes)
+setInterval(async () => {
+  if(duoConnectionId && duoPlayerId) {
+    try {
+      await supabase
+        .from('duo_live')
+        .update({ last_ping: new Date().toISOString() })
+        .eq('connection_id', duoConnectionId)
+        .eq('player_id', duoPlayerId);
+    } catch(e) {
+      console.warn('Erreur ping duo:', e);
+    }
+  }
+}, 10000);
+
+// Exposer les fonctions au scope global
+window.supabaseHandleDuo = handleDuoConnection;
+window.supabaseCleanupDuo = cleanupDuoConnection;
+
+// ====== LEADERBOARD FUNCTIONS ======
 
 async function fetchLeaderboard(){
   const bodyEl = document.getElementById('lbBody');
