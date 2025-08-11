@@ -402,80 +402,16 @@
                   Paramètres Mobiles
                 </div>
 
-                <!-- Contrôles tactiles -->
+                <!-- Indicateur de connexion -->
                 <div style="margin-bottom:24px">
-                  <div style="font-size:14px;font-weight:700;color:#1FB6FF;margin-bottom:12px;text-align:center">🎮 Contrôles Tactiles</div>
-                  <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:16px;margin-bottom:16px">
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:center">
-                      <div style="background:rgba(31,182,255,0.15);border-radius:6px;padding:12px">
-                        <div style="font-size:20px;margin-bottom:4px">👈</div>
-                        <div style="font-size:12px;color:#1FB6FF;font-weight:600">SWIPE GAUCHE</div>
-                        <div style="font-size:10px;color:#bcd6df">Déplacer à gauche</div>
-                      </div>
-                      <div style="background:rgba(31,182,255,0.15);border-radius:6px;padding:12px">
-                        <div style="font-size:20px;margin-bottom:4px">👉</div>
-                        <div style="font-size:12px;color:#1FB6FF;font-weight:600">SWIPE DROITE</div>
-                        <div style="font-size:10px;color:#bcd6df">Déplacer à droite</div>
-                      </div>
-                      <div style="background:rgba(155,93,229,0.15);border-radius:6px;padding:12px">
-                        <div style="font-size:20px;margin-bottom:4px">👆</div>
-                        <div style="font-size:12px;color:#9B5DE5;font-weight:600">SWIPE HAUT</div>
-                        <div style="font-size:10px;color:#bcd6df">Tourner la pièce</div>
-                      </div>
-                      <div style="background:rgba(255,209,102,0.15);border-radius:6px;padding:12px">
-                        <div style="font-size:20px;margin-bottom:4px">👇</div>
-                        <div style="font-size:12px;color:#FFD166;font-weight:600">SWIPE BAS</div>
-                        <div style="font-size:10px;color:#bcd6df">Descendre plus vite</div>
-                      </div>
+                  <div style="font-size:14px;font-weight:700;color:#1FB6FF;margin-bottom:12px;text-align:center">� Connexion</div>
+                  <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:16px;text-align:center">
+                    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px">
+                      <div id="mobileConnectionStatus" style="width:12px;height:12px;border-radius:50%;background:#2BD4A4;box-shadow:0 0 8px rgba(43,212,164,0.4)"></div>
+                      <span style="font-size:13px;color:#fff;font-weight:600">État de la connexion</span>
                     </div>
+                    <div id="mobileConnectionText" style="font-size:11px;color:#bcd6df">Connecté au serveur</div>
                   </div>
-                </div>
-
-                <!-- Paramètres de sensibilité -->
-                <div style="margin-bottom:24px">
-                  <div style="font-size:14px;font-weight:700;color:#2BD4A4;margin-bottom:12px;text-align:center">⚙️ Sensibilité</div>
-                  <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:16px">
-                    <div style="margin-bottom:16px">
-                      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-                        <span style="font-size:13px;color:#fff;font-weight:600">Sensibilité Swipe</span>
-                        <span style="font-size:12px;color:#bcd6df" id="swipeSensitivityValue">Normale</span>
-                      </div>
-                      <input type="range" id="swipeSensitivity" min="1" max="3" value="2" style="width:100%;height:6px;background:rgba(255,255,255,0.1);border-radius:3px">
-                    </div>
-                    <div>
-                      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-                        <span style="font-size:13px;color:#fff;font-weight:600">Vibrations</span>
-                        <span style="font-size:12px;color:#bcd6df" id="vibrationStatus">Activées</span>
-                      </div>
-                      <label style="display:flex;align-items:center;cursor:pointer">
-                        <input type="checkbox" id="vibrationToggle" checked style="margin-right:8px">
-                        <span style="font-size:12px;color:#bcd6df">Vibrer lors des actions</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Options d'affichage mobile -->
-                <div style="margin-bottom:24px">
-                  <div style="font-size:14px;font-weight:700;color:#FF6B6B;margin-bottom:12px;text-align:center">📱 Affichage</div>
-                  <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:16px">
-                    <div style="margin-bottom:16px">
-                      <label style="display:flex;align-items:center;cursor:pointer;margin-bottom:12px">
-                        <input type="checkbox" id="fullscreenToggle" style="margin-right:8px">
-                        <span style="font-size:12px;color:#fff;font-weight:600">Mode plein écran</span>
-                      </label>
-                      <label style="display:flex;align-items:center;cursor:pointer">
-                        <input type="checkbox" id="rotationLockToggle" checked style="margin-right:8px">
-                        <span style="font-size:12px;color:#fff;font-weight:600">Verrouiller rotation écran</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Boutons d'actions Mobile -->
-                <div style="display:flex;gap:12px;justify-content:center;margin-bottom:12px">
-                  <button class="btn" id="saveMobileSettingsBtn" style="padding:12px 20px">Enregistrer</button>
-                  <button class="btn" id="resetMobileSettingsBtn" style="padding:12px 20px">Par défaut</button>
                 </div>
               </div>
             </div>
@@ -556,18 +492,18 @@
       <!-- Version Mobile optimisée -->
       <div class="mobile-layout" style="display:none;position:relative;width:100vw;height:100vh;box-sizing:border-box">
         <!-- Score/Niveau en haut à gauche avec prochaines pièces en dessous -->
-  <div class="mobile-ui" style="position:absolute;top:clamp(6px,1.5vh,10px);left:clamp(0px,0.3vw,3px);z-index:100">
+  <div class="mobile-ui" style="position:absolute;top:clamp(4px,1vh,8px);left:clamp(0px,0.2vw,2px);z-index:100">
           <!-- Score/Stats -->
-          <div class="mobile-stats" style="background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:clamp(8px,2vh,12px) clamp(10px,2.5vw,14px);backdrop-filter:blur(10px);font-size:clamp(14px,3.5vw,18px);color:#e4f3fa;font-weight:600;margin-bottom:clamp(8px,2vh,12px)">
-            <div>Score: <strong id="mobileScore" style="color:#FFD166;font-size:clamp(16px,4vw,22px)">0</strong></div>
-            <div>Niveau: <strong id="mobileLevel" style="color:#1FB6FF;font-size:clamp(14px,3.5vw,18px)">0</strong></div>
-            <div>Lignes: <strong id="mobileLines" style="color:#2BD4A4;font-size:clamp(14px,3.5vw,18px)">0</strong></div>
+          <div class="mobile-stats" style="background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:clamp(6px,1.5vh,10px) clamp(8px,2vw,12px);backdrop-filter:blur(8px);font-size:clamp(12px,3vw,16px);color:#e4f3fa;font-weight:600;margin-bottom:clamp(6px,1.5vh,10px)">
+            <div>Score: <strong id="mobileScore" style="color:#FFD166;font-size:clamp(14px,3.5vw,20px)">0</strong></div>
+            <div>Niveau: <strong id="mobileLevel" style="color:#1FB6FF;font-size:clamp(12px,3vw,16px)">0</strong></div>
+            <div>Lignes: <strong id="mobileLines" style="color:#2BD4A4;font-size:clamp(12px,3vw,16px)">0</strong></div>
           </div>
           
           <!-- Prochaines pièces en dessous du score -->
-          <div class="mobile-next" style="background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:clamp(6px,1.5vh,8px) clamp(5px,1.2vw,8px);backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;gap:clamp(3px,0.8vh,5px);margin-top:clamp(4px,1vh,8px)">
-            <div style="font-size:clamp(10px,2.5vw,12px);color:#e4f3fa;text-align:center;opacity:0.8;margin:0 auto 2px auto;width:100%">Suivant</div>
-            <canvas id="mobileNext1" width="64" height="40" style="display:block;margin:0 auto;border-radius:6px;background:#031318;border:1px solid rgba(255,255,255,0.1)"></canvas>
+          <div class="mobile-next" style="background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:clamp(4px,1vh,6px) clamp(4px,1vw,6px);backdrop-filter:blur(8px);display:flex;flex-direction:column;align-items:center;gap:clamp(2px,0.5vh,4px);margin-top:clamp(2px,0.5vh,6px)">
+            <div style="font-size:clamp(9px,2vw,11px);color:#e4f3fa;text-align:center;opacity:0.7;margin:0 auto 1px auto;width:100%">Suivant</div>
+            <canvas id="mobileNext1" width="64" height="40" style="display:block;margin:0 auto;border-radius:6px;background:#031318;border:1px solid rgba(255,255,255,0.08)"></canvas>
             <canvas id="mobileNext2" width="64" height="40" style="display:block;margin:0 auto;border-radius:6px;background:#031318;border:1px solid rgba(255,255,255,0.1)"></canvas>
             <canvas id="mobileNext3" width="64" height="40" style="display:block;margin:0 auto;border-radius:6px;background:#031318;border:1px solid rgba(255,255,255,0.1)"></canvas>
           </div>
@@ -596,7 +532,7 @@
       </div>
       
       <!-- Boutons bas centre -->
-  <div style="position:absolute;bottom:clamp(66px,12vh,74px);left:50%;transform:translateX(-50%);display:flex;gap:clamp(12px,3vw,15px);pointer-events:auto">
+  <div style="position:absolute;bottom:clamp(76px,14vh,84px);left:50%;transform:translateX(-50%);display:flex;gap:clamp(12px,3vw,15px);pointer-events:auto">
         <div class="mobileBtn" id="mRotate" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,55px);height:clamp(50px,12vw,55px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4vw,20px);backdrop-filter:blur(8px)">⤾</div>
         <div class="mobileBtn" id="mDown" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,55px);height:clamp(50px,12vw,55px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4vw,20px);backdrop-filter:blur(8px)">▼</div>
         <div class="mobileBtn" id="mDrop" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,55px);height:clamp(50px,12vw,55px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4vw,20px);backdrop-filter:blur(8px)">⤓</div>
@@ -812,67 +748,20 @@ function handleTouchEnd(e) {
 
 // Mobile settings event listeners
 function initMobileSettings() {
-  const swipeSensitivitySlider = document.getElementById('swipeSensitivity');
-  const swipeSensitivityValue = document.getElementById('swipeSensitivityValue');
-  const vibrationToggle = document.getElementById('vibrationToggle');
-  const vibrationStatus = document.getElementById('vibrationStatus');
-  const fullscreenToggle = document.getElementById('fullscreenToggle');
-  const rotationLockToggle = document.getElementById('rotationLockToggle');
+  // Plus de paramètres mobiles complexes - juste l'indicateur de connexion
+  updateMobileConnectionStatus();
+}
+
+function updateMobileConnectionStatus() {
+  const statusDot = document.getElementById('mobileConnectionStatus');
+  const statusText = document.getElementById('mobileConnectionText');
   
-  if (swipeSensitivitySlider) {
-    swipeSensitivitySlider.addEventListener('input', (e) => {
-      swipeSensitivity = parseInt(e.target.value);
-      const labels = { 1: 'Haute', 2: 'Normale', 3: 'Basse' };
-      if (swipeSensitivityValue) swipeSensitivityValue.textContent = labels[swipeSensitivity];
-      localStorage.setItem('tetris_swipe_sensitivity', swipeSensitivity);
-    });
+  if (statusDot && statusText) {
+    // Simule un état de connexion (peut être lié à votre vraie logique de connexion)
+    statusDot.style.background = '#2BD4A4';
+    statusDot.style.boxShadow = '0 0 8px rgba(43,212,164,0.4)';
+    statusText.textContent = 'Connecté au serveur';
   }
-  
-  if (vibrationToggle) {
-    vibrationToggle.addEventListener('change', (e) => {
-      vibrationsEnabled = e.target.checked;
-      if (vibrationStatus) vibrationStatus.textContent = vibrationsEnabled ? 'Activées' : 'Désactivées';
-      localStorage.setItem('tetris_vibrations', vibrationsEnabled);
-      if (vibrationsEnabled) vibrate(100); // Test vibration
-    });
-  }
-  
-  if (fullscreenToggle) {
-    fullscreenToggle.addEventListener('change', (e) => {
-      if (e.target.checked) {
-        if (document.documentElement.requestFullscreen) {
-          document.documentElement.requestFullscreen();
-        }
-      } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        }
-      }
-    });
-  }
-  
-  if (rotationLockToggle) {
-    rotationLockToggle.addEventListener('change', (e) => {
-      if (screen.orientation && screen.orientation.lock) {
-        if (e.target.checked) {
-          screen.orientation.lock('portrait').catch(() => {});
-        } else {
-          screen.orientation.unlock();
-        }
-      }
-    });
-  }
-  
-  // Load saved settings
-  swipeSensitivity = parseInt(localStorage.getItem('tetris_swipe_sensitivity') || 2);
-  vibrationsEnabled = JSON.parse(localStorage.getItem('tetris_vibrations') || 'true');
-  
-  if (swipeSensitivitySlider) swipeSensitivitySlider.value = swipeSensitivity;
-  if (vibrationToggle) vibrationToggle.checked = vibrationsEnabled;
-  if (vibrationStatus) vibrationStatus.textContent = vibrationsEnabled ? 'Activées' : 'Désactivées';
-  
-  const labels = { 1: 'Haute', 2: 'Normale', 3: 'Basse' };
-  if (swipeSensitivityValue) swipeSensitivityValue.textContent = labels[swipeSensitivity];
 }
 
 // Grid
@@ -910,7 +799,7 @@ function ensureAudio(){ if(!audioCtx) audioCtx = new (window.AudioContext||windo
 
 function startMusic(){
   if(!musicOn) return;
-  if(!audioEl){ audioEl = new Audio('son/Tetris.mp3'); audioEl.loop = true; audioEl.volume = 0.25; }
+  if(!audioEl){ audioEl = new Audio('Son/Tetris.mp3'); audioEl.loop = true; audioEl.volume = 0.25; }
   const p = audioEl.play(); if(p && p.catch){ p.catch(()=>{}); }
 }
 function stopMusic(){ if(audioEl){ try{ audioEl.pause(); audioEl.currentTime = 0; }catch(e){} } }
@@ -1122,13 +1011,13 @@ function updateScore(cleared){
   lines += cleared; 
   const prevLevel = level;
   
-  // Niveau monte plus rapidement : tous les 3 lignes au lieu de 5
-  level = Math.floor(lines/3); 
+  // Niveau monte encore plus rapidement : tous les 2 lignes au lieu de 3
+  level = Math.floor(lines/2); 
   
-  // Difficulté augmente moins vite (était level*70, maintenant level*30)
-  dropInterval = Math.max(100, 800 - level*30); 
+  // Difficulté augmente moins vite (était level*70, maintenant level*25)
+  dropInterval = Math.max(100, 800 - level*25); 
   
-  // Changer l'atmosphère dès qu'on atteint les niveaux 5, 10, 15, etc.
+  // Changer l'atmosphère tous les 5 niveaux
   // Utiliser (level+1) pour que ça se déclenche au niveau affiché à l'utilisateur
   const atmosphereLevel = Math.floor((level+1)/5);
   const prevAtmosphereLevel = Math.floor((prevLevel+1)/5);
