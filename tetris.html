@@ -924,7 +924,7 @@ let nextQueue = [];
 function fillQueue(){ while(nextQueue.length<3) nextQueue.push(createPiece(nextFromBag())); }
 
 let cur = null;
-function spawn(){ cur = nextQueue.shift(); cur.x = Math.floor(COLS/2)-2; cur.y = -1; nextQueue.push(createPiece(nextFromBag())); renderNext(); if(collides(cur,0,0)) onGameOver(); }
+function spawn(){ cur = nextQueue.shift(); cur.x = Math.floor(COLS/2)-2; cur.y = -1; nextQueue.push(createPiece(nextFromBag())); renderNext(); scheduleDuoStateSend(); if(collides(cur,0,0)) onGameOver(); }
 
 // game state
 let dropInterval = 800; let lastDrop = 0; let lastTime = 0; let score = 0; let level = 0; let lines = 0; let running = false; var highscore = Number(localStorage.getItem('tetris_hs')||0);
@@ -1148,7 +1148,7 @@ function processSweeps(dt){ // advance sweeps, when done remove rows
 }
 
 function lockPiece(){ if(!cur) return; const shape = cur.shape; for(let r=0;r<4;r++) for(let c=0;c<4;c++) if(shape[r][c]){ const x=cur.x+c, y=cur.y+r; if(y>=0 && y<ROWS && x>=0 && x<COLS) grid[y][x] = cur.type; }
-  playSfx('lock'); const cleared = clearLinesWithSweep(); if(cleared) { triggerClearEffect(cleared, lastClearedRows); registerClear(cleared); updateScore(cleared); playSfx('clear'); cur = null; } else { registerClear(0); spawn(); } }
+  playSfx('lock'); const cleared = clearLinesWithSweep(); if(cleared) { triggerClearEffect(cleared, lastClearedRows); registerClear(cleared); updateScore(cleared); playSfx('clear'); cur = null; } else { registerClear(0); spawn(); } scheduleDuoStateSend(); }
 
 // Niveau interne commence à 0, on affiche +1 pour l'utilisateur
 function updateScore(cleared){ 
@@ -1183,6 +1183,7 @@ function updateScore(cleared){
   if(mobileScore) mobileScore.innerText = score;
   if(mobileLevel) mobileLevel.innerText = (level+1);
   if(mobileLines) mobileLines.innerText = lines;
+  scheduleDuoStateSend();
   
   if(score > highscore){ 
     highscore = score; 
@@ -1252,6 +1253,7 @@ function hardDrop(){
   const color = COLORS[cur.type];
   hardDropEffect = { t:0, duration:300, cells, color, dist };
   lockPiece();
+  scheduleDuoStateSend();
 }
 function rotatePiece(){
   if(!cur) return;
@@ -1266,11 +1268,12 @@ function rotatePiece(){
       cur.shape = nextShape;
       cur.x += k;
       playSfx('rotate');
+  scheduleDuoStateSend();
       return;
     }
   }
 }
-function movePiece(dx,dy){ if(!cur) return false; if(!collides(cur,dx,dy)){ cur.x += dx; cur.y += dy; return true; } return false; }
+function movePiece(dx,dy){ if(!cur) return false; if(!collides(cur,dx,dy)){ cur.x += dx; cur.y += dy; scheduleDuoStateSend(); return true; } return false; }
 
 // main loop
 function loop(now=0){ if(!running) return; if(pauseOpen) { requestAnimationFrame(loop); return; }
@@ -2065,6 +2068,8 @@ let duoSharedStartAt = null; // timestamp (ms) commun
 let duoStateInterval = null; // interval d'envoi état
 let opponentState = { grid:[], score:0, level:0, lines:0, updated:0 };
 let opponentCtx = null; // contexte canvas adversaire
+let duoStartCommitted = false; // évite multiples set start_at
+let duoLastSendTime = 0; let duoSendScheduled = false;
 
 // Fonction pour nettoyer la connexion duo
 async function cleanupDuoConnection() {
@@ -2321,6 +2326,8 @@ function startDuoGame() {
   }
   // Préparer pièces mais ne pas lancer loop encore
   resetGrid(); bag=[]; nextQueue=[]; fillQueue(); spawn(); running = false; drawBoard(); renderNext();
+  // état initial vers l'adversaire
+  scheduleDuoStateSend();
   
   // TODO: Ajouter la logique de synchronisation du jeu duo
 }
@@ -2342,6 +2349,8 @@ function handleDuoLiveChange(payload) {
           opponentState.score = d.state.score ?? opponentState.score;
           opponentState.level = d.state.level ?? opponentState.level;
           opponentState.lines = d.state.lines ?? opponentState.lines;
+          opponentState.cur = d.state.cur || null;
+          opponentState.next = d.state.next || [];
           opponentState.updated = Date.now();
           drawOpponentBoard();
           updateOpponentStats();
@@ -2369,12 +2378,22 @@ async function initDuoCountdownAndStart(){
     if(error){ console.warn('start_at read error', error); }
     let existingStart = null;
     if(data){
+      // Vérifier que les deux joueurs sont "ready" avant de lancer
+      const bothReady = data.filter(r=>r.etat==='ready').length === 2;
       data.forEach(r=>{ if(r.data && r.data.start_at) existingStart = r.data.start_at; });
+      if(!bothReady){
+        // réessaie plus tard jusqu'à ce que les deux soient prêts
+        setTimeout(()=>initDuoCountdownAndStart(), 600);
+        return;
+      }
     }
     if(!existingStart){
       // Créer un start_at dans ~5s (aligner sur secondes pour cohérence)
-      existingStart = Date.now() + 5000;
-      await supabase.from('duo_live').update({ data: { start_at: existingStart } }).eq('room_id', duoConnectionId).eq('joueur', duoPlayerId);
+      if(!duoStartCommitted){
+        duoStartCommitted = true;
+        existingStart = Date.now() + 5000;
+        await supabase.from('duo_live').update({ data: { start_at: existingStart } }).eq('room_id', duoConnectionId).eq('joueur', duoPlayerId);
+      }
     }
     duoSharedStartAt = existingStart;
     scheduleCountdown();
@@ -2438,9 +2457,29 @@ function startDuoTimer(){
 
 function sendDuoState(){
   try {
-    const state = { grid, score, level, lines };
-    supabase.from('duo_live').update({ data: { start_at: duoSharedStartAt, state } }).eq('room_id', duoConnectionId).eq('joueur', duoPlayerId);
+    if(!duoConnectionId || !duoPlayerId) return;
+    const piece = cur ? { type:cur.type, x:cur.x, y:cur.y, rot:cur.rotIndex, shape:cur.shape } : null;
+    const nextTypes = nextQueue.map(p=>p.type);
+    const state = { grid, score, level, lines, cur:piece, next:nextTypes };
+    // Récupérer ancienne data pour préserver start_at si déjà fixé
+    supabase.from('duo_live').select('data').eq('room_id', duoConnectionId).eq('joueur', duoPlayerId).single().then(res=>{
+      const prev = (res.data && res.data.data) || {};
+      const merged = { ...prev, state };
+      if(duoSharedStartAt) merged.start_at = duoSharedStartAt; // ne l'écrase pas si undefined
+      supabase.from('duo_live').update({ data: merged }).eq('room_id', duoConnectionId).eq('joueur', duoPlayerId);
+    });
   } catch(e){ console.warn('sendDuoState error', e); }
+}
+
+function scheduleDuoStateSend(){
+  if(!duoConnectionId) return;
+  const now = Date.now();
+  if(now - duoLastSendTime > 90){
+    duoLastSendTime = now; sendDuoState();
+  } else if(!duoSendScheduled){
+    duoSendScheduled = true;
+    setTimeout(()=>{ duoSendScheduled = false; duoLastSendTime = Date.now(); sendDuoState(); }, 95);
+  }
 }
 
 function drawOpponentBoard(){
@@ -2451,6 +2490,14 @@ function drawOpponentBoard(){
   for(let r=0;r<ROWS;r++) for(let col=0;col<COLS;col++){
     const val = (opponentState.grid[r]||[])[col];
     if(val){ drawBlock(opponentCtx, col, r, COLORS[val], cell); }
+  }
+  // pièce courante adverse si reçue
+  if(opponentState.cur){
+    const p = opponentState.cur;
+    const shape = p.shape || [];
+    for(let r=0;r<4;r++) for(let cc=0;cc<4;cc++) if(shape[r] && shape[r][cc]){
+      const x = p.x + cc; const y = p.y + r; if(y>=0) drawBlock(opponentCtx, x, y, COLORS[p.type]||'#888', cell);
+    }
   }
   // grille légère
   opponentCtx.strokeStyle='rgba(255,255,255,0.05)'; opponentCtx.lineWidth=1;
