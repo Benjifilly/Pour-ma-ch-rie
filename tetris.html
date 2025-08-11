@@ -239,7 +239,7 @@
                   </div>
                   <div id="duoWaitCount" style="font-size:clamp(15px,2vw,20px);color:#fff;font-weight:700;margin-top:18px">Joueurs connectés : 1/2</div>
                 </div>
-                <button class="btn" id="duoBackBtn" style="margin-top:24px;max-width:180px">Retour</button>
+                <button class="btn" id="duoBackBtn" style="margin-top:8px;max-width:180px;position:relative;top:-12px">Retour</button>
                 </div>
               </div>
               <button class="btn btn-lg" id="helpBtn" style="padding:12px 20px">Aide</button>
@@ -599,6 +599,13 @@
               <canvas id="next3" width="96" height="64" style="border-radius:10px;overflow:hidden;background:#031318;max-width:15vw;max-height:10vw"></canvas>
             </div>
           </div>
+          <div id="opponentPanel" class="panel" style="display:none;position:relative;overflow:hidden">
+            <div style="text-align:center;font-weight:700;color:#ff6b6b;margin-bottom:6px;font-size:clamp(11px,2.8vw,14px)">Adversaire</div>
+            <canvas id="opponentBoard" width="120" height="240" style="width:100%;max-width:160px;height:auto;border:1px solid rgba(255,255,255,0.08);background:#031318;border-radius:8px;display:block;margin:0 auto"></canvas>
+            <div id="opponentStats" style="margin-top:6px;font-size:11px;color:#bcd6df;text-align:center;display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
+              <span id="oppScore">S:0</span><span id="oppLevel">N:0</span><span id="oppLines">L:0</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -606,6 +613,14 @@
       <div class="mobile-layout" style="display:none;position:relative;width:100vw;height:100vh;box-sizing:border-box">
         <!-- Score/Niveau en haut à gauche avec prochaines pièces en dessous -->
   <div class="mobile-ui" style="position:absolute;top:clamp(4px,1vh,8px);left:clamp(0px,0.2vw,2px);z-index:100">
+          <!-- Mini plateau adversaire (Duo) -->
+          <div id="opponentMobileWrap" style="display:none;background:rgba(0,0,0,0.28);border:1px solid rgba(255,107,107,0.4);border-radius:10px;padding:6px 6px 8px 6px;margin-bottom:6px;backdrop-filter:blur(6px);min-width:82px;max-width:90px">
+            <div style="font-size:9px;font-weight:700;color:#ff6b6b;letter-spacing:.5px;text-align:center;margin-bottom:4px">ADV</div>
+            <canvas id="opponentBoardMobile" width="80" height="160" style="width:80px;height:160px;display:block;background:#031318;border:1px solid rgba(255,255,255,0.08);border-radius:6px"></canvas>
+            <div id="opponentStatsMobile" style="display:flex;justify-content:center;gap:4px;margin-top:4px;font-size:8px;color:#bcd6df;font-weight:600">
+              <span id="oppScoreM">S:0</span><span id="oppLevelM">N:0</span><span id="oppLinesM">L:0</span>
+            </div>
+          </div>
           <!-- Score/Stats -->
           <div class="mobile-stats" style="background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:clamp(6px,1.5vh,10px) clamp(8px,2vw,12px);backdrop-filter:blur(8px);font-size:clamp(12px,3vw,16px);color:#e4f3fa;font-weight:600;margin-bottom:clamp(6px,1.5vh,10px)">
             <div>Score: <strong id="mobileScore" style="color:#FFD166;font-size:clamp(14px,3.5vw,20px)">0</strong></div>
@@ -655,6 +670,12 @@
 
   <!-- combo badge -->
   <div class="comboBadge" id="comboBadge">COMBO +1</div>
+
+  <!-- Overlay compte à rebours Duo -->
+  <div id="duoCountdownOverlay" style="display:none;position:fixed;inset:0;z-index:4000;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px)">
+    <div id="duoCountdownNumber" style="font-size:clamp(60px,12vw,140px);font-weight:900;color:#FFD166;text-shadow:0 0 20px rgba(255,209,102,0.5);font-family:'TetrisFont',sans-serif">5</div>
+  </div>
+  <div id="duoTimer" style="display:none;position:fixed;top:10px;left:50%;transform:translateX(-50%);font-size:clamp(18px,3vw,28px);font-weight:800;color:#FFD166;z-index:3500;font-family:'TetrisFont',sans-serif;letter-spacing:1px">00:00</div>
 
   <!-- Pause modal responsive -->
   <div id="pauseOverlay" class="overlayFull" style="display:none;background:rgba(0,0,0,0.45);z-index:3000">
@@ -2039,6 +2060,11 @@ let duoConnectionId = null;
 let duoPlayerId = null;
 let duoSubscription = null;
 let duoHandshakeComplete = false;
+let duoConnecting = false; // empêche d'écraser le statut "Connexion :P"
+let duoSharedStartAt = null; // timestamp (ms) commun
+let duoStateInterval = null; // interval d'envoi état
+let opponentState = { grid:[], score:0, level:0, lines:0, updated:0 };
+let opponentCtx = null; // contexte canvas adversaire
 
 // Fonction pour nettoyer la connexion duo
 async function cleanupDuoConnection() {
@@ -2048,7 +2074,7 @@ async function cleanupDuoConnection() {
   }
   if(duoConnectionId && duoPlayerId) {
     try {
-      await supabase.from('duo_live').delete().eq('connection_id', duoConnectionId).eq('player_id', duoPlayerId);
+      await supabase.from('duo_live').delete().eq('room_id', duoConnectionId).eq('joueur', duoPlayerId);
     } catch(e) {
       console.warn('Erreur cleanup duo:', e);
     }
@@ -2056,6 +2082,7 @@ async function cleanupDuoConnection() {
   duoConnectionId = null;
   duoPlayerId = null;
   duoHandshakeComplete = false;
+  duoConnecting = false;
   window.duoConnectionId = null;
 }
 
@@ -2067,19 +2094,18 @@ async function handleDuoConnection() {
     const duoWaitCountEl = document.getElementById('duoWaitCount');
     const feedback = (msg)=>{ if(duoWaitCountEl) duoWaitCountEl.textContent = msg; };
 
-    // 1. Chercher une connexion existante avec un seul joueur en attente (< 2)
+    // 1. Chercher une room existante avec un seul joueur (etat = waiting ou handshake_sent)
     let reuseId = null;
     try {
       const { data: openRows, error: openErr } = await supabase
         .from('duo_live')
-        .select('connection_id, player_id, status, last_ping')
-        .gte('last_ping', new Date(Date.now()-30000).toISOString());
+        .select('room_id, joueur, etat, updated_at');
       if(!openErr && openRows && openRows.length){
         // Compter par connection_id
         const map = new Map();
         openRows.forEach(r=>{
-          if(!map.has(r.connection_id)) map.set(r.connection_id, []);
-          map.get(r.connection_id).push(r);
+          if(!map.has(r.room_id)) map.set(r.room_id, []);
+          map.get(r.room_id).push(r);
         });
         for(const [cid, rows] of map.entries()){
           if(rows.length===1){ reuseId = cid; break; }
@@ -2094,9 +2120,9 @@ async function handleDuoConnection() {
     // 3. Vérifier si on est déjà inscrit (reload éventuel)
     const { data: existing, error: existErr } = await supabase
       .from('duo_live')
-      .select('player_id')
-      .eq('connection_id', duoConnectionId)
-      .eq('player_id', duoPlayerId)
+      .select('joueur')
+      .eq('room_id', duoConnectionId)
+      .eq('joueur', duoPlayerId)
       .limit(1);
     if(existErr){ console.warn('Check exist failed', existErr); }
 
@@ -2105,10 +2131,9 @@ async function handleDuoConnection() {
       const { error: insertError } = await supabase
         .from('duo_live')
         .insert({
-          connection_id: duoConnectionId,
-            player_id: duoPlayerId,
-            status: 'waiting',
-            last_ping: new Date().toISOString()
+          room_id: duoConnectionId,
+          joueur: duoPlayerId,
+          etat: 'waiting'
         });
       if(insertError){
         console.error('Erreur insertion duo_live:', insertError);
@@ -2123,14 +2148,14 @@ async function handleDuoConnection() {
     feedback('Joueurs connectés : 1/2');
 
     // 5. Vérifier combien de joueurs sont connectés
-    await checkPlayerCount();
+  await checkPlayerCount();
 
     // 6. S'abonner aux changements temps réel (une seule fois)
     if(!duoSubscription){
       duoSubscription = supabase
         .channel('duo_live_changes')
         .on('postgres_changes', 
-          { event: '*', schema: 'public', table: 'duo_live', filter: `connection_id=eq.${duoConnectionId}` },
+          { event: '*', schema: 'public', table: 'duo_live', filter: `room_id=eq.${duoConnectionId}` },
           (payload) => {
             console.log('Changement duo_live:', payload);
             handleDuoLiveChange(payload);
@@ -2150,9 +2175,8 @@ async function checkPlayerCount() {
   try {
     const { data, error } = await supabase
       .from('duo_live')
-      .select('player_id, status')
-      .eq('connection_id', duoConnectionId)
-      .gte('last_ping', new Date(Date.now() - 30000).toISOString()); // dernières 30 secondes
+      .select('joueur, etat, updated_at')
+      .eq('room_id', duoConnectionId);
     
     if(error) {
       console.error('Erreur checkPlayerCount:', error);
@@ -2161,16 +2185,17 @@ async function checkPlayerCount() {
     
     const playerCount = data.length;
     const duoWaitCount = document.getElementById('duoWaitCount');
-    
-    if(playerCount === 1) {
-      if(duoWaitCount) duoWaitCount.textContent = 'Joueurs connectés : 1/2';
-    } else if(playerCount === 2) {
-      if(duoWaitCount) duoWaitCount.textContent = 'Joueurs connectés : 2/2';
-      
-      // Attendre 1 seconde puis commencer le handshake
-      setTimeout(() => {
-        startDuoHandshake(data);
-      }, 1000);
+
+    if(!duoConnecting) {
+      if(playerCount === 1) {
+        if(duoWaitCount) duoWaitCount.textContent = 'Joueurs connectés : 1/2';
+      } else if(playerCount === 2) {
+        if(duoWaitCount) duoWaitCount.textContent = 'Joueurs connectés : 2/2';
+        // Attendre 1 seconde puis commencer le handshake
+        setTimeout(() => {
+          startDuoHandshake(data);
+        }, 1000);
+      }
     }
     
   } catch(e) {
@@ -2183,16 +2208,14 @@ async function startDuoHandshake(players) {
   try {
     const duoWaitCount = document.getElementById('duoWaitCount');
     if(duoWaitCount) duoWaitCount.textContent = 'Connexion :P';
+  duoConnecting = true;
     
     // Envoyer signal de handshake
     const { error } = await supabase
       .from('duo_live')
-      .update({ 
-        status: 'handshake_sent',
-        last_ping: new Date().toISOString()
-      })
-      .eq('connection_id', duoConnectionId)
-      .eq('player_id', duoPlayerId);
+      .update({ etat: 'handshake_sent' })
+      .eq('room_id', duoConnectionId)
+      .eq('joueur', duoPlayerId);
     
     if(error) {
       console.error('Erreur handshake:', error);
@@ -2206,6 +2229,7 @@ async function startDuoHandshake(players) {
     
   } catch(e) {
     console.error('Erreur startDuoHandshake:', e);
+  duoConnecting = false; // en cas d'erreur on libère
   }
 }
 
@@ -2214,9 +2238,9 @@ async function checkHandshakeComplete() {
   try {
     const { data, error } = await supabase
       .from('duo_live')
-      .select('player_id, status')
-      .eq('connection_id', duoConnectionId)
-      .eq('status', 'handshake_sent');
+      .select('joueur, etat')
+      .eq('room_id', duoConnectionId)
+      .eq('etat', 'handshake_sent');
     
     if(error) {
       console.error('Erreur checkHandshakeComplete:', error);
@@ -2227,12 +2251,9 @@ async function checkHandshakeComplete() {
       // Les deux joueurs ont envoyé le handshake, marquer comme ready
       await supabase
         .from('duo_live')
-        .update({ 
-          status: 'ready',
-          last_ping: new Date().toISOString()
-        })
-        .eq('connection_id', duoConnectionId)
-        .eq('player_id', duoPlayerId);
+        .update({ etat: 'ready' })
+        .eq('room_id', duoConnectionId)
+        .eq('joueur', duoPlayerId);
       
       duoHandshakeComplete = true;
       
@@ -2253,11 +2274,53 @@ function startDuoGame() {
   
   // Masquer l'overlay d'attente
   document.getElementById('duoWaitOverlay').style.display = 'none';
+  duoConnecting = false;
+
+  // Afficher panneau adversaire
+  const isMobileView = window.innerWidth <= 820 || isOnMobile;
+  if(isMobileView){
+    const mobWrap = document.getElementById('opponentMobileWrap');
+    if(mobWrap) mobWrap.style.display='block';
+    const oppMob = document.getElementById('opponentBoardMobile');
+    if(oppMob) opponentCtx = oppMob.getContext('2d');
+    // cacher panel desktop si présent
+    const oppPanelDesk = document.getElementById('opponentPanel');
+    if(oppPanelDesk) oppPanelDesk.style.display='none';
+  } else {
+    const oppPanel = document.getElementById('opponentPanel');
+    if(oppPanel) oppPanel.style.display = 'block';
+    const oppCanvas = document.getElementById('opponentBoard');
+    if(oppCanvas) opponentCtx = oppCanvas.getContext('2d');
+    // cacher version mobile si besoin
+    const mobWrap = document.getElementById('opponentMobileWrap');
+    if(mobWrap) mobWrap.style.display='none';
+  }
+
+  // Déterminer / écrire start_at commun si pas encore défini
+  initDuoCountdownAndStart().then(()=>{
+    // Une fois le compte à rebours terminé, on démarre le jeu
+  });
+
+  // Lancer envoi périodique d'état
+  if(duoStateInterval) clearInterval(duoStateInterval);
+  duoStateInterval = setInterval(()=>{
+    if(!running) return; // n'envoie que si partie en cours
+    sendDuoState();
+  }, 700); // fréquence modérée
   
   // Démarrer le jeu Tetris
-  window.resetGame();
-  window.startGame();
-  window.showGameScreen();
+  window.resetGame(); // prépare grid etc.
+  // Affiche l'écran de jeu (si pas déjà) avant que la partie commence
+  if(typeof window.showGameScreen==='function'){ window.showGameScreen(); }
+  else {
+    // fallback si fonction pas définie: masquer menu & afficher gameScreen
+    const menuScreen = document.getElementById('menuScreen');
+    const gameScreenEl = document.getElementById('gameScreen');
+    if(menuScreen) menuScreen.style.display='none';
+    if(gameScreenEl) gameScreenEl.style.display='flex';
+  }
+  // Préparer pièces mais ne pas lancer loop encore
+  resetGrid(); bag=[]; nextQueue=[]; fillQueue(); spawn(); running = false; drawBoard(); renderNext();
   
   // TODO: Ajouter la logique de synchronisation du jeu duo
 }
@@ -2269,13 +2332,142 @@ function handleDuoLiveChange(payload) {
     setTimeout(() => {
       checkPlayerCount();
     }, 500);
+
+    // Récupération data adversaire si update
+    if(payload.new && payload.new.room_id === duoConnectionId && payload.new.joueur !== duoPlayerId && payload.new.data){
+      try {
+        const d = payload.new.data;
+        if(d.state){ // état jeu
+          opponentState.grid = d.state.grid || opponentState.grid;
+          opponentState.score = d.state.score ?? opponentState.score;
+          opponentState.level = d.state.level ?? opponentState.level;
+          opponentState.lines = d.state.lines ?? opponentState.lines;
+          opponentState.updated = Date.now();
+          drawOpponentBoard();
+          updateOpponentStats();
+        }
+        if(d.start_at && !duoSharedStartAt){
+          duoSharedStartAt = d.start_at;
+          scheduleCountdown();
+        }
+      } catch(e){ console.warn('Parse opponent data error', e); }
+    }
   } else if(payload.eventType === 'DELETE') {
     // Un joueur s'est déconnecté
     const duoWaitCount = document.getElementById('duoWaitCount');
-    if(duoWaitCount && !duoHandshakeComplete) {
+    if(duoWaitCount && !duoHandshakeComplete && !duoConnecting) {
       duoWaitCount.textContent = 'Joueurs connectés : 1/2';
     }
   }
+}
+
+// ================== DUO SYNC & COUNTDOWN ==================
+async function initDuoCountdownAndStart(){
+  // Lire start_at
+  try {
+    const { data, error } = await supabase.from('duo_live').select('joueur, data').eq('room_id', duoConnectionId);
+    if(error){ console.warn('start_at read error', error); }
+    let existingStart = null;
+    if(data){
+      data.forEach(r=>{ if(r.data && r.data.start_at) existingStart = r.data.start_at; });
+    }
+    if(!existingStart){
+      // Créer un start_at dans ~5s (aligner sur secondes pour cohérence)
+      existingStart = Date.now() + 5000;
+      await supabase.from('duo_live').update({ data: { start_at: existingStart } }).eq('room_id', duoConnectionId).eq('joueur', duoPlayerId);
+    }
+    duoSharedStartAt = existingStart;
+    scheduleCountdown();
+  } catch(e){ console.error('initDuoCountdown error', e); }
+}
+
+function scheduleCountdown(){
+  const overlay = document.getElementById('duoCountdownOverlay');
+  const numberEl = document.getElementById('duoCountdownNumber');
+  if(!overlay||!numberEl||!duoSharedStartAt) return;
+  overlay.style.display='flex';
+  let raf; function tick(){
+    const remain = Math.max(0, duoSharedStartAt - Date.now());
+    const secs = Math.ceil(remain/1000);
+    numberEl.textContent = secs>0? secs : 'GO';
+    numberEl.style.transform = 'scale(' + (1 + (remain%1000)/1000*0.4) + ')';
+    if(remain<=0){
+      if(!running){ startDuoRunning(); startDuoTimer(); }
+      setTimeout(()=>{ overlay.style.display='none'; }, 600);
+      cancelAnimationFrame(raf); return;
+    }
+    raf = requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+// Lance réellement la partie duo après le countdown
+function startDuoRunning(){
+  // running false initial; on démarre la boucle identique au solo
+  menuScreen.style.display='none';
+  gameScreen.style.display='flex';
+  running = true; lastTime = performance.now(); lastDrop = 0; ensureAudio(); startMusic(); pauseOpen=false;
+  if(window.innerWidth <= 768 || 'ontouchstart' in window) {
+    document.getElementById('mobileTouchControls').style.display = 'block';
+  }
+  requestAnimationFrame(loop);
+}
+
+// Exposer showGameScreen si non défini
+if(typeof window.showGameScreen!=='function'){
+  window.showGameScreen = function(){
+    const menuScreen = document.getElementById('menuScreen');
+    const gs = document.getElementById('gameScreen');
+    if(menuScreen) menuScreen.style.display='none';
+    if(gs) gs.style.display='flex';
+  };
+}
+
+let duoTimerStart = null; let duoTimerInterval = null;
+function startDuoTimer(){
+  const tEl = document.getElementById('duoTimer'); if(!tEl) return;
+  tEl.style.display='block';
+  duoTimerStart = Date.now();
+  if(duoTimerInterval) clearInterval(duoTimerInterval);
+  duoTimerInterval = setInterval(()=>{
+    const elapsed = Date.now() - duoTimerStart;
+    const s = Math.floor(elapsed/1000); const m = Math.floor(s/60); const ss = s%60;
+    tEl.textContent = String(m).padStart(2,'0') + ':' + String(ss).padStart(2,'0');
+  }, 500);
+}
+
+function sendDuoState(){
+  try {
+    const state = { grid, score, level, lines };
+    supabase.from('duo_live').update({ data: { start_at: duoSharedStartAt, state } }).eq('room_id', duoConnectionId).eq('joueur', duoPlayerId);
+  } catch(e){ console.warn('sendDuoState error', e); }
+}
+
+function drawOpponentBoard(){
+  if(!opponentCtx || !opponentState.grid.length) return;
+  const c = opponentCtx.canvas; opponentCtx.clearRect(0,0,c.width,c.height);
+  opponentCtx.fillStyle='#06161b'; opponentCtx.fillRect(0,0,c.width,c.height);
+  const cell = Math.floor(c.width / COLS);
+  for(let r=0;r<ROWS;r++) for(let col=0;col<COLS;col++){
+    const val = (opponentState.grid[r]||[])[col];
+    if(val){ drawBlock(opponentCtx, col, r, COLORS[val], cell); }
+  }
+  // grille légère
+  opponentCtx.strokeStyle='rgba(255,255,255,0.05)'; opponentCtx.lineWidth=1;
+  for(let x=0;x<=COLS;x++){ opponentCtx.beginPath(); opponentCtx.moveTo(x*cell,0); opponentCtx.lineTo(x*cell,ROWS*cell); opponentCtx.stroke(); }
+  for(let y=0;y<=ROWS;y++){ opponentCtx.beginPath(); opponentCtx.moveTo(0,y*cell); opponentCtx.lineTo(COLS*cell,y*cell); opponentCtx.stroke(); }
+}
+
+function updateOpponentStats(){
+  const sEl=document.getElementById('oppScore'); const lEl=document.getElementById('oppLevel'); const liEl=document.getElementById('oppLines');
+  if(sEl) sEl.textContent = 'S:'+opponentState.score;
+  if(lEl) lEl.textContent = 'N:'+opponentState.level;
+  if(liEl) liEl.textContent = 'L:'+opponentState.lines;
+  // mobile mirroring
+  const sm=document.getElementById('oppScoreM'); const lm=document.getElementById('oppLevelM'); const lim=document.getElementById('oppLinesM');
+  if(sm) sm.textContent = 'S:'+opponentState.score;
+  if(lm) lm.textContent = 'N:'+opponentState.level;
+  if(lim) lim.textContent = 'L:'+opponentState.lines;
 }
 
 // Générer un ID de connexion unique
@@ -2289,9 +2481,9 @@ setInterval(async () => {
     try {
       await supabase
         .from('duo_live')
-        .update({ last_ping: new Date().toISOString() })
-        .eq('connection_id', duoConnectionId)
-        .eq('player_id', duoPlayerId);
+        .update({ updated_at: new Date().toISOString() })
+        .eq('room_id', duoConnectionId)
+        .eq('joueur', duoPlayerId);
     } catch(e) {
       console.warn('Erreur ping duo:', e);
     }
