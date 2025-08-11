@@ -1519,7 +1519,12 @@ const menuPages = {
   leaderboard: document.getElementById('tab-leaderboard'),
 };
 function showMenuPage(name){
-  Object.values(menuPages).forEach(el=>el.style.display='none');
+  // Masquer toutes les pages du menu
+  Object.values(menuPages).forEach(el=>{
+    if(el) el.style.display='none';
+  });
+  
+  // Afficher la page demandée
   if(menuPages[name]){
     menuPages[name].style.display = 'flex';
     if(window.refreshTitleLayouts){
@@ -1527,8 +1532,8 @@ function showMenuPage(name){
       setTimeout(()=>refreshTitleLayouts(),40);
       // recalcul après stabilisation (padding/marges)
       setTimeout(()=>refreshTitleLayouts(),180);
-  // second passage après éventuel scroll bar apparition
-  setTimeout(()=>refreshTitleLayouts(),400);
+      // second passage après éventuel scroll bar apparition
+      setTimeout(()=>refreshTitleLayouts(),400);
     }
   }
 }
