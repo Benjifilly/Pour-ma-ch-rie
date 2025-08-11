@@ -2059,48 +2059,89 @@ async function cleanupDuoConnection() {
   window.duoConnectionId = null;
 }
 
-// Fonction principale pour gérer la connexion duo
+// Fonction principale pour gérer la connexion duo (avec réutilisation d'une session en attente)
 async function handleDuoConnection() {
   try {
     const user = sessionStorage.getItem('currentUser') || localStorage.getItem('lastUser') || 'Benjamin';
     duoPlayerId = user;
-    
-    // Générer ou rejoindre une connection
-    duoConnectionId = generateConnectionId();
-    window.duoConnectionId = duoConnectionId;
-    
-    // Insérer notre présence dans duo_live
-    const { error: insertError } = await supabase
-      .from('duo_live')
-      .insert({
-        connection_id: duoConnectionId,
-        player_id: duoPlayerId,
-        status: 'waiting',
-        last_ping: new Date().toISOString()
-      });
-    
-    if(insertError) {
-      console.error('Erreur insertion duo_live:', insertError);
-      return;
-    }
-    
-    // Vérifier combien de joueurs sont connectés
-    await checkPlayerCount();
-    
-    // S'abonner aux changements temps réel
-    duoSubscription = supabase
-      .channel('duo_live_changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'duo_live', filter: `connection_id=eq.${duoConnectionId}` },
-        (payload) => {
-          console.log('Changement duo_live:', payload);
-          handleDuoLiveChange(payload);
+    const duoWaitCountEl = document.getElementById('duoWaitCount');
+    const feedback = (msg)=>{ if(duoWaitCountEl) duoWaitCountEl.textContent = msg; };
+
+    // 1. Chercher une connexion existante avec un seul joueur en attente (< 2)
+    let reuseId = null;
+    try {
+      const { data: openRows, error: openErr } = await supabase
+        .from('duo_live')
+        .select('connection_id, player_id, status, last_ping')
+        .gte('last_ping', new Date(Date.now()-30000).toISOString());
+      if(!openErr && openRows && openRows.length){
+        // Compter par connection_id
+        const map = new Map();
+        openRows.forEach(r=>{
+          if(!map.has(r.connection_id)) map.set(r.connection_id, []);
+          map.get(r.connection_id).push(r);
+        });
+        for(const [cid, rows] of map.entries()){
+          if(rows.length===1){ reuseId = cid; break; }
         }
-      )
-      .subscribe();
-      
+      }
+    } catch(_e){ /* silencieux */ }
+
+    // 2. Utiliser reuseId ou générer un nouveau
+    duoConnectionId = reuseId || generateConnectionId();
+    window.duoConnectionId = duoConnectionId;
+
+    // 3. Vérifier si on est déjà inscrit (reload éventuel)
+    const { data: existing, error: existErr } = await supabase
+      .from('duo_live')
+      .select('player_id')
+      .eq('connection_id', duoConnectionId)
+      .eq('player_id', duoPlayerId)
+      .limit(1);
+    if(existErr){ console.warn('Check exist failed', existErr); }
+
+    if(!existing || !existing.length){
+      // 4. Insérer présence
+      const { error: insertError } = await supabase
+        .from('duo_live')
+        .insert({
+          connection_id: duoConnectionId,
+            player_id: duoPlayerId,
+            status: 'waiting',
+            last_ping: new Date().toISOString()
+        });
+      if(insertError){
+        console.error('Erreur insertion duo_live:', insertError);
+        let msg = 'Erreur connexion duo';
+        if(insertError.message && insertError.message.match(/relationship|permission|policy/i)) msg = 'Accès refusé (RLS)';
+        if(insertError.message && insertError.message.match(/column/i)) msg = 'Structure table duo_live invalide';
+        feedback(msg);
+        return;
+      }
+    }
+
+    feedback('Joueurs connectés : 1/2');
+
+    // 5. Vérifier combien de joueurs sont connectés
+    await checkPlayerCount();
+
+    // 6. S'abonner aux changements temps réel (une seule fois)
+    if(!duoSubscription){
+      duoSubscription = supabase
+        .channel('duo_live_changes')
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'duo_live', filter: `connection_id=eq.${duoConnectionId}` },
+          (payload) => {
+            console.log('Changement duo_live:', payload);
+            handleDuoLiveChange(payload);
+          }
+        )
+        .subscribe();
+    }
   } catch(e) {
     console.error('Erreur handleDuoConnection:', e);
+    const duoWaitCountEl = document.getElementById('duoWaitCount');
+    if(duoWaitCountEl) duoWaitCountEl.textContent = 'Erreur connexion duo';
   }
 }
 
