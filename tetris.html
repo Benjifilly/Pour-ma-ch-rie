@@ -27,13 +27,6 @@
       body{-webkit-text-size-adjust:100%;touch-action:manipulation}
       *{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
     }
-
-    /* iPhone optimisation: help page & spacing */
-    @media screen and (max-width:480px) and (max-height:900px){
-      #tab-help{padding:clamp(6px,1.8vh,28px) clamp(4px,4vw,26px) clamp(6px,1.5vh,20px) clamp(4px,4vw,26px) !important;min-height:68vh !important}
-      .mobile-ui{top:clamp(0px,0.4vh,4px) !important}
-      #mobileTouchControls > div[style*="bottom:"]{bottom:clamp(92px,17vh,108px) !important}
-    }
     
     /* Atmosphères par niveau */
     body.atmosphere-0 { background:linear-gradient(180deg,#071020 0%, #071827 70%) !important; }
@@ -130,6 +123,9 @@
       #tab-leaderboard {
         min-height: 60vh !important;
       }
+  /* Remonter page aide sur iPhone */
+  #tab-help { padding: clamp(8px,2vh,28px) clamp(6px,3vw,32px) clamp(12px,3vh,32px) clamp(6px,3vw,32px) !important; min-height:65vh !important; }
+  #tab-help .panel { max-height: clamp(48vh,60vh,68vh) !important; }
     }
     
     /* Media query pour très petits écrans (iPhone SE, etc.) */
@@ -141,6 +137,9 @@
         min-height: 55vh !important;
         padding: clamp(10px, 2vh, 30px) clamp(8px, 2vw, 20px) !important;
       }
+  /* Petits écrans supplémentaires: aide encore plus haute */
+  #tab-help { padding: clamp(6px,1.5vh,20px) clamp(6px,4vw,28px) clamp(10px,2.5vh,26px) clamp(6px,4vw,28px) !important; }
+  #tab-help .panel { max-height: clamp(50vh,62vh,70vh) !important; }
     }
     
     /* Custom scrollbar pour la page d'aide */
@@ -223,7 +222,7 @@
           </div>
 
           <!-- Page Aide -->
-          <div class="menuPage" id="tab-help" style="display:none;flex-direction:column;align-items:center;justify-content:flex-start;gap:clamp(1vh,2vh,3vh);padding:clamp(10px,2.5vh,40px) clamp(6px,3vw,32px) clamp(8px,2vh,28px) clamp(6px,3vw,32px);height:auto;min-height:72vh;text-align:center">
+          <div class="menuPage" id="tab-help" style="display:none;flex-direction:column;align-items:center;justify-content:flex-start;gap:clamp(1vh,2vh,3vh);padding:clamp(20px,4vh,60px) clamp(8px,3vw,40px) clamp(16px,3vh,40px) clamp(8px,3vw,40px);height:auto;min-height:78vh;text-align:center">
             <div style="background:#9B5DE5;padding:clamp(8px,1.5vh,18px) clamp(12px,3vw,24px);border-radius:clamp(8px,2vw,14px);font-size:clamp(16px,3vw,22px);font-weight:900;letter-spacing:.8px;color:#fff;align-self:center;min-width:clamp(180px,40vw,260px);text-align:center">AIDE</div>
             
             <div class="panel" style="background:linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02));max-width:clamp(300px,90vw,900px);width:100%;border:1px solid rgba(255,255,255,0.08);max-height:clamp(40vh,60vh,70vh);overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.3) transparent">
@@ -542,7 +541,7 @@
       <!-- Version Mobile optimisée -->
       <div class="mobile-layout" style="display:none;position:relative;width:100vw;height:100vh;box-sizing:border-box">
         <!-- Score/Niveau en haut à gauche avec prochaines pièces en dessous -->
-  <div class="mobile-ui" style="position:absolute;top:clamp(2px,0.6vh,6px);left:clamp(0px,0.2vw,2px);z-index:100">
+  <div class="mobile-ui" style="position:absolute;top:clamp(4px,1vh,8px);left:clamp(0px,0.2vw,2px);z-index:100">
           <!-- Score/Stats -->
           <div class="mobile-stats" style="background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:clamp(6px,1.5vh,10px) clamp(8px,2vw,12px);backdrop-filter:blur(8px);font-size:clamp(12px,3vw,16px);color:#e4f3fa;font-weight:600;margin-bottom:clamp(6px,1.5vh,10px)">
             <div>Score: <strong id="mobileScore" style="color:#FFD166;font-size:clamp(14px,3.5vw,20px)">0</strong></div>
@@ -560,7 +559,7 @@
         </div>
 
         <!-- Jeu parfaitement centré - 80% de l'écran -->
-  <div style="position:absolute;top:46%;left:50%;transform:translate(-55%,-50%);z-index:50;display:flex;align-items:center;justify-content:center;width:100vw;height:100vh;pointer-events:none">
+  <div style="position:absolute;top:42%;left:50%;transform:translate(-55%,-50%);z-index:50;display:flex;align-items:center;justify-content:center;width:100vw;height:100vh;pointer-events:none">
           <canvas id="mobileBoard" style="max-width:90vw;max-height:88vh;border:2px solid rgba(255,255,255,0.12);border-radius:10px;background:#000;margin:0 auto;pointer-events:auto"></canvas>
         </div>
       </div>
@@ -582,9 +581,10 @@
       </div>
       
       <!-- Boutons bas centre -->
-  <div style="position:absolute;bottom:clamp(88px,16vh,96px);left:50%;transform:translateX(-50%);display:flex;gap:clamp(12px,3vw,18px);pointer-events:auto">
-        <div class="mobileBtn" id="mDown" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.65);width:clamp(54px,13vw,60px);height:clamp(54px,13vw,60px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(18px,4.5vw,22px);backdrop-filter:blur(8px)">▼</div>
-        <div class="mobileBtn" id="mDrop" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.65);width:clamp(54px,13vw,60px);height:clamp(54px,13vw,60px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(18px,4.5vw,22px);backdrop-filter:blur(8px)">⤓</div>
+  <div style="position:absolute;bottom:clamp(88px,16vh,100px);left:50%;transform:translateX(-50%);display:flex;gap:clamp(12px,3vw,15px);pointer-events:auto">
+        <div class="mobileBtn" id="mRotate" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,55px);height:clamp(50px,12vw,55px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4vw,20px);backdrop-filter:blur(8px)">⤾</div>
+        <div class="mobileBtn" id="mDown" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,55px);height:clamp(50px,12vw,55px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4vw,20px);backdrop-filter:blur(8px)">▼</div>
+        <div class="mobileBtn" id="mDrop" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,55px);height:clamp(50px,12vw,55px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4vw,20px);backdrop-filter:blur(8px)">⤓</div>
       </div>
     </div>
   </div>
@@ -1318,24 +1318,10 @@ function hookTouchHold(id, fn, interval = 150) {
 function setupMobileControls(){
   hookTouch('mLeft', ()=>{ if(running && !pauseOpen) movePiece(-1,0); });
   hookTouch('mRight', ()=>{ if(running && !pauseOpen) movePiece(1,0); });
+  hookTouch('mRotate', ()=>{ if(running && !pauseOpen) rotatePiece(); });
   hookTouchHold('mDown', ()=>{ if(running && !pauseOpen) movePiece(0,1); }, 100); // Hold avec interval de 100ms
   hookTouch('mDrop', ()=>{ if(running && !pauseOpen) hardDrop(); });
   hookTouch('pauseBtn', ()=>{ if(running) togglePause(); });
-  // Tap sur le canvas pour rotation
-  const boardCanvas = document.getElementById('board');
-  if(boardCanvas){
-    boardCanvas.addEventListener('touchstart', (e)=>{
-      if(!running || pauseOpen) return;
-      // Ignorer si multi-touch (prévenir pinch)
-      if(e.touches && e.touches.length>1) return;
-      rotatePiece();
-    }, {passive:true});
-    boardCanvas.addEventListener('mousedown', (e)=>{
-      if(window.innerWidth>820) return; // seulement mobile / petit écran
-      if(!running || pauseOpen) return;
-      rotatePiece();
-    });
-  }
 }
 
 // Initialiser les contrôles mobiles
@@ -1390,14 +1376,20 @@ const quitContinueBtn = document.getElementById('quitContinue');
 const quitConfirmBtn = document.getElementById('quitConfirm');
 
 function showQuitConfirmModal() {
-  if (!running) return; // Si le jeu n'est pas en cours, pas besoin de confirmation
-  
-  // Mettre à jour les stats dans la modal
-  document.getElementById('quitScore').textContent = score;
-  document.getElementById('quitLevel').textContent = level + 1;
-  document.getElementById('quitLines').textContent = lines;
-  
-  // Afficher la modal
+  if (!running) return; // Jeu déjà arrêté
+
+  // Si aucun point encore (score==0), pas de confirmation: retour direct menu
+  if (score <= 0) {
+    if (pauseOpen) hidePause(); // fermer pause si ouverte
+    showMenu();
+    return;
+  }
+
+  // Mettre à jour les stats dans la modal (partie avancée seulement si score>0)
+  const qs = document.getElementById('quitScore'); if(qs) qs.textContent = score;
+  const ql = document.getElementById('quitLevel'); if(ql) ql.textContent = level + 1;
+  const qlignes = document.getElementById('quitLines'); if(qlignes) qlignes.textContent = lines;
+
   quitConfirmModal.classList.add('show');
 }
 
