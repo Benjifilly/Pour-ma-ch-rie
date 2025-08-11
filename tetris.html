@@ -6,9 +6,12 @@
   <meta name="theme-color" content="#071020" id="themeColorMeta">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="msapplication-navbutton-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
   <title>Tetris — jeu</title>
   <style>
-    :root{ --bg:#071021; --card:#0c1720; --accent:#ffd166; --muted:#98a8b9 }
+    :root{ --bg:#071021; --card:#0c1720; --accent:#ffd166; --muted:#98a8b9; color-scheme: dark }
     html,body{height:100%;margin:0;overflow:hidden;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;background:linear-gradient(180deg,#071020 0%, #071827 70%);color:#e6eef6;transition:background 2s ease-in-out;user-select:none}
     
     /* Atmosphères par niveau */
@@ -593,7 +596,7 @@
       </div>
       
       <!-- Boutons bas centre -->
-  <div style="position:absolute;bottom:clamp(56px,10vh,64px);left:50%;transform:translateX(-50%);display:flex;gap:clamp(12px,3vw,15px);pointer-events:auto">
+  <div style="position:absolute;bottom:clamp(66px,12vh,74px);left:50%;transform:translateX(-50%);display:flex;gap:clamp(12px,3vw,15px);pointer-events:auto">
         <div class="mobileBtn" id="mRotate" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,55px);height:clamp(50px,12vw,55px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4vw,20px);backdrop-filter:blur(8px)">⤾</div>
         <div class="mobileBtn" id="mDown" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,55px);height:clamp(50px,12vw,55px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4vw,20px);backdrop-filter:blur(8px)">▼</div>
         <div class="mobileBtn" id="mDrop" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,55px);height:clamp(50px,12vw,55px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4vw,20px);backdrop-filter:blur(8px)">⤓</div>
