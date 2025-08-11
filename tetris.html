@@ -873,7 +873,7 @@ let sweeps = []; // {row, t, duration}
 let particles = [];
 let lastClearedRows = [];
 let clearEffect = null; // {type, t, duration}
-function spawnParticlesForRow(r){ for(let c=0;c<COLS;c++){ const x = c*BLOCK + BLOCK/2; const y = r*BLOCK + BLOCK/2; const angle = Math.random()*Math.PI*2; const speed = 1 + Math.random()*3; particles.push({x,y,vx:Math.cos(angle)*speed, vy:Math.sin(angle)*speed - 2, life:60, color:shadeColor(COLORS[grid[r][c]]||'#fff',0)}); } }
+function spawnParticlesForRow(r){ for(let c=0;c<COLS;c++){ const x = c*BLOCK + BLOCK/2; const y = r*BLOCK + BLOCK/2; const angle = Math.random()*Math.PI*2; const speed = 1 + Math.random()*3; particles.push({x,y,vx:Math.cos(angle)*speed, vy:Math.sin(angle)*speed - 2, life:120, color:shadeColor(COLORS[grid[r][c]]||'#fff',0)}); } }
 function updateParticles(){ for(let i=particles.length-1;i>=0;i--){ const p=particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.12; p.life--; if(p.life<=0) particles.splice(i,1); } }
 function drawParticles(){ for(const p of particles){ ctx.fillStyle = p.color; ctx.fillRect(p.x-3,p.y-3,6,6); } }
 
@@ -895,7 +895,7 @@ function triggerClearEffect(count, rows){
   clearEffect = {type, t:0, duration};
   // Particules supplémentaires pour triple et tetris
   if(type==='triple' || type==='tetris'){
-    rows.forEach(r=>{ for(let c=0;c<COLS;c++){ const x=c*BLOCK+BLOCK/2, y=r*BLOCK+BLOCK/2; for(let i=0;i< (type==='tetris'?8:4); i++){ const ang = Math.random()*Math.PI*2; const sp = (type==='tetris'? 2+Math.random()*5:1+Math.random()*3); particles.push({x,y,vx:Math.cos(ang)*sp, vy:Math.sin(ang)*sp - (type==='tetris'?3:2), life:type==='tetris'?80:60, color: shadeColor(COLORS[grid[r][c]]||'#fff', type==='tetris'? 40:20) }); } }});
+    rows.forEach(r=>{ for(let c=0;c<COLS;c++){ const x=c*BLOCK+BLOCK/2, y=r*BLOCK+BLOCK/2; for(let i=0;i< (type==='tetris'?8:4); i++){ const ang = Math.random()*Math.PI*2; const sp = (type==='tetris'? 2+Math.random()*5:1+Math.random()*3); particles.push({x,y,vx:Math.cos(ang)*sp, vy:Math.sin(ang)*sp - (type==='tetris'?3:2), life:type==='tetris'?160:120, color: shadeColor(COLORS[grid[r][c]]||'#fff', type==='tetris'? 40:20) }); } }});
   }
 }
 
