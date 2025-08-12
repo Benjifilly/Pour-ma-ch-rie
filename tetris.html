@@ -660,7 +660,7 @@
       </div>
       
       <!-- Boutons bas centre -->
-  <div id="touchBottomWrap" style="position:absolute;bottom:clamp(48px,10vh,72px);left:50%;transform:translateX(-50%);display:flex;gap:clamp(12px,3vw,15px);pointer-events:auto">
+  <div id="touchBottomWrap" style="position:absolute;bottom:clamp(56px,11vh,80px);left:50%;transform:translateX(-50%);display:flex;gap:clamp(12px,3vw,15px);pointer-events:auto">
         <div class="mobileBtn" id="mRotate" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,55px);height:clamp(50px,12vw,55px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4vw,20px);backdrop-filter:blur(8px)">⤾</div>
         <div class="mobileBtn" id="mDown" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,55px);height:clamp(50px,12vw,55px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4vw,20px);backdrop-filter:blur(8px)">▼</div>
         <div class="mobileBtn" id="mDrop" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,55px);height:clamp(50px,12vw,55px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4vw,20px);backdrop-filter:blur(8px)">⤓</div>
@@ -1576,7 +1576,7 @@ function onGameOver(){
       ctx.restore();
     }catch{}
   // Si l’adversaire a aussi fini, afficher le résultat
-  try{ if(duoRemote.finishedAt){ finalizeDuoResult(); } }catch{}
+  try{ if(duoRemote.finishedAt && !duoResultShown){ finalizeDuoResult(); } }catch{}
   return;
   }
   const overlay = document.getElementById('gameOverOverlay'); overlay.style.display='flex'; const goText = document.getElementById('gameOverText');
@@ -2242,6 +2242,8 @@ function getPlayerDisplayName(id){
   }catch{ return 'Joueur'; }
 }
 function finalizeDuoResult(){
+  if(duoResultShown) return; // idempotent guard
+  duoResultShown = true;
   try{
     const overlay = document.getElementById('duoResultOverlay'); if(!overlay) return;
     const hud = document.getElementById('duoHudTop'); if(hud){ hud.style.display='none'; }
@@ -2569,6 +2571,8 @@ let duoReadyHostNow = null; // référence temporelle host pour startAt (corrige
 let duoCountdownPinned = false; // une fois le compte à rebours lancé, ne plus recalculer startAt
 let duoOppStaleStrikes = 0; // compte les checks consécutifs en retard avant de marquer déconnecté
 let duoLastDiscNotify = 0; // ms: anti-spam notifications
+let duoResultShown = false; // éviter double affichage et garantir l'affichage
+let duoCountdownActive = false; // évite le flicker 2/2 pendant le compte à rebours
 
 // Fonction pour nettoyer la connexion duo
 async function cleanupDuoConnection() {
@@ -2607,6 +2611,8 @@ async function cleanupDuoConnection() {
   duoRealtimeReady = false;
   window.duoConnectionId = null;
   try { window.duoPlayerId = null; } catch {}
+  duoResultShown = false;
+  duoCountdownActive = false;
 }
 
 // Fonction principale pour gérer la connexion duo (avec réutilisation d'une session en attente)
@@ -2757,7 +2763,7 @@ function processDuoRoomSnapshot(rows){
   });
   filtered = [...latestByPlayer.values()];
   const playerCount = filtered.length;
-  if(duoWaitCount) duoWaitCount.textContent = `Joueurs connectés : ${playerCount}/2`;
+  if(duoWaitCount && !duoCountdownActive) duoWaitCount.textContent = `Joueurs connectés : ${playerCount}/2`;
 
   // Déterminer host/guest de façon stable: prioriser data.role==='host', sinon fallback à l'antériorité
   const parsed = filtered.map(r=>{
@@ -2786,7 +2792,7 @@ function processDuoRoomSnapshot(rows){
   }
 
   if(playerCount === 1){
-    if(statusEl) statusEl.textContent = "En attente d'un joueur...";
+  if(statusEl && !duoCountdownActive) statusEl.textContent = "En attente d'un joueur...";
   setDuoBackDisabled(false);
     // Marquer son rôle comme host dès maintenant (idempotent)
     try{
@@ -2810,7 +2816,7 @@ function processDuoRoomSnapshot(rows){
     return;
   }
   if(playerCount > 2){
-    if(statusEl) statusEl.textContent = 'Salle pleine (erreur)';
+  if(statusEl && !duoCountdownActive) statusEl.textContent = 'Salle pleine (erreur)';
   setDuoBackDisabled(false);
     return;
   }
@@ -2881,7 +2887,7 @@ function processDuoRoomSnapshot(rows){
     }
     if(!duoStarted){
       scheduleDuoStart();
-      if(statusEl) statusEl.textContent = 'Démarrage imminent...';
+  if(statusEl) statusEl.textContent = 'Démarrage imminent...';
   setDuoBackDisabled(true);
     }
     return;
@@ -2957,6 +2963,7 @@ function scheduleDuoStart(){
   // Garantir un minimum de 600ms local pour laisser l'autre appliquer seed si arrivée tardive
   if(delay < 600) { duoStartAt = now + 800; delay = 800; }
   duoCountdownPinned = true; // ne plus recalculer duoStartAt après ce point
+  duoCountdownActive = true;
   duoStarted = true;
   if(!duoHealthLoop){ duoHealthLoop = setInterval(checkDuoHealth, 5000); }
   if(!duoSeed){ console.warn('Duo: démarrage sans seed défini'); }
@@ -2975,6 +2982,7 @@ function scheduleDuoStart(){
       if(remainingMs <= 0){
         if(countEl) countEl.textContent = 'Départ!';
         startDuoGame();
+        duoCountdownActive = false;
       } else {
         setTimeout(tick, 200);
       }
@@ -2991,6 +2999,8 @@ async function checkDuoHealth(){
       .select('joueur, updated_at')
       .eq('room_id', duoConnectionId);
     if(error) return;
+  // Fallback: si les deux ont une fin, assurer l'affichage du résultat
+  try{ if(duoLocal.finishedAt && duoRemote.finishedAt && !duoResultShown){ finalizeDuoResult(); } }catch{}
     const now = Date.now();
     const oppRow = data.find(r=> r.joueur !== duoPlayerId);
     const THRESH = (typeof isMobile !== 'undefined' && isMobile) ? 22000 : 12000; // seuil plus large sur mobile
@@ -3119,7 +3129,7 @@ function handleDuoLiveChange(payload) {
                 const ss = String(t%60).padStart(2,'0');
                 hud.textContent = `${mm}:${ss}`;
                 clearInterval(hud._intv); hud._intv = null;
-                finalizeDuoResult();
+                if(!duoResultShown) finalizeDuoResult();
               }
             }catch{}
           }
