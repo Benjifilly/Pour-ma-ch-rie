@@ -649,16 +649,16 @@
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="2" width="3" height="12" rx="1"/><rect x="10" y="2" width="3" height="12" rx="1"/></svg>
       </div>
       
-      <!-- Boutons gauche/droite au centre -->
-      <div style="position:absolute;top:50%;left:clamp(8px,2vw,10px);transform:translateY(-50%);display:flex;flex-direction:column;gap:20px;pointer-events:auto">
+    <!-- Boutons gauche/droite au centre -->
+    <div id="touchLeftWrap" style="position:absolute;top:50%;left:clamp(8px,2vw,10px);transform:translateY(-50%);display:flex;flex-direction:column;gap:20px;pointer-events:auto">
         <div class="mobileBtn" id="mLeft" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,60px);height:clamp(50px,12vw,60px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(18px,4vw,24px);backdrop-filter:blur(8px)">◀</div>
       </div>
-      <div style="position:absolute;top:50%;right:clamp(8px,2vw,10px);transform:translateY(-50%);display:flex;flex-direction:column;gap:20px;pointer-events:auto">
+    <div id="touchRightWrap" style="position:absolute;top:50%;right:clamp(8px,2vw,10px);transform:translateY(-50%);display:flex;flex-direction:column;gap:20px;pointer-events:auto">
         <div class="mobileBtn" id="mRight" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,60px);height:clamp(50px,12vw,60px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(18px,4vw,24px);backdrop-filter:blur(8px)">▶</div>
       </div>
       
       <!-- Boutons bas centre -->
-  <div style="position:absolute;bottom:clamp(88px,16vh,100px);left:50%;transform:translateX(-50%);display:flex;gap:clamp(12px,3vw,15px);pointer-events:auto">
+  <div id="touchBottomWrap" style="position:absolute;bottom:clamp(88px,16vh,100px);left:50%;transform:translateX(-50%);display:flex;gap:clamp(12px,3vw,15px);pointer-events:auto">
         <div class="mobileBtn" id="mRotate" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,55px);height:clamp(50px,12vw,55px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4vw,20px);backdrop-filter:blur(8px)">⤾</div>
         <div class="mobileBtn" id="mDown" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,55px);height:clamp(50px,12vw,55px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4vw,20px);backdrop-filter:blur(8px)">▼</div>
         <div class="mobileBtn" id="mDrop" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,55px);height:clamp(50px,12vw,55px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4vw,20px);backdrop-filter:blur(8px)">⤓</div>
@@ -925,7 +925,8 @@ function spawn(){ cur = nextQueue.shift(); cur.x = Math.floor(COLS/2)-2; cur.y =
 
 // game state
 let dropInterval = 800; let lastDrop = 0; let lastTime = 0; let score = 0; let level = 0; let lines = 0; let running = false; var highscore = Number(localStorage.getItem('tetris_hs')||0);
-const hsEl = document.getElementById('hsValue'); if(hsEl) hsEl.innerText = highscore;
+// Ne pas afficher immédiatement le score local, laisser "-" jusqu'au chargement des scores utilisateur
+const hsEl = document.getElementById('hsValue'); if(hsEl) hsEl.innerText = '-';
 
 // combo handling: add number of lines cleared to combo directly
 let combo = 0; let lastClearWas = false;
@@ -1806,9 +1807,22 @@ if(touchToggle){
   }
   touchToggle.addEventListener('change', ()=>{
     localStorage.setItem('tetris_touch_controls', touchToggle.checked? '1':'0');
-    // Appliquer immédiatement si en jeu
-    const mtcEl = document.getElementById('mobileTouchControls');
-    if(mtcEl){ mtcEl.style.display = touchToggle.checked? 'block':'none'; }
+    // Appliquer immédiatement uniquement si une partie est en cours
+    if(typeof running !== 'undefined' && running){
+      const mtcEl = document.getElementById('mobileTouchControls');
+      if(mtcEl){
+        mtcEl.style.display = 'block';
+        const groups = [
+          document.getElementById('touchLeftWrap'),
+          document.getElementById('touchRightWrap'),
+          document.getElementById('touchBottomWrap')
+        ];
+        groups.forEach(g=>{ if(g) g.style.display = touchToggle.checked? 'flex':'none'; });
+        // pauseBtn reste visible
+        const pauseBtn = document.getElementById('pauseBtn');
+        if(pauseBtn) pauseBtn.style.display = 'flex';
+      }
+    }
   });
 }
 
@@ -1840,12 +1854,23 @@ function startGameFromMenu(){
     show = (pref === '1');
   }
   const mtcEl = document.getElementById('mobileTouchControls');
-  if(mtcEl) mtcEl.style.display = show? 'block':'none';
+  if(mtcEl){
+    // Toujours afficher le conteneur pour garder le bouton Pause
+    mtcEl.style.display = 'block';
+    const groups = [
+      document.getElementById('touchLeftWrap'),
+      document.getElementById('touchRightWrap'),
+      document.getElementById('touchBottomWrap')
+    ];
+    groups.forEach(g=>{ if(g) g.style.display = show? 'flex':'none'; });
+    const pauseBtn = document.getElementById('pauseBtn');
+    if(pauseBtn) pauseBtn.style.display = 'flex';
+  }
   requestAnimationFrame(loop);
 }
 function showMenu(){ // stop and return
   running = false; stopMusic(); menuScreen.style.display='flex'; gameScreen.style.display='none'; const go = document.getElementById('gameOverOverlay'); if(go) go.style.display='none';
-  // Cacher les contrôles mobiles
+  // Cacher complètement l'overlay de contrôles mobiles au menu
   const mtc = document.getElementById('mobileTouchControls'); if(mtc) mtc.style.display='none';
   
   // Réinitialiser complètement le jeu
@@ -2527,7 +2552,8 @@ async function fetchGlobalHighscore(){
     if(data && data.length){
       const remote = Number(data[0].score)||0;
       if(remote > highscore){ highscore = remote; }
-      const hsEl = document.getElementById('hsValue'); if(hsEl) hsEl.innerText = highscore;
+      // Ne pas mettre à jour hsValue ici pour éviter d'écraser temporairement le score personnel
+      // L'affichage sera géré par fetchPersonalBest()
     }
   }catch(e){ console.warn('Global HS fetch failed', e); }
 }
@@ -2536,6 +2562,11 @@ window.fetchGlobalHighscore = fetchGlobalHighscore;
 // Récupère meilleurs score / niveau / lignes pour l'utilisateur connecté
 async function fetchPersonalBest(){
   try{
+    // Afficher un indicateur de chargement pendant la requête
+    const hsEl = document.getElementById('hsValue'); if(hsEl) hsEl.textContent = '-';
+    const lvlEl = document.getElementById('hsLevel'); if(lvlEl) lvlEl.textContent = '-';
+    const liEl = document.getElementById('hsLines'); if(liEl) liEl.textContent = '-';
+    
     const rawUser = sessionStorage.getItem('currentUser') || localStorage.getItem('lastUser') || 'Benjamin';
     const user = rawUser.substring(0,24);
     console.log('Recherche stats pour:', user); // Debug
@@ -2553,9 +2584,9 @@ async function fetchPersonalBest(){
       if((bestLines===null || bestLines===0) && bestLevel>1) bestLines = (bestLevel-1)*10;
       if(bestLines===null) bestLines = 0;
     }
-    const hsEl = document.getElementById('hsValue'); if(hsEl) hsEl.textContent = (bestScore===null || bestScore===0)? '-' : bestScore;
-    const lvlEl = document.getElementById('hsLevel'); if(lvlEl) lvlEl.textContent = (bestLevel===null || bestScore===0)? '-' : bestLevel;
-    const liEl = document.getElementById('hsLines'); if(liEl) liEl.textContent = (bestLines===null || bestScore===0)? '-' : bestLines;
+    if(hsEl) hsEl.textContent = (bestScore===null || bestScore===0)? '-' : bestScore;
+    if(lvlEl) lvlEl.textContent = (bestLevel===null || bestScore===0)? '-' : bestLevel;
+    if(liEl) liEl.textContent = (bestLines===null || bestScore===0)? '-' : bestLines;
   }catch(e){ console.warn('Personal best fetch failed', e); }
 }
 window.fetchPersonalBest = fetchPersonalBest;
@@ -2600,9 +2631,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
   if(lbRefresh) lbRefresh.addEventListener('click', ()=>fetchLeaderboard());
   const lbBack = document.getElementById('leaderboardBackBtn');
   if(lbBack) lbBack.addEventListener('click', ()=>showMenuPage('home'));
-  // lancer récupération du highscore global dès le chargement
-  fetchGlobalHighscore();
-  fetchPersonalBest();
+  // Charger d'abord les scores personnels, puis le highscore global
+  fetchPersonalBest().then(()=>{
+    fetchGlobalHighscore();
+  }).catch(()=>{
+    fetchGlobalHighscore();
+  });
   
   // Initialisation du jeu seulement si authentifié
   resizeBoard(); 
