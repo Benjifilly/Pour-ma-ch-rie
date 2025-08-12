@@ -2242,11 +2242,13 @@ function getPlayerDisplayName(id){
   }catch{ return 'Joueur'; }
 }
 function finalizeDuoResult(){
-  if(duoResultShown) return; // idempotent guard
-  duoResultShown = true;
+  // Afficher/mettre à jour le modal de résultat Duo. Ne pas bloquer si déjà affiché.
   try{
     const overlay = document.getElementById('duoResultOverlay'); if(!overlay) return;
+    // Masquer HUD Duo s'il existe
     const hud = document.getElementById('duoHudTop'); if(hud){ hud.style.display='none'; }
+    // S'assurer que l'overlay est visible au moins une fois
+    if(!duoResultShown){ overlay.style.display = 'flex'; duoResultShown = true; }
     // Calculer durées à partir du startAt sync
     const startTs = (duoLocal.startAt || duoRemote.startAt || duoStartAt || Date.now());
     const p1DurMs = Math.max(0, (duoLocal.finishedAt||Date.now()) - startTs);
@@ -2290,14 +2292,16 @@ function finalizeDuoResult(){
     const p2Score = document.getElementById('duoP2Score'); if(p2Score) p2Score.textContent = String(rs.score||0);
     const p2Level = document.getElementById('duoP2Level'); if(p2Level) p2Level.textContent = String(rs.level||1);
     const p2Lines = document.getElementById('duoP2Lines'); if(p2Lines) p2Lines.textContent = String(rs.lines||0);
-  overlay.style.display = 'flex';
+    // Afficher (ou garder visible) l'overlay
+    overlay.style.display = 'flex';
     // Bind boutons
     const rb = document.getElementById('duoReplayBtn'); if(rb){ rb.onclick = ()=>{ overlay.style.display='none'; showMenu(); document.getElementById('duoGameBtn')?.click(); } }
     const mb = document.getElementById('duoMenuBtn'); if(mb){ mb.onclick = ()=>{ overlay.style.display='none'; showMenu(); } }
 
     // Enregistrement en base duo_scores - uniquement si on est le gagnant et pas déjà soumis
     try{
-      if(!duoScoreSubmitted && winnerName === localName){
+      const bothFinished = !!(duoLocal.finishedAt && duoRemote.finishedAt);
+      if(!duoScoreSubmitted && winnerName === localName && bothFinished){
         duoScoreSubmitted = true;
         const winner = winnerName;
         // Temps en secondes pour la table (spécification: integer seconds)
@@ -3022,8 +3026,12 @@ async function checkDuoHealth(){
         // Strikes avant notification pour éviter faux positifs
         const needed = (typeof isMobile !== 'undefined' && isMobile) ? 3 : 2;
         duoOppStaleStrikes = Math.min(needed, duoOppStaleStrikes + 1);
-        if(duoOppStaleStrikes >= needed && !duoOpponentDisconnected){
-          markOpponentDisconnected('Adversaire déconnecté');
+        if(duoOppStaleStrikes >= needed){
+          if(!duoOpponentDisconnected){ markOpponentDisconnected('Adversaire déconnecté'); }
+          // Si l'adversaire est considéré inactif, verrouiller sa fin si non définie
+          try{ if(!duoRemote.finishedAt){ duoRemote.finishedAt = Date.now(); } }catch{}
+          // Si notre partie est finie, afficher le résultat maintenant
+          try{ if(duoLocal.finishedAt && !duoResultShown){ finalizeDuoResult(); } }catch{}
         }
       }
     } else {
@@ -3208,6 +3216,8 @@ function handleDuoLiveChange(payload) {
       }, 1500);
     } else {
       // Pendant la partie
+  // Si l'adversaire se déconnecte sans avoir publié finishedAt, fixer un timestamp de fin côté distant
+  try{ if(!duoRemote.finishedAt){ duoRemote.finishedAt = Date.now(); } }catch{}
       if(duoLocal.finishedAt){
         // Notre partie est déjà finie: tenter d'afficher le résultat, puis revenir au menu
         try{ if(!duoResultShown) finalizeDuoResult(); }catch{}
