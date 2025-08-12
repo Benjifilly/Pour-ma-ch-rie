@@ -637,9 +637,9 @@
           </div>
         </div>
 
-    <!-- Jeu légèrement plus bas pour un meilleur confort visuel -->
-  <div style="position:absolute;top:54%;left:50%;transform:translate(-50%,-50%);z-index:50;display:flex;align-items:center;justify-content:center;width:100vw;height:100vh;pointer-events:none">
-          <canvas id="mobileBoard" style="max-width:90vw;max-height:88vh;border:2px solid rgba(255,255,255,0.12);border-radius:10px;background:#000;margin:0 auto;pointer-events:auto"></canvas>
+  <!-- Jeu positionné plus en haut à gauche -->
+  <div style="position:absolute;top:6%;left:4%;transform:none;z-index:50;display:flex;align-items:flex-start;justify-content:flex-start;width:100vw;height:100vh;pointer-events:none">
+    <canvas id="mobileBoard" style="max-width:min(86vw,600px);max-height:min(84vh,880px);border:2px solid rgba(255,255,255,0.12);border-radius:10px;background:#000;margin:0;pointer-events:auto"></canvas>
         </div>
       </div>
     </div>
@@ -1710,6 +1710,11 @@ function setupMobileControls(){
   hookTouchHold('mDown', ()=>{ if(running && !pauseOpen) movePiece(0,1); }, 100); // Hold avec interval de 100ms
   hookTouch('mDrop', ()=>{ if(running && !pauseOpen) hardDrop(); });
   // Désactivé en Duo: pas de pause; sur solo on garde la touche P mais on ne mappe plus le bouton mobile explicitement
+  const pbtn = document.getElementById('pauseBtn');
+  if(pbtn){
+    pbtn.addEventListener('click', (ev)=>{ ev.preventDefault(); if(running && !isDuoMode) togglePause(); });
+    pbtn.addEventListener('touchstart', (ev)=>{ ev.preventDefault(); if(running && !isDuoMode) togglePause(); });
+  }
 }
 
 // Initialiser les contrôles mobiles
@@ -2563,6 +2568,7 @@ let duoOpponentDisconnected = false; // indicateur de présence adverse
 let duoOpponentLastSeen = 0; // ms
 let duoNotifPermissionAsked = false; // permission notifications
 let duoScoreSubmitted = false; // éviter doublons et limiter l'insert au gagnant
+let duoReadyHostNow = null; // référence temporelle host pour startAt (corrige le décalage d'horloge)
 
 // Fonction pour nettoyer la connexion duo
 async function cleanupDuoConnection() {
@@ -2595,6 +2601,7 @@ async function cleanupDuoConnection() {
   duoOpponentDisconnected = false;
   duoOpponentLastSeen = 0;
   duoScoreSubmitted = false;
+  duoReadyHostNow = null;
   duoRealtimeReady = false;
   window.duoConnectionId = null;
   try { window.duoPlayerId = null; } catch {}
@@ -2851,16 +2858,21 @@ function processDuoRoomSnapshot(rows){
   }
   if(duoRole === 'host' && hostRow.etat==='seed' && guestRow.etat==='seed_ack' && hostData.seed){
     duoSeed = hostData.seed; if(typeof window!=='undefined') window.duoSeed = duoSeed;
-  // Démarrage plus large pour compenser latence (5s pour countdown visuel)
-  duoStartAt = Date.now() + 5000;
-    hostData = { role:'host', seed:duoSeed, startAt:duoStartAt };
+    // Démarrage dans 5s basé sur l'horloge du host pour corriger les décalages
+    duoReadyHostNow = Date.now();
+    duoStartAt = duoReadyHostNow + 5000;
+    hostData = { role:'host', seed:duoSeed, startAt:duoStartAt, hostNow: duoReadyHostNow };
     updateOwnDuoState('ready', hostData);
   if(statusEl) statusEl.textContent = 'Synchronisation prête...'; setDuoBackDisabled(false);
     return;
   }
   if(duoRole === 'guest' && hostRow.etat==='ready' && hostData.startAt){
     duoSeed = hostData.seed; if(typeof window!=='undefined') window.duoSeed = duoSeed;
-    duoStartAt = hostData.startAt;
+    // Ajuster startAt local en compensant l'offset d'horloge: startAtHost - (hostNow - nowLocal)
+    const nowLocal = Date.now();
+    const hostNowRef = (typeof hostData.hostNow === 'number') ? hostData.hostNow : (hostData.startAt - 5000);
+    const skew = hostNowRef - nowLocal;
+    duoStartAt = hostData.startAt - skew;
     if(!duoStarted){
       scheduleDuoStart();
       if(statusEl) statusEl.textContent = 'Démarrage imminent...';
@@ -2870,6 +2882,7 @@ function processDuoRoomSnapshot(rows){
   }
   if(duoRole === 'host' && hostRow.etat==='ready' && guestRow.etat==='seed_ack' && hostData.startAt){
     duoSeed = hostData.seed; if(typeof window!=='undefined') window.duoSeed = duoSeed;
+    // Rester cohérent avec la première publication
     duoStartAt = hostData.startAt;
     if(!duoStarted){
       scheduleDuoStart();
@@ -2901,14 +2914,18 @@ function processDuoRoomSnapshot(rows){
       // Host en ready mais l'autre n'a pas réagi → republier ready chaque 3s maxi
       if(duoRole==='host' && hostRow.etat==='ready' && hostData.startAt){
         if(guestRow && guestRow.etat!=='ready' && nowMs - (duoHandshakeTs.ready||0) > 3000){
-          updateOwnDuoState('ready', { role:'host', seed: hostData.seed, startAt: hostData.startAt });
+          const repHostNow = (typeof hostData.hostNow==='number') ? hostData.hostNow : (duoReadyHostNow||null);
+          updateOwnDuoState('ready', { role:'host', seed: hostData.seed, startAt: hostData.startAt, hostNow: repHostNow });
           duoHandshakeTs.ready = nowMs;
         }
       }
-      // Si startAt est passé côté guest (événement raté), démarrer quand même avec délai min
+      // Si startAt est passé côté guest (événement raté), démarrer quand même avec délai min, en compensant l'offset
       if(duoRole==='guest' && hostRow.etat==='ready' && hostData.startAt && !duoStarted){
         duoSeed = hostData.seed; if(typeof window!=='undefined') window.duoSeed = duoSeed;
-        duoStartAt = hostData.startAt;
+        const nowLocal2 = Date.now();
+        const hostNowRef2 = (typeof hostData.hostNow === 'number') ? hostData.hostNow : (hostData.startAt - 5000);
+        const skew2 = hostNowRef2 - nowLocal2;
+        duoStartAt = hostData.startAt - skew2;
         scheduleDuoStart();
         if(statusEl) statusEl.textContent = 'Démarrage imminent...'; setDuoBackDisabled(true);
       }
