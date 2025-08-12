@@ -698,7 +698,7 @@
     /* Mobile/tablette: sous le chrono, en haut droite */
     @media (max-width: 899px) {
       #opponentMini {
-        top: clamp(70px, 14vh, 110px) !important;
+  top: clamp(56px, 10vh, 100px) !important;
         right: max(8px, 2vw) !important;
         transform: none !important;
       }
@@ -2569,6 +2569,7 @@ let duoOpponentLastSeen = 0; // ms
 let duoNotifPermissionAsked = false; // permission notifications
 let duoScoreSubmitted = false; // éviter doublons et limiter l'insert au gagnant
 let duoReadyHostNow = null; // référence temporelle host pour startAt (corrige le décalage d'horloge)
+let duoCountdownPinned = false; // une fois le compte à rebours lancé, ne plus recalculer startAt
 
 // Fonction pour nettoyer la connexion duo
 async function cleanupDuoConnection() {
@@ -2602,6 +2603,7 @@ async function cleanupDuoConnection() {
   duoOpponentLastSeen = 0;
   duoScoreSubmitted = false;
   duoReadyHostNow = null;
+  duoCountdownPinned = false;
   duoRealtimeReady = false;
   window.duoConnectionId = null;
   try { window.duoPlayerId = null; } catch {}
@@ -2859,8 +2861,10 @@ function processDuoRoomSnapshot(rows){
   if(duoRole === 'host' && hostRow.etat==='seed' && guestRow.etat==='seed_ack' && hostData.seed){
     duoSeed = hostData.seed; if(typeof window!=='undefined') window.duoSeed = duoSeed;
     // Démarrage dans 5s basé sur l'horloge du host pour corriger les décalages
-    duoReadyHostNow = Date.now();
-    duoStartAt = duoReadyHostNow + 5000;
+    if(!duoCountdownPinned){
+      duoReadyHostNow = Date.now();
+      duoStartAt = duoReadyHostNow + 5000;
+    }
     hostData = { role:'host', seed:duoSeed, startAt:duoStartAt, hostNow: duoReadyHostNow };
     updateOwnDuoState('ready', hostData);
   if(statusEl) statusEl.textContent = 'Synchronisation prête...'; setDuoBackDisabled(false);
@@ -2869,10 +2873,12 @@ function processDuoRoomSnapshot(rows){
   if(duoRole === 'guest' && hostRow.etat==='ready' && hostData.startAt){
     duoSeed = hostData.seed; if(typeof window!=='undefined') window.duoSeed = duoSeed;
     // Ajuster startAt local en compensant l'offset d'horloge: startAtHost - (hostNow - nowLocal)
-    const nowLocal = Date.now();
-    const hostNowRef = (typeof hostData.hostNow === 'number') ? hostData.hostNow : (hostData.startAt - 5000);
-    const skew = hostNowRef - nowLocal;
-    duoStartAt = hostData.startAt - skew;
+    if(!duoCountdownPinned){
+      const nowLocal = Date.now();
+      const hostNowRef = (typeof hostData.hostNow === 'number') ? hostData.hostNow : (hostData.startAt - 5000);
+      const skew = hostNowRef - nowLocal;
+      duoStartAt = hostData.startAt - skew;
+    }
     if(!duoStarted){
       scheduleDuoStart();
       if(statusEl) statusEl.textContent = 'Démarrage imminent...';
@@ -2919,13 +2925,15 @@ function processDuoRoomSnapshot(rows){
           duoHandshakeTs.ready = nowMs;
         }
       }
-      // Si startAt est passé côté guest (événement raté), démarrer quand même avec délai min, en compensant l'offset
+      // Si startAt est passé côté guest (événement raté), démarrer quand même (sans recalcul si déjà épinglé)
       if(duoRole==='guest' && hostRow.etat==='ready' && hostData.startAt && !duoStarted){
         duoSeed = hostData.seed; if(typeof window!=='undefined') window.duoSeed = duoSeed;
-        const nowLocal2 = Date.now();
-        const hostNowRef2 = (typeof hostData.hostNow === 'number') ? hostData.hostNow : (hostData.startAt - 5000);
-        const skew2 = hostNowRef2 - nowLocal2;
-        duoStartAt = hostData.startAt - skew2;
+        if(!duoCountdownPinned){
+          const nowLocal2 = Date.now();
+          const hostNowRef2 = (typeof hostData.hostNow === 'number') ? hostData.hostNow : (hostData.startAt - 5000);
+          const skew2 = hostNowRef2 - nowLocal2;
+          duoStartAt = hostData.startAt - skew2;
+        }
         scheduleDuoStart();
         if(statusEl) statusEl.textContent = 'Démarrage imminent...'; setDuoBackDisabled(true);
       }
@@ -2948,6 +2956,7 @@ function scheduleDuoStart(){
   let delay = Math.max(0, duoStartAt - now);
   // Garantir un minimum de 600ms local pour laisser l'autre appliquer seed si arrivée tardive
   if(delay < 600) { duoStartAt = now + 800; delay = 800; }
+  duoCountdownPinned = true; // ne plus recalculer duoStartAt après ce point
   duoStarted = true;
   if(!duoHealthLoop){ duoHealthLoop = setInterval(checkDuoHealth, 5000); }
   if(!duoSeed){ console.warn('Duo: démarrage sans seed défini'); }
