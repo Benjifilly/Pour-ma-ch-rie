@@ -2312,6 +2312,13 @@ function finalizeDuoResult(){
         const secSanaa = (localName==='Sanaa'? Math.round(p1DurMs/1000) : (remoteName==='Sanaa'? Math.round(p2DurMs/1000) : null));
         const secBen = (localName==='Benjamin'? Math.round(p1DurMs/1000) : (remoteName==='Benjamin'? Math.round(p2DurMs/1000) : null));
         submitDuoScore({ gagnant: winner, temps_sanaa: secSanaa, temps_benjamin: secBen });
+
+        // Enregistrer aussi le score du gagnant dans le leaderboard solo (tetris_scores) si disponible
+        try{
+          const lvlWinner = (localName===winnerName) ? level : (rs.level||1);
+          const scoreWinner = (localName===winnerName) ? score : (rs.score||0);
+          submitScoreToLeaderboard(scoreWinner, lvlWinner).catch(()=>{});
+        }catch(_){ }
       }
     }catch(_){ /* non bloquant */ }
   }catch(e){ console.warn('finalizeDuoResult error', e); }
@@ -2570,6 +2577,7 @@ let duoNotifPermissionAsked = false; // permission notifications
 let duoScoreSubmitted = false; // éviter doublons et limiter l'insert au gagnant
 let duoReadyHostNow = null; // référence temporelle host pour startAt (corrige le décalage d'horloge)
 let duoCountdownPinned = false; // une fois le compte à rebours lancé, ne plus recalculer startAt
+let duoOppStaleStrikes = 0; // compte les checks consécutifs en retard avant de marquer déconnecté
 
 // Fonction pour nettoyer la connexion duo
 async function cleanupDuoConnection() {
@@ -2604,6 +2612,7 @@ async function cleanupDuoConnection() {
   duoScoreSubmitted = false;
   duoReadyHostNow = null;
   duoCountdownPinned = false;
+  duoOppStaleStrikes = 0;
   duoRealtimeReady = false;
   window.duoConnectionId = null;
   try { window.duoPlayerId = null; } catch {}
@@ -2992,23 +3001,25 @@ async function checkDuoHealth(){
       .eq('room_id', duoConnectionId);
     if(error) return;
     const now = Date.now();
-    const stale = data.filter(r => now - new Date(r.updated_at).getTime() > 12000);
-    if(stale.length){
-      const oppRow = data.find(r=> r.joueur !== duoPlayerId);
-      const oppIsStale = oppRow ? (now - new Date(oppRow.updated_at).getTime() > 12000) : true;
+    const oppRow = data.find(r=> r.joueur !== duoPlayerId);
+    const THRESH = (typeof isMobile !== 'undefined' && isMobile) ? 22000 : 12000; // seuil plus large sur mobile
+    const oppIsStale = oppRow ? (now - new Date(oppRow?.updated_at||0).getTime() > THRESH) : true;
+    if(oppIsStale){
       if(!duoStarted){
-        if(oppIsStale){
-          const duoWaitCount = document.getElementById('duoWaitCount');
-          if(duoWaitCount) duoWaitCount.textContent = 'Joueur inactif, fermeture.';
-          setTimeout(()=>{ cleanupDuoConnection(); const ov=document.getElementById('duoWaitOverlay'); if(ov) ov.style.display='none'; },1400);
-        }
+        const duoWaitCount = document.getElementById('duoWaitCount');
+        if(duoWaitCount) duoWaitCount.textContent = 'Joueur inactif, fermeture.';
+        setTimeout(()=>{ cleanupDuoConnection(); const ov=document.getElementById('duoWaitOverlay'); if(ov) ov.style.display='none'; },1400);
       } else {
-        if(oppIsStale && !duoOpponentDisconnected){
+        // Strikes avant notification pour éviter faux positifs
+        const needed = (typeof isMobile !== 'undefined' && isMobile) ? 3 : 2;
+        duoOppStaleStrikes = Math.min(needed, duoOppStaleStrikes + 1);
+        if(duoOppStaleStrikes >= needed && !duoOpponentDisconnected){
           markOpponentDisconnected('Adversaire déconnecté');
         }
       }
     } else {
       // Si tout va bien, enlever éventuellement le badge
+      duoOppStaleStrikes = 0;
       if(duoOpponentDisconnected){ clearOpponentDisconnectedBadge(); }
     }
   } catch(e){ console.warn('checkDuoHealth error', e);} 
@@ -3089,6 +3100,7 @@ function handleDuoLiveChange(payload) {
     if(row && row.joueur && row.joueur !== duoPlayerId && row.data){
           // marque la présence adverse
           duoOpponentLastSeen = Date.now();
+          duoOppStaleStrikes = 0;
           if(duoOpponentDisconnected){ clearOpponentDisconnectedBadge(); }
           let d = row.data; if(typeof d === 'string'){ try{ d = JSON.parse(d); }catch{} }
           if(d && d.state){
