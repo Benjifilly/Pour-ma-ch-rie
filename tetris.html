@@ -3157,7 +3157,7 @@ function handleDuoLiveChange(payload) {
       // Afficher mini plateau adverse en Duo
       try{
         const row = payload.new || payload.record || null;
-    if(row && row.joueur && row.joueur !== duoPlayerId && row.data){
+        if(row && row.joueur && row.joueur !== duoPlayerId && row.data){
           // marque la présence adverse
           duoOpponentLastSeen = Date.now();
           duoOppStaleStrikes = 0;
@@ -3168,10 +3168,12 @@ function handleDuoLiveChange(payload) {
             drawOpponentMini(d.state);
             duoOpponentHydrated = true;
             // Stocker état et finishedAt distant
-      duoRemote.state = d.state;
-      duoRemote.id = row.joueur;
-      duoRemote.startAt = d.startAt || duoRemote.startAt || duoStartAt;
+            duoRemote.state = d.state;
+            duoRemote.id = row.joueur;
+            duoRemote.startAt = d.startAt || duoRemote.startAt || duoStartAt;
             duoRemote.finishedAt = d.state.finishedAt || (d.state.alive? null : Date.now());
+            // Si les deux ont un finishedAt connu, afficher immédiatement le résultat (idempotent)
+            if(duoLocal.finishedAt && duoRemote.finishedAt && !duoResultShown){ finalizeDuoResult(); }
             // Si les deux sont KO, arrêter et figer le chrono Duo puis afficher résultat
             try{
               const hud = document.getElementById('duoHudTop');
