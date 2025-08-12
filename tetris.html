@@ -660,7 +660,7 @@
       </div>
       
       <!-- Boutons bas centre -->
-  <div id="touchBottomWrap" style="position:absolute;bottom:clamp(88px,16vh,100px);left:50%;transform:translateX(-50%);display:flex;gap:clamp(12px,3vw,15px);pointer-events:auto">
+  <div id="touchBottomWrap" style="position:absolute;bottom:clamp(48px,10vh,72px);left:50%;transform:translateX(-50%);display:flex;gap:clamp(12px,3vw,15px);pointer-events:auto">
         <div class="mobileBtn" id="mRotate" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,55px);height:clamp(50px,12vw,55px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4vw,20px);backdrop-filter:blur(8px)">⤾</div>
         <div class="mobileBtn" id="mDown" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,55px);height:clamp(50px,12vw,55px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4vw,20px);backdrop-filter:blur(8px)">▼</div>
         <div class="mobileBtn" id="mDrop" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,55px);height:clamp(50px,12vw,55px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4vw,20px);backdrop-filter:blur(8px)">⤓</div>
@@ -687,21 +687,11 @@
       gap: 6px;
       transition: opacity .25s ease, transform .25s ease, box-shadow .25s ease, border-color .25s ease;
     }
-    /* Desktop: centré verticalement à droite */
-    @media (min-width: 900px) {
-      #opponentMini {
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        right: max(16px, 2vw) !important;
-      }
-    }
-    /* Mobile/tablette: sous le chrono, en haut droite */
-    @media (max-width: 899px) {
-      #opponentMini {
-  top: clamp(56px, 10vh, 100px) !important;
-        right: max(8px, 2vw) !important;
-        transform: none !important;
-      }
+    /* Position top-right sur tous les appareils */
+    #opponentMini {
+      top: max(8px, calc(env(safe-area-inset-top) + 8px)) !important;
+      right: max(8px, 2vw) !important;
+      transform: none !important;
     }
     /* Badge déconnexion amélioré */
     #opDiscBadge {
@@ -2578,6 +2568,7 @@ let duoScoreSubmitted = false; // éviter doublons et limiter l'insert au gagnan
 let duoReadyHostNow = null; // référence temporelle host pour startAt (corrige le décalage d'horloge)
 let duoCountdownPinned = false; // une fois le compte à rebours lancé, ne plus recalculer startAt
 let duoOppStaleStrikes = 0; // compte les checks consécutifs en retard avant de marquer déconnecté
+let duoLastDiscNotify = 0; // ms: anti-spam notifications
 
 // Fonction pour nettoyer la connexion duo
 async function cleanupDuoConnection() {
@@ -3191,7 +3182,11 @@ function markOpponentDisconnected(msg){
     badge.textContent = msg || 'Adversaire déconnecté';
   }
   // Notification/toast utilisateur
-  showUserNotification('Adversaire déconnecté', msg || 'Adversaire déconnecté');
+  const now = Date.now();
+  if(now - duoLastDiscNotify > 10000){ // intervalle min 10s
+    duoLastDiscNotify = now;
+    showUserNotification('Adversaire déconnecté', msg || 'Adversaire déconnecté');
+  }
 }
 
 function clearOpponentDisconnectedBadge(){
@@ -3449,6 +3444,19 @@ document.addEventListener('DOMContentLoaded', ()=>{
   drawBoard(); 
   renderNext(); 
   changeAtmosphere(0);
+
+  // Pause auto en solo si l'onglet perd le focus; en duo, on continue
+  try{
+    document.addEventListener('visibilitychange', ()=>{
+      if(document.hidden){
+        if(!isDuoMode && running && !pauseOpen){
+          showPause();
+        }
+      } else {
+        // ne rien faire au retour; l'utilisateur reprend manuellement
+      }
+    });
+  }catch{}
 });
 </script>
 
