@@ -2573,6 +2573,8 @@ let duoOppStaleStrikes = 0; // compte les checks consécutifs en retard avant de
 let duoLastDiscNotify = 0; // ms: anti-spam notifications
 let duoResultShown = false; // éviter double affichage et garantir l'affichage
 let duoCountdownActive = false; // évite le flicker 2/2 pendant le compte à rebours
+let duoWaitStartTs = 0; // début d'attente en salle (pour migration matchmaking)
+let duoMigratingRoom = false; // évite migrations concurrentes
 
 // Fonction pour nettoyer la connexion duo
 async function cleanupDuoConnection() {
@@ -2613,6 +2615,8 @@ async function cleanupDuoConnection() {
   try { window.duoPlayerId = null; } catch {}
   duoResultShown = false;
   duoCountdownActive = false;
+  duoWaitStartTs = 0;
+  duoMigratingRoom = false;
 }
 
 // Fonction principale pour gérer la connexion duo (avec réutilisation d'une session en attente)
@@ -2716,6 +2720,8 @@ async function handleDuoConnection() {
         checkPlayerCount();
       }, 1200);
     }
+  // Marquer le début d'attente pour potentielle migration
+  duoWaitStartTs = Date.now();
   } catch(e) {
     console.error('Erreur handleDuoConnection:', e);
     const duoWaitCountEl = document.getElementById('duoWaitCount');
@@ -2794,6 +2800,8 @@ function processDuoRoomSnapshot(rows){
   if(playerCount === 1){
   if(statusEl && !duoCountdownActive) statusEl.textContent = "En attente d'un joueur...";
   setDuoBackDisabled(false);
+  // Si on est seul trop longtemps, tenter une migration vers une autre salle ouverte (évite le deadlock 1/2 vs 1/2)
+  try{ maybeMigrateToOpenRoom(); }catch{}
     // Marquer son rôle comme host dès maintenant (idempotent)
     try{
       const selfRow = parsed[0];
@@ -3026,6 +3034,57 @@ async function checkDuoHealth(){
   } catch(e){ console.warn('checkDuoHealth error', e);} 
 }
 
+// Cherche une autre salle ouverte avec 1 joueur et migre si disponible (corrige deadlock 1/2 contre 1/2)
+async function maybeMigrateToOpenRoom(){
+  if(duoStarted || duoMigratingRoom) return;
+  const waited = Date.now() - (duoWaitStartTs||Date.now());
+  // N'essayer qu'après un court délai
+  if(waited < 2500) return;
+  duoMigratingRoom = true;
+  try{
+    const since = new Date(Date.now()-15000).toISOString();
+    const { data: openRows, error } = await supabase
+      .from('duo_live')
+      .select('room_id, joueur, updated_at')
+      .gt('updated_at', since);
+    if(error){ duoMigratingRoom = false; return; }
+    // Grouper par room et trouver une room avec exactement 1 joueur (≠ moi) qui n'est pas la mienne
+    const byRoom = new Map();
+    (openRows||[]).forEach(r=>{ if(!byRoom.has(r.room_id)) byRoom.set(r.room_id, []); byRoom.get(r.room_id).push(r); });
+    let target = null;
+    for(const [rid, rows] of byRoom.entries()){
+      if(rid === duoConnectionId) continue;
+      if(rows.length === 1 && rows[0].joueur !== duoPlayerId){ target = { room_id: rid, row: rows[0] }; break; }
+    }
+    if(target){ await migrateToRoom(target.room_id); }
+  }catch(_){ /* ignore */ }
+  finally{ duoMigratingRoom = false; }
+}
+
+// Migre vers une autre room: désabonne l'ancienne, supprime sa ligne et rejoint la nouvelle room
+async function migrateToRoom(newRoomId){
+  try{
+    // Se désabonner de l'ancienne room
+    if(duoSubscription){ try{ await supabase.removeChannel(duoSubscription); }catch{} duoSubscription = null; }
+    // Supprimer sa ligne de l'ancienne room
+    try{ await supabase.from('duo_live').delete().eq('room_id', duoConnectionId).eq('joueur', duoPlayerId); }catch{}
+    // Basculer sur la nouvelle room
+    duoConnectionId = newRoomId; window.duoConnectionId = newRoomId;
+    duoRole = null; duoSeed = null; duoStartAt = null; duoCountdownPinned = false; duoStarted = false; duoOpponentHydrated = false; duoResultShown = false; duoHandshakeComplete = false;
+    // Inscription dans la nouvelle room
+    try{ await supabase.from('duo_live').insert({ room_id: duoConnectionId, joueur: duoPlayerId, etat: 'waiting' }); }catch{}
+    // Ré-abonnement realtime pour la nouvelle room
+    duoSubscription = supabase
+      .channel('duo_live_changes')
+      .on('postgres_changes', { event:'*', schema:'public', table:'duo_live', filter:`room_id=eq.${duoConnectionId}` }, (payload)=>{ handleDuoLiveChange(payload); })
+      .subscribe((status)=>{ if(status==='SUBSCRIBED'){ duoRealtimeReady = true; } });
+    // Re-check immédiat
+    const duoWaitCountEl = document.getElementById('duoWaitCount'); if(duoWaitCountEl) duoWaitCountEl.textContent = 'Joueurs connectés : 1/2';
+    duoWaitStartTs = Date.now();
+    await checkPlayerCount();
+  }catch(e){ console.warn('Migration room duo échouée', e); }
+}
+
 // Lancer le jeu duo
 async function startDuoGame() {
   console.log('Lancement du jeu duo !');
@@ -3146,9 +3205,16 @@ function handleDuoLiveChange(payload) {
         const ov = document.getElementById('duoWaitOverlay'); if(ov) ov.style.display = 'none';
       }, 1500);
     } else {
-      // Pendant la partie: signaler la déconnexion mais laisser continuer
-  markOpponentDisconnected('Votre adversaire a quitté la partie');
-  showUserNotification('Adversaire déconnecté', 'Votre adversaire a quitté la partie.');
+      // Pendant la partie
+      if(duoLocal.finishedAt){
+        // Notre partie est déjà finie: tenter d'afficher le résultat, puis revenir au menu
+        try{ if(!duoResultShown) finalizeDuoResult(); }catch{}
+        setTimeout(()=>{ const ov = document.getElementById('duoResultOverlay'); if(ov) ov.style.display='none'; showMenu(); }, 1200);
+      } else {
+        // Sinon, notifier la déconnexion mais laisser continuer (règle Duo)
+        markOpponentDisconnected('Votre adversaire a quitté la partie');
+        showUserNotification('Adversaire déconnecté', 'Votre adversaire a quitté la partie.');
+      }
     }
   }
 }
