@@ -638,7 +638,7 @@
         </div>
 
   <!-- Jeu positionné plus en haut à gauche -->
-  <div style="position:absolute;top:6%;left:4%;transform:none;z-index:50;display:flex;align-items:flex-start;justify-content:flex-start;width:100vw;height:100vh;pointer-events:none">
+  <div style="position:absolute;top:6%;left:6%;transform:none;z-index:50;display:flex;align-items:flex-start;justify-content:flex-start;width:100vw;height:100vh;pointer-events:none">
     <canvas id="mobileBoard" style="max-width:min(86vw,600px);max-height:min(84vh,880px);border:2px solid rgba(255,255,255,0.12);border-radius:10px;background:#000;margin:0;pointer-events:auto"></canvas>
         </div>
       </div>
@@ -907,6 +907,9 @@ for(const k of Object.keys(TETROMINOES)){ let rots=TETROMINOES[k]; let full=rots
 let isDuoMode = false;
 let duoLocal = { startAt:null, finishedAt:null, elapsedSec:null };
 let duoRemote = { startAt:null, finishedAt:null, elapsedSec:null, state:null, id:null };
+// Flags Duo nécessaires avant toute référence (évite ReferenceError si utilisés avant déclaration)
+let duoResultShown = false; // modal résultat déjà affiché
+let duoCountdownActive = false; // évite le flicker 2/2 pendant le compte à rebours
 function setDuoBackDisabled(disabled){
   const btn = document.getElementById('duoBackBtn');
   if(!btn) return;
@@ -2575,8 +2578,7 @@ let duoReadyHostNow = null; // référence temporelle host pour startAt (corrige
 let duoCountdownPinned = false; // une fois le compte à rebours lancé, ne plus recalculer startAt
 let duoOppStaleStrikes = 0; // compte les checks consécutifs en retard avant de marquer déconnecté
 let duoLastDiscNotify = 0; // ms: anti-spam notifications
-let duoResultShown = false; // éviter double affichage et garantir l'affichage
-let duoCountdownActive = false; // évite le flicker 2/2 pendant le compte à rebours
+// duoResultShown & duoCountdownActive déclarés plus haut
 let duoWaitStartTs = 0; // début d'attente en salle (pour migration matchmaking)
 let duoMigratingRoom = false; // évite migrations concurrentes
 
