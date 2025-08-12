@@ -593,13 +593,15 @@
   <div id="gameScreen" style="display:none" class="center">
     <div class="container" style="padding:clamp(8px,2vh,20px);max-width:100vw;box-sizing:border-box">
       <!-- Version Desktop -->
-      <div class="board-wrap desktop-layout" style="gap:clamp(8px,2vw,18px);align-items:flex-start;justify-content:center;flex-wrap:wrap">
+  <div class="board-wrap desktop-layout" style="gap:clamp(8px,2vw,18px);align-items:center;justify-content:center;flex-wrap:wrap;min-height:100vh">
         <div class="card" style="flex-shrink:0">
           <canvas id="board" style="max-width:min(70vw,400px);height:auto"></canvas>
         </div>
         <div class="side" style="min-width:clamp(200px,25vw,280px);max-width:300px">
           <div class="panel">
-            <div style="display:flex;justify-content:flex-end;align-items:center"><button class="btn" id="backBtn" style="padding:clamp(6px,2vw,12px) clamp(8px,3vw,16px);font-size:clamp(10px,3vw,14px)">Menu</button></div>
+            <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px">
+              <button class="btn" id="backBtn" style="padding:clamp(6px,2vw,12px) clamp(8px,3vw,16px);font-size:clamp(10px,3vw,14px)">Menu</button>
+            </div>
             <div style="margin-top:10px;font-size:clamp(12px,3vw,14px)">Score: <strong id="score" style="color:#FFD166;font-size:clamp(14px,3.5vw,18px)">0</strong></div>
             <div style="font-size:clamp(12px,3vw,14px)">Niveau: <strong id="level" style="color:#1FB6FF;font-size:clamp(13px,3.2vw,16px)">0</strong></div>
             <div style="font-size:clamp(12px,3vw,14px)">Lignes: <strong id="lines" style="color:#2BD4A4;font-size:clamp(13px,3.2vw,16px)">0</strong></div>
@@ -635,8 +637,8 @@
           </div>
         </div>
 
-        <!-- Jeu parfaitement centré - 80% de l'écran -->
-  <div style="position:absolute;top:42%;left:50%;transform:translate(-55%,-50%);z-index:50;display:flex;align-items:center;justify-content:center;width:100vw;height:100vh;pointer-events:none">
+    <!-- Jeu légèrement plus bas pour un meilleur confort visuel -->
+  <div style="position:absolute;top:54%;left:50%;transform:translate(-50%,-50%);z-index:50;display:flex;align-items:center;justify-content:center;width:100vw;height:100vh;pointer-events:none">
           <canvas id="mobileBoard" style="max-width:90vw;max-height:88vh;border:2px solid rgba(255,255,255,0.12);border-radius:10px;background:#000;margin:0 auto;pointer-events:auto"></canvas>
         </div>
       </div>
@@ -664,6 +666,83 @@
         <div class="mobileBtn" id="mDrop" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);width:clamp(50px,12vw,55px);height:clamp(50px,12vw,55px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,4vw,20px);backdrop-filter:blur(8px)">⤓</div>
       </div>
     </div>
+
+  <!-- Styles placement amélioré du mini plateau adverse -->
+  <style>
+    /* Positionnement amélioré et réactif du mini-plateau adverse */
+    #opponentMini {
+      position: fixed !important;
+      right: max(12px, env(safe-area-inset-right)) !important;
+      top: calc(env(safe-area-inset-top) + 72px) !important;
+      z-index: 1400 !important;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      padding: 8px 8px 10px 8px;
+      backdrop-filter: blur(6px);
+      min-width: 132px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: opacity .25s ease, transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+    /* Desktop: centré verticalement à droite */
+    @media (min-width: 900px) {
+      #opponentMini {
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        right: max(16px, 2vw) !important;
+      }
+    }
+    /* Mobile/tablette: sous le chrono, en haut droite */
+    @media (max-width: 899px) {
+      #opponentMini {
+        top: clamp(70px, 14vh, 110px) !important;
+        right: max(8px, 2vw) !important;
+        transform: none !important;
+      }
+    }
+    /* Badge déconnexion amélioré */
+    #opDiscBadge {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      top: 6px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #fff;
+      background: linear-gradient(90deg, rgba(255,86,63,0.95), rgba(255,121,97,0.85));
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 8px;
+      box-shadow: 0 6px 22px rgba(255, 99, 71, 0.25), inset 0 0 12px rgba(0,0,0,0.25);
+      z-index: 10;
+      text-align: center;
+      pointer-events: none;
+      user-select: none;
+      letter-spacing: .3px;
+    }
+    /* Effet pulsing quand déconnecté */
+    @keyframes opMiniPulse {
+      0% { box-shadow: inset 0 0 0 1px rgba(255,99,71,0.25), 0 0 0 0 rgba(255,99,71,0.18); }
+      50% { box-shadow: inset 0 0 0 1px rgba(255,99,71,0.45), 0 0 0 6px rgba(255,99,71,0.12); }
+      100% { box-shadow: inset 0 0 0 1px rgba(255,99,71,0.25), 0 0 0 0 rgba(255,99,71,0.18); }
+    }
+    #opponentMini.opponentMini--disconnected {
+      border-color: rgba(255,99,71,0.55) !important;
+      animation: opMiniPulse 1.4s ease-in-out infinite;
+    }
+  </style>
+
+  <!-- HUD Duo: chrono en haut centré -->
+  <div id="duoHudTop" style="display:none;position:fixed;top:clamp(6px,1.5vh,12px);left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.12);color:#e4f3fa;font-weight:800;padding:6px 12px;border-radius:10px;backdrop-filter:blur(6px);z-index:1500;letter-spacing:.5px;min-width:84px;text-align:center">00:00</div>
+
+      <!-- Mini plateau adverse (Duo) -->
+      <div id="opponentMini" style="display:none;">
+        <canvas id="opBoard" width="120" height="240" style="display:block;border-radius:6px;background:#031318;margin:0 auto"></canvas>
+        <div id="opStats" style="margin-top:6px;font-size:10px;color:#e6eef6;text-align:center;opacity:0.85">Niveau: – • Lignes: –</div>
+      </div>
   </div>
 
   <!-- combo badge -->
@@ -698,6 +777,35 @@
       <div style="display:flex;gap:clamp(6px,2vw,10px);justify-content:center;width:100%;flex-wrap:wrap">
         <button class="btn btn-lg" id="replayBtn" style="pointer-events:auto;flex:1;min-width:clamp(80px,20vw,120px);font-size:clamp(12px,3vw,14px);padding:clamp(8px,2vh,12px) clamp(12px,3vw,16px)">Rejouer</button>
         <button class="btn btn-lg" id="menuBtnFromGO" style="pointer-events:auto;flex:1;min-width:clamp(80px,20vw,120px);font-size:clamp(12px,3vw,14px);padding:clamp(8px,2vh,12px) clamp(12px,3vw,16px)">Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Résultat Duo -->
+  <div id="duoResultOverlay" class="overlayFull" style="display:none;pointer-events:auto;background:rgba(7,16,32,0.92);backdrop-filter:blur(8px);z-index:5000">
+    <div class="gameOverWrap" style="display:flex;flex-direction:column;align-items:center;gap:clamp(10px,2.5vh,16px);pointer-events:auto;padding:clamp(12px,3vw,24px);max-width:92vw">
+      <div id="duoWinnerTitle" style="font-size:clamp(20px,6vw,28px);font-weight:900;color:#fff;letter-spacing:1px;text-align:center"></div>
+      <div style="display:flex;gap:clamp(10px,3vw,20px);flex-wrap:wrap;justify-content:center">
+        <div id="duoCardLocal" style="min-width:220px;background:linear-gradient(180deg,rgba(43,212,164,0.08),rgba(255,255,255,0.04));border:1px solid rgba(43,212,164,0.35);border-radius:12px;padding:12px 16px;color:#e6eef6;position:relative">
+          <div style="position:absolute;top:8px;right:10px;font-size:11px;background:rgba(43,212,164,0.18);border:1px solid rgba(43,212,164,0.45);padding:2px 6px;border-radius:999px;color:#2BD4A4" id="duoLocalBadge">Joueur</div>
+          <div style="font-weight:800;margin-bottom:6px" id="duoP1Name">Joueur 1</div>
+          <div>Temps: <strong id="duoP1Time">00:00</strong></div>
+          <div>Score: <strong id="duoP1Score">0</strong></div>
+          <div>Niveau: <strong id="duoP1Level">1</strong></div>
+          <div>Lignes: <strong id="duoP1Lines">0</strong></div>
+        </div>
+        <div id="duoCardRemote" style="min-width:220px;background:linear-gradient(180deg,rgba(255,59,59,0.08),rgba(255,255,255,0.04));border:1px solid rgba(255,59,59,0.35);border-radius:12px;padding:12px 16px;color:#e6eef6;position:relative">
+          <div style="position:absolute;top:8px;right:10px;font-size:11px;background:rgba(255,59,59,0.18);border:1px solid rgba(255,59,59,0.45);padding:2px 6px;border-radius:999px;color:#ff6b6b" id="duoRemoteBadge">Adversaire</div>
+          <div style="font-weight:800;margin-bottom:6px" id="duoP2Name">Joueur 2</div>
+          <div>Temps: <strong id="duoP2Time">00:00</strong></div>
+          <div>Score: <strong id="duoP2Score">0</strong></div>
+          <div>Niveau: <strong id="duoP2Level">1</strong></div>
+          <div>Lignes: <strong id="duoP2Lines">0</strong></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:clamp(6px,2vw,10px);justify-content:center;width:100%;flex-wrap:wrap;margin-top:6px">
+        <button class="btn btn-lg" id="duoReplayBtn" style="pointer-events:auto;flex:1;min-width:clamp(80px,20vw,120px)">Rejouer</button>
+        <button class="btn btn-lg" id="duoMenuBtn" style="pointer-events:auto;flex:1;min-width:clamp(80px,20vw,120px)">Menu</button>
       </div>
     </div>
   </div>
@@ -804,6 +912,34 @@ const COLORS = { 'I':'#1FB6FF','O':'#FFD166','T':'#9B5DE5','S':'#2BD4A4','Z':'#F
 const TETROMINOES = { 'I': [[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]]], 'O': [[[0,1,1,0],[0,1,1,0],[0,0,0,0],[0,0,0,0]]], 'T': [[[0,1,0,0],[1,1,1,0],[0,0,0,0],[0,0,0,0]]], 'S': [[[0,1,1,0],[1,1,0,0],[0,0,0,0],[0,0,0,0]]], 'Z': [[[1,1,0,0],[0,1,1,0],[0,0,0,0],[0,0,0,0]]], 'J': [[[1,0,0,0],[1,1,1,0],[0,0,0,0],[0,0,0,0]]], 'L': [[[0,0,1,0],[1,1,1,0],[0,0,0,0],[0,0,0,0]]] };
 function rotateMatrix(mat){ const N=mat.length; const res=Array.from({length:N},()=>Array(N).fill(0)); for(let r=0;r<N;r++) for(let c=0;c<N;c++) res[c][N-1-r]=mat[r][c]; return res; }
 for(const k of Object.keys(TETROMINOES)){ let rots=TETROMINOES[k]; let full=rots.slice(); let curr=rots[0]; for(let i=1;i<4;i++){ curr=rotateMatrix(curr); if(!full.some(m=>JSON.stringify(m)===JSON.stringify(curr))) full.push(curr);} TETROMINOES[k]=full; }
+
+// Duo helpers (globaux)
+let isDuoMode = false;
+let duoLocal = { startAt:null, finishedAt:null, elapsedSec:null };
+let duoRemote = { startAt:null, finishedAt:null, elapsedSec:null, state:null, id:null };
+function setDuoBackDisabled(disabled){
+  const btn = document.getElementById('duoBackBtn');
+  if(!btn) return;
+  btn.disabled = !!disabled;
+  btn.style.opacity = disabled? '0.6':'1';
+  btn.style.pointerEvents = disabled? 'none':'auto';
+}
+function applyDuoUiMode(active){
+  // Masquer/afficher uniquement la ligne Score (desktop et mobile)
+  const scoreStrong = document.getElementById('score');
+  if(scoreStrong && scoreStrong.parentElement){ scoreStrong.parentElement.style.display = active? 'none':''; }
+  const mobileScore = document.getElementById('mobileScore');
+  if(mobileScore && mobileScore.parentElement){ mobileScore.parentElement.style.display = active? 'none':''; }
+  // Masquer le bouton Menu en Duo
+  const backBtn = document.getElementById('backBtn');
+  if(backBtn){ backBtn.style.display = active? 'none' : ''; }
+}
+// Exposer pour le module
+if(typeof window !== 'undefined'){
+  window.isDuoMode = isDuoMode;
+  window.setDuoBackDisabled = setDuoBackDisabled;
+  window.applyDuoUiMode = applyDuoUiMode;
+}
 
 // Mobile/Desktop detection and settings management
 const isMobile = () => /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
@@ -921,7 +1057,10 @@ let nextQueue = [];
 function fillQueue(){ while(nextQueue.length<3) nextQueue.push(createPiece(nextFromBag())); }
 
 let cur = null;
-function spawn(){ cur = nextQueue.shift(); cur.x = Math.floor(COLS/2)-2; cur.y = -1; nextQueue.push(createPiece(nextFromBag())); renderNext(); if(collides(cur,0,0)) onGameOver(); }
+function spawn(){
+  cur = nextQueue.shift(); cur.x = Math.floor(COLS/2)-2; cur.y = -1; nextQueue.push(createPiece(nextFromBag())); renderNext(); if(collides(cur,0,0)) onGameOver();
+  if(isDuoMode) publishDuoState();
+}
 
 // game state
 let dropInterval = 800; let lastDrop = 0; let lastTime = 0; let score = 0; let level = 0; let lines = 0; let running = false; var highscore = Number(localStorage.getItem('tetris_hs')||0);
@@ -963,6 +1102,11 @@ function drawBoard(highlightRows=[]){
   ctx.clearRect(0,0,boardCanvas.width,boardCanvas.height);
   ctx.fillStyle = '#06161b';
   ctx.fillRect(0,0,boardCanvas.width,boardCanvas.height);
+  // Si en duo et joueur KO, griser le fond
+  if(isDuoMode && !running){
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.fillRect(0,0,boardCanvas.width,boardCanvas.height);
+  }
   // blocs déjà posés
   for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(grid[r][c]){ const flash = highlightRows.includes(r)?0.5:0; drawBlock(ctx,c,r,COLORS[grid[r][c]],BLOCK,flash); }
 
@@ -990,6 +1134,22 @@ function drawBoard(highlightRows=[]){
   ctx.strokeStyle='rgba(0,0,0,0.12)'; ctx.lineWidth=1;
   for(let x=0;x<=COLS;x++){ ctx.beginPath(); ctx.moveTo(x*BLOCK,0); ctx.lineTo(x*BLOCK,boardCanvas.height); ctx.stroke(); }
   for(let y=0;y<=ROWS;y++){ ctx.beginPath(); ctx.moveTo(0,y*BLOCK); ctx.lineTo(boardCanvas.width,y*BLOCK); ctx.stroke(); }
+
+  // En Duo, si KO, dessiner le texte GAME OVER au centre pour qu'il reste visible même après des redraws
+  if(isDuoMode && !running){
+    try{
+      ctx.save();
+      ctx.fillStyle = '#ff3b3b';
+      ctx.font = `900 ${Math.floor(BLOCK*1.4)}px Inter, system-ui, Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = 'rgba(0,0,0,0.55)';
+      ctx.strokeText('GAME OVER', boardCanvas.width/2, boardCanvas.height/2);
+      ctx.fillText('GAME OVER', boardCanvas.width/2, boardCanvas.height/2);
+      ctx.restore();
+    }catch{}
+  }
 }
 
 function renderNext(){
@@ -1029,6 +1189,114 @@ function clearLinesWithSweep(){ // sweep animation then remove lines
   const duration = 260;
   full.forEach(r=>{ sweeps.push({row:r, t:0, duration}); spawnParticlesForRow(r); });
   return full.length;
+}
+
+// ===== Duo sync: publication et rendu adversaire =====
+// Throttling des publications pour éviter trop d'écritures DB
+let duoPublishTimer = null;
+let duoLastSentAt = 0;
+let duoPendingData = null;
+let duoLastSig = '';
+const DUO_PUBLISH_MIN_MS = 120; // envoi au plus toutes les ~120ms
+
+function compactGrid(g){ // compresser en string lignes de 20 x 10 (caractères A..Z pour types, '.' vide)
+  return g.map(row=> row.map(cell=> cell? cell : '.').join('')).join('\n');
+}
+function expandGrid(str){
+  const rows = str.split('\n'); const g = Array.from({length:ROWS},()=>Array(COLS).fill(null));
+  for(let r=0;r<Math.min(rows.length,ROWS);r++){
+    const line = rows[r]||''; for(let c=0;c<Math.min(line.length,COLS);c++){
+      const ch = line[c]; g[r][c] = (ch==='.'? null : ch);
+    }
+  }
+  return g;
+}
+function computeDuoStateAndSig(){
+  const gridStr = compactGrid(grid);
+  const curSig = cur ? `${cur.type}:${cur.x}:${cur.y}:${cur.rotIndex}` : '-';
+  const nextSig = nextQueue.slice(0,3).map(p=>p? p.type : '.').join('');
+  const aliveSig = running ? '1' : '0';
+  const finishAt = running ? null : (typeof window!=='undefined' ? (window.duoFinishedAt||null) : null);
+  const elapsedSec = running ? null : (typeof window!=='undefined' ? (window.duoElapsedSec|| ( (window.duoFinishedAt && (typeof duoStartAt==='number')) ? Math.max(0, Math.floor((window.duoFinishedAt - duoStartAt)/1000)) : (typeof duoLocal!=='undefined' && duoLocal.startAt ? Math.max(0, Math.floor(((window.duoFinishedAt||Date.now()) - duoLocal.startAt)/1000)) : null))) : null);
+  const sig = `${gridStr}|${curSig}|${nextSig}|${score}|${level}|${lines}|${aliveSig}|${finishAt||'-'}|${elapsedSec??'-'}`;
+  const data = {
+    role: (typeof duoRole !== 'undefined' && duoRole) ? duoRole : 'player',
+    seed: (typeof duoSeed !== 'undefined') ? duoSeed : (window.duoSeed||null),
+    startAt: (typeof duoStartAt !== 'undefined') ? duoStartAt : null,
+    state: {
+      grid: gridStr,
+      cur: cur? { type: cur.type, x: cur.x, y: cur.y, shape: cur.shape } : null,
+      next: nextQueue.slice(0,3).map(p=> p? {type:p.type, shape:p.shape} : null),
+      score, level, lines,
+  alive: running,
+  finishedAt: finishAt,
+  elapsedSec: elapsedSec
+    }
+  };
+  return { data, sig };
+}
+
+async function sendPendingDuoState(){
+  const connId = window.duoConnectionId || (typeof duoConnectionId!=='undefined'? duoConnectionId : null);
+  const playerId = window.duoPlayerId || (typeof duoPlayerId!=='undefined'? duoPlayerId : null);
+  const sb = (typeof supabase !== 'undefined') ? supabase : (window.supabase || window._supabaseClient || null);
+  if(!connId || !playerId || !sb || !duoPendingData) { duoPublishTimer = null; return; }
+  try{
+    await sb.from('duo_live').update({ data: duoPendingData.data }).eq('room_id', connId).eq('joueur', playerId);
+    duoLastSentAt = Date.now();
+    duoLastSig = duoPendingData.sig;
+  }catch(e){ /* ignorer erreurs transitoires */ }
+  finally{
+    duoPublishTimer = null;
+    duoPendingData = null;
+  }
+}
+
+function scheduleDuoStateSend(){
+  const now = Date.now();
+  const dueIn = Math.max(0, DUO_PUBLISH_MIN_MS - (now - duoLastSentAt));
+  if(dueIn === 0){
+    // envoyer immédiatement
+    sendPendingDuoState();
+  } else if(!duoPublishTimer){
+    duoPublishTimer = setTimeout(()=>{ sendPendingDuoState(); }, dueIn);
+  }
+}
+
+async function publishDuoState(){
+  if(!isDuoMode) return;
+  const connId = window.duoConnectionId || (typeof duoConnectionId!=='undefined'? duoConnectionId : null);
+  const playerId = window.duoPlayerId || (typeof duoPlayerId!=='undefined'? duoPlayerId : null);
+  if(!connId || !playerId) return;
+  const payload = computeDuoStateAndSig();
+  if(payload.sig === duoLastSig) return; // inchangé
+  duoPendingData = payload;
+  scheduleDuoStateSend();
+}
+function drawOpponentMini(state){
+  const wrap = document.getElementById('opponentMini'); const cv = document.getElementById('opBoard'); if(!wrap || !cv) return;
+  const c = cv.getContext('2d'); c.clearRect(0,0,cv.width,cv.height);
+  // Atmosphère adverse: choisir une couleur de fond selon son niveau (même logique que changeAtmosphere)
+  try{
+    const lvl = (typeof state.level === 'number' ? state.level : 0);
+    const atmosphereIndex = Math.floor((lvl+1)/5) % 10;
+    const bgColors = ['#04131a','#1a0a1a','#1a0a2e','#2e0a1a','#2e1a0a','#0a2e1a','#1a2e0a','#2e2e0a','#0a0a2e','#2e0a0a'];
+    c.fillStyle = bgColors[atmosphereIndex] || '#031318';
+    c.fillRect(0,0,cv.width,cv.height);
+  }catch{ c.fillStyle='#031318'; c.fillRect(0,0,cv.width,cv.height); }
+  const og = expandGrid(state.grid||''); const cell = Math.floor(Math.min(cv.width/COLS, cv.height/ROWS));
+  for(let r=0;r<ROWS;r++) for(let cc=0;cc<COLS;cc++){ const t = og[r][cc]; if(t){ const x=cc*cell, y=r*cell; c.fillStyle = COLORS[t]||'#999'; c.fillRect(x+1,y+1,cell-2,cell-2); }}
+  // pièce courante adverse
+  if(state.cur){ const {type,x,y,shape} = state.cur; for(let r=0;r<4;r++) for(let cc=0;cc<4;cc++) if(shape[r][cc]){ const px=(x+cc)*cell, py=(y+r)*cell; if(py>=0){ c.fillStyle = COLORS[type]||'#aaa'; c.fillRect(px+1,py+1,cell-2,cell-2); } } }
+  // Mettre à jour stats adverses
+  try{
+    const st = document.getElementById('opStats');
+    if(st){
+      const humanLvl = (typeof state.level === 'number' ? state.level+1 : 1);
+      const li = (typeof state.lines === 'number' ? state.lines : 0);
+      st.textContent = `Niveau: ${humanLvl} • Lignes: ${li}`;
+    }
+  }catch{}
 }
 
 function triggerClearEffect(count, rows){
@@ -1145,8 +1413,13 @@ function processSweeps(dt){ // advance sweeps, when done remove rows
   return sweeps.length>0;
 }
 
-function lockPiece(){ if(!cur) return; const shape = cur.shape; for(let r=0;r<4;r++) for(let c=0;c<4;c++) if(shape[r][c]){ const x=cur.x+c, y=cur.y+r; if(y>=0 && y<ROWS && x>=0 && x<COLS) grid[y][x] = cur.type; }
-  playSfx('lock'); const cleared = clearLinesWithSweep(); if(cleared) { triggerClearEffect(cleared, lastClearedRows); registerClear(cleared); updateScore(cleared); playSfx('clear'); cur = null; } else { registerClear(0); spawn(); } }
+function lockPiece(){
+  if(!cur) return; const shape = cur.shape; for(let r=0;r<4;r++) for(let c=0;c<4;c++) if(shape[r][c]){ const x=cur.x+c, y=cur.y+r; if(y>=0 && y<ROWS && x>=0 && x<COLS) grid[y][x] = cur.type; }
+  playSfx('lock'); const cleared = clearLinesWithSweep();
+  if(cleared) { triggerClearEffect(cleared, lastClearedRows); registerClear(cleared); updateScore(cleared); playSfx('clear'); cur = null; }
+  else { registerClear(0); spawn(); }
+  if(isDuoMode) publishDuoState();
+}
 
 // Niveau interne commence à 0, on affiche +1 pour l'utilisateur
 function updateScore(cleared){ 
@@ -1250,6 +1523,7 @@ function hardDrop(){
   const color = COLORS[cur.type];
   hardDropEffect = { t:0, duration:300, cells, color, dist };
   lockPiece();
+  if(isDuoMode) publishDuoState();
 }
 function rotatePiece(){
   if(!cur) return;
@@ -1264,18 +1538,19 @@ function rotatePiece(){
       cur.shape = nextShape;
       cur.x += k;
       playSfx('rotate');
+  if(isDuoMode) publishDuoState();
       return;
     }
   }
 }
-function movePiece(dx,dy){ if(!cur) return false; if(!collides(cur,dx,dy)){ cur.x += dx; cur.y += dy; return true; } return false; }
+function movePiece(dx,dy){ if(!cur) return false; if(!collides(cur,dx,dy)){ cur.x += dx; cur.y += dy; if(isDuoMode) publishDuoState(); return true; } return false; }
 
 // main loop
 function loop(now=0){ if(!running) return; if(pauseOpen) { requestAnimationFrame(loop); return; }
   const dt = now - lastTime; lastTime = now; lastDrop += dt;
   const sweeping = processSweeps(dt);
   if(!sweeping){
-    if(lastDrop > dropInterval){ lastDrop = 0; if(!movePiece(0,1)) lockPiece(); }
+  if(lastDrop > dropInterval){ lastDrop = 0; if(!movePiece(0,1)) { lockPiece(); } }
   } else {
     // during sweep animation: do not fall; when sweep ends, respawn if needed
   }
@@ -1284,7 +1559,37 @@ function loop(now=0){ if(!running) return; if(pauseOpen) { requestAnimationFrame
   drawBoard(); drawParticles(); drawClearEffectOverlay(); drawHardDropEffect(); requestAnimationFrame(loop); }
 
 // game over
-function onGameOver(){ running = false; stopMusic(); const overlay = document.getElementById('gameOverOverlay'); overlay.style.display='flex'; const goText = document.getElementById('gameOverText');
+function onGameOver(){
+  running = false;
+  stopMusic();
+  if(isDuoMode){
+    // Pas d'overlay plein écran: on grise le board (fait dans drawBoard) et on affiche le texte directement dans la zone de jeu
+    // Ne pas arrêter le chrono en Duo: il continue de tourner
+    // Continuer d'afficher l'adversaire grâce au mini plateau
+    // On publie aussi l'état KO
+  // Mémoriser le timestamp de fin local (basé sur l’horloge) et publier
+  try{ if(!duoLocal.finishedAt) duoLocal.finishedAt = Date.now(); if(typeof window!=='undefined') window.duoFinishedAt = duoLocal.finishedAt; }catch{}
+  try{ publishDuoState(); }catch{}
+  // Redessiner le plateau local en mode grisé
+  drawBoard();
+    // Dessiner 'GAME OVER' en rouge au centre du canvas
+    try{
+      ctx.save();
+      ctx.fillStyle = '#ff3b3b';
+      ctx.font = `900 ${Math.floor(BLOCK*1.4)}px Inter, system-ui, Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = 'rgba(0,0,0,0.55)';
+      ctx.strokeText('GAME OVER', boardCanvas.width/2, boardCanvas.height/2);
+      ctx.fillText('GAME OVER', boardCanvas.width/2, boardCanvas.height/2);
+      ctx.restore();
+    }catch{}
+  // Si l’adversaire a aussi fini, afficher le résultat
+  try{ if(duoRemote.finishedAt){ finalizeDuoResult(); } }catch{}
+  return;
+  }
+  const overlay = document.getElementById('gameOverOverlay'); overlay.style.display='flex'; const goText = document.getElementById('gameOverText');
   // restart animation
   goText.style.opacity = 0; void goText.offsetWidth; goText.style.opacity = 1;
   const replayBtn = document.getElementById('replayBtn');
@@ -1404,7 +1709,7 @@ function setupMobileControls(){
   hookTouch('mRotate', ()=>{ if(running && !pauseOpen) rotatePiece(); });
   hookTouchHold('mDown', ()=>{ if(running && !pauseOpen) movePiece(0,1); }, 100); // Hold avec interval de 100ms
   hookTouch('mDrop', ()=>{ if(running && !pauseOpen) hardDrop(); });
-  hookTouch('pauseBtn', ()=>{ if(running) togglePause(); });
+  // Désactivé en Duo: pas de pause; sur solo on garde la touche P mais on ne mappe plus le bouton mobile explicitement
 }
 
 // Initialiser les contrôles mobiles
@@ -1421,6 +1726,7 @@ const toggleSfxBtn = document.getElementById('toggleSfxBtn');
 const pauseAudioRow = document.getElementById('pauseAudioRow');
 let pauseOpen = false;
 function showPause(){
+  if(isDuoMode) return; // pas de pause en duo
   pauseOpen = true; pauseOverlay.style.display='flex';
   // afficher boutons audio seulement mobile
   if(isMobile && pauseAudioRow){ pauseAudioRow.style.display='flex'; updateAudioToggleButtons(); }
@@ -1433,6 +1739,7 @@ function showPause(){
   }, 100);
 }
 function hidePause(){
+  if(isDuoMode) return; // pas de pause en duo
   pauseOpen = false; pauseOverlay.style.display='none';
   if(isMobile && pauseAudioRow){ pauseAudioRow.style.display='none'; }
   // reprendre musique si elle jouait
@@ -1449,7 +1756,7 @@ function closePauseOnClickOutside(event) {
     hidePause(); // Reprendre le jeu
   }
 }
-function togglePause(){ if(!running) return; pauseOpen ? hidePause() : showPause(); }
+function togglePause(){ if(!running) return; if(isDuoMode) return; pauseOpen ? hidePause() : showPause(); }
 if(pauseContinueBtn) pauseContinueBtn.addEventListener('click', ()=>{ hidePause(); });
 if(pauseMenuBtn) pauseMenuBtn.addEventListener('click', ()=>{ showQuitConfirmModal(); });
 
@@ -1713,6 +2020,7 @@ async function handleDuoConnection() {
   }
 }
 document.getElementById('backBtn').addEventListener('click', ()=>{ 
+  if(isDuoMode) return; // Pas de retour en Duo
   // Si le jeu est en cours, afficher la modal de confirmation
   if(running) {
     showQuitConfirmModal();
@@ -1730,6 +2038,9 @@ if(settingsBtn){ settingsBtn.addEventListener('click', ()=>{ showMenuPage('setti
 if(helpBackBtn){ helpBackBtn.addEventListener('click', ()=>{ showMenuPage('home'); }); }
 if(settingsBackBtn){ settingsBackBtn.addEventListener('click', ()=>{ showMenuPage('home'); }); }
 if(leaderboardBtn){ leaderboardBtn.addEventListener('click', ()=>{ showMenuPage('leaderboard'); fetchLeaderboard(); }); }
+// Pause desktop
+const pauseBtnDesktop = document.getElementById('pauseBtnDesktop');
+// Bouton pause desktop supprimé
 
 // Switch leaderboard solo/duo
 const lbTabSolo = document.getElementById('lbTabSolo');
@@ -1856,15 +2167,41 @@ function startGameFromMenu(){
   const mtcEl = document.getElementById('mobileTouchControls');
   if(mtcEl){
     // Toujours afficher le conteneur pour garder le bouton Pause
-    mtcEl.style.display = 'block';
+  mtcEl.style.display = 'block';
     const groups = [
       document.getElementById('touchLeftWrap'),
       document.getElementById('touchRightWrap'),
       document.getElementById('touchBottomWrap')
     ];
     groups.forEach(g=>{ if(g) g.style.display = show? 'flex':'none'; });
-    const pauseBtn = document.getElementById('pauseBtn');
-    if(pauseBtn) pauseBtn.style.display = 'flex';
+  const pauseBtn = document.getElementById('pauseBtn');
+  if(pauseBtn) pauseBtn.style.display = isDuoMode? 'none' : 'flex';
+  }
+  // Si on vient du mode Duo, masquer le score
+  if(isDuoMode){ applyDuoUiMode(true); }
+  // Chrono duo (mm:ss)
+  if(isDuoMode){
+    const hud = document.getElementById('duoHudTop');
+    if(hud){
+      hud.style.display='block';
+      // Utiliser startAt synchronisé si disponible
+      const startTs = (typeof duoStartAt==='number' && duoStartAt) ? duoStartAt : Date.now();
+      duoLocal.startAt = startTs;
+      clearInterval(hud._intv); hud._intv = setInterval(()=>{
+        let effectiveNow = Date.now();
+        // Si les deux ont fini, figer sur le max des deux
+  if(duoLocal.finishedAt && duoRemote.finishedAt){ effectiveNow = Math.max(duoLocal.finishedAt, duoRemote.finishedAt); }
+  const t = Math.max(0, Math.floor((effectiveNow-startTs)/1000));
+  duoLocal.elapsedSec = t;
+        const mm = String(Math.floor(t/60)).padStart(2,'0');
+        const ss = String(t%60).padStart(2,'0');
+        hud.textContent = `${mm}:${ss}`;
+      }, 250);
+    }
+    const mini = document.getElementById('opponentMini'); if(mini) mini.style.display='block';
+  } else {
+    const hud = document.getElementById('duoHudTop'); if(hud){ hud.style.display='none'; clearInterval(hud._intv); }
+    const mini = document.getElementById('opponentMini'); if(mini) mini.style.display='none';
   }
   requestAnimationFrame(loop);
 }
@@ -1872,6 +2209,10 @@ function showMenu(){ // stop and return
   running = false; stopMusic(); menuScreen.style.display='flex'; gameScreen.style.display='none'; const go = document.getElementById('gameOverOverlay'); if(go) go.style.display='none';
   // Cacher complètement l'overlay de contrôles mobiles au menu
   const mtc = document.getElementById('mobileTouchControls'); if(mtc) mtc.style.display='none';
+  // Quitter le mode Duo UI si actif
+  if(isDuoMode){ applyDuoUiMode(false); isDuoMode=false; }
+  const hud = document.getElementById('duoHudTop'); if(hud){ hud.style.display='none'; clearInterval(hud._intv); }
+  const mini = document.getElementById('opponentMini'); if(mini) mini.style.display='none';
   
   // Réinitialiser complètement le jeu
   score = 0; level = 0; lines = 0; combo = 0;
@@ -1892,6 +2233,98 @@ function showMenu(){ // stop and return
   
   // Réinitialiser l'atmosphère au menu
   changeAtmosphere(0);
+}
+
+// ===== Résultat Duo =====
+function formatMmSsFromMs(ms){ const s = Math.max(0, Math.floor(ms/1000)); const mm=String(Math.floor(s/60)).padStart(2,'0'); const ss=String(s%60).padStart(2,'0'); return `${mm}:${ss}`; }
+function getPlayerDisplayName(id){
+  try{
+    const s = id? String(id).toLowerCase() : '';
+    if(s.includes('sanaa')) return 'Sanaa';
+    if(s.includes('ben')) return 'Benjamin';
+    if(s.includes('benjamin')) return 'Benjamin';
+    return 'Joueur';
+  }catch{ return 'Joueur'; }
+}
+function finalizeDuoResult(){
+  try{
+    const overlay = document.getElementById('duoResultOverlay'); if(!overlay) return;
+    const hud = document.getElementById('duoHudTop'); if(hud){ hud.style.display='none'; }
+    // Calculer durées à partir du startAt sync
+    const startTs = (duoLocal.startAt || duoRemote.startAt || duoStartAt || Date.now());
+    const p1DurMs = Math.max(0, (duoLocal.finishedAt||Date.now()) - startTs);
+    const p2DurMs = Math.max(0, (duoRemote.finishedAt||Date.now()) - startTs);
+    // Vainqueur = celui qui a duré le plus longtemps
+    const localName = getPlayerDisplayName(window?.duoPlayerId)||'Joueur 1';
+    const remoteName = getPlayerDisplayName(duoRemote.id)||'Joueur 2';
+    let winnerName = localName, loserName = remoteName;
+    if(p2DurMs > p1DurMs){ winnerName = remoteName; loserName = localName; }
+    const winTime = formatMmSsFromMs(Math.max(p1DurMs,p2DurMs));
+    const loseTime = formatMmSsFromMs(Math.min(p1DurMs,p2DurMs));
+    const wTitle = document.getElementById('duoWinnerTitle');
+    if(wTitle){
+      wTitle.innerHTML = `<span style="color:#2BD4A4">${winnerName}</span> gagne ! <span style="opacity:.85">(${winTime})</span>`;
+    }
+    // Badges et ordre
+    const localBadge = document.getElementById('duoLocalBadge');
+    const remoteBadge = document.getElementById('duoRemoteBadge');
+    if(localBadge) localBadge.textContent = localName === winnerName ? 'Gagnant' : 'Perdant';
+    if(remoteBadge) remoteBadge.textContent = remoteName === winnerName ? 'Gagnant' : 'Perdant';
+    const localCard = document.getElementById('duoCardLocal');
+    const remoteCard = document.getElementById('duoCardRemote');
+    if(localCard && remoteCard){
+      // Place le gagnant à gauche visuellement
+      const container = localCard.parentElement;
+      if(winnerName === remoteName){
+        container.insertBefore(remoteCard, localCard);
+      } else {
+        container.insertBefore(localCard, remoteCard);
+      }
+    }
+    // Renseigner panneaux
+  const p1Name = document.getElementById('duoP1Name'); if(p1Name) p1Name.textContent = localName;
+    const p1Time = document.getElementById('duoP1Time'); if(p1Time) p1Time.textContent = formatMmSsFromMs(p1DurMs);
+    const p1Score = document.getElementById('duoP1Score'); if(p1Score) p1Score.textContent = String(score);
+    const p1Level = document.getElementById('duoP1Level'); if(p1Level) p1Level.textContent = String(level);
+    const p1Lines = document.getElementById('duoP1Lines'); if(p1Lines) p1Lines.textContent = String(lines);
+    const rs = duoRemote.state || { score:0, level:1, lines:0 };
+  const p2Name = document.getElementById('duoP2Name'); if(p2Name) p2Name.textContent = remoteName;
+    const p2Time = document.getElementById('duoP2Time'); if(p2Time) p2Time.textContent = formatMmSsFromMs(p2DurMs);
+    const p2Score = document.getElementById('duoP2Score'); if(p2Score) p2Score.textContent = String(rs.score||0);
+    const p2Level = document.getElementById('duoP2Level'); if(p2Level) p2Level.textContent = String(rs.level||1);
+    const p2Lines = document.getElementById('duoP2Lines'); if(p2Lines) p2Lines.textContent = String(rs.lines||0);
+  overlay.style.display = 'flex';
+    // Bind boutons
+    const rb = document.getElementById('duoReplayBtn'); if(rb){ rb.onclick = ()=>{ overlay.style.display='none'; showMenu(); document.getElementById('duoGameBtn')?.click(); } }
+    const mb = document.getElementById('duoMenuBtn'); if(mb){ mb.onclick = ()=>{ overlay.style.display='none'; showMenu(); } }
+
+    // Enregistrement en base duo_scores - uniquement si on est le gagnant et pas déjà soumis
+    try{
+      if(!duoScoreSubmitted && winnerName === localName){
+        duoScoreSubmitted = true;
+        const winner = winnerName;
+        // Temps en secondes pour la table (spécification: integer seconds)
+        const secSanaa = (localName==='Sanaa'? Math.round(p1DurMs/1000) : (remoteName==='Sanaa'? Math.round(p2DurMs/1000) : null));
+        const secBen = (localName==='Benjamin'? Math.round(p1DurMs/1000) : (remoteName==='Benjamin'? Math.round(p2DurMs/1000) : null));
+        submitDuoScore({ gagnant: winner, temps_sanaa: secSanaa, temps_benjamin: secBen });
+      }
+    }catch(_){ /* non bloquant */ }
+  }catch(e){ console.warn('finalizeDuoResult error', e); }
+}
+
+// Envoi d'un résultat Duo vers public.duo_scores
+async function submitDuoScore(row){
+  try{
+    if(!window.supabase){ console.warn('Supabase indisponible'); return; }
+    if(!row || !row.gagnant){ return; }
+    const payload = {
+      gagnant: String(row.gagnant).substring(0,64),
+      temps_sanaa: (typeof row.temps_sanaa === 'number'? row.temps_sanaa : null),
+      temps_benjamin: (typeof row.temps_benjamin === 'number'? row.temps_benjamin : null)
+    };
+    const { error } = await window.supabase.from('duo_scores').insert(payload);
+    if(error){ console.warn('duo_scores insert error', error.message); }
+  }catch(e){ console.warn('submitDuoScore error', e); }
 }
 
 // mute buttons
@@ -2104,6 +2537,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const SUPA_URL = 'https://ocdloxagawjkokiheuiu.supabase.co';
 const SUPA_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jZGxveGFnYXdqa29raWhldWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1MTM1NTQsImV4cCI6MjA2ODA4OTU1NH0.OFC4QyrCKtyY_2JA2I5MnI8JjmuFBYHuJH7nO1Vyu5o';
 const supabase = createClient(SUPA_URL, SUPA_ANON_KEY);
+// Exposer pour les autres scripts (non-module) qui publient l'état Duo
+try { window._supabaseClient = supabase; window.supabase = supabase; } catch {}
 
 // ====== FONCTIONS DUO MODE ======
 // Variables globales pour le mode duo
@@ -2120,6 +2555,14 @@ let duoStarted = false;
 let duoHealthLoop = null;
 let duoRealtimeReady = false; // abonnement realtime établi
 let duoStatePollLoop = null;  // fallback polling si websocket échoue
+let duoOpponentHydrateLoop = null; // polling initial pour récupérer l'état adverse
+let duoOpponentHydrated = false;
+let duoHandshakeWatchLoop = null; // polling résilient du handshake jusqu'au départ
+let duoHandshakeTs = { seed: 0, ready: 0 }; // timestamps locaux des étapes envoyées
+let duoOpponentDisconnected = false; // indicateur de présence adverse
+let duoOpponentLastSeen = 0; // ms
+let duoNotifPermissionAsked = false; // permission notifications
+let duoScoreSubmitted = false; // éviter doublons et limiter l'insert au gagnant
 
 // Fonction pour nettoyer la connexion duo
 async function cleanupDuoConnection() {
@@ -2145,15 +2588,26 @@ async function cleanupDuoConnection() {
   if(duoStateLoop){ clearInterval(duoStateLoop); duoStateLoop = null; }
   if(duoHealthLoop){ clearInterval(duoHealthLoop); duoHealthLoop = null; }
   if(duoStatePollLoop){ clearInterval(duoStatePollLoop); duoStatePollLoop = null; }
+  if(duoOpponentHydrateLoop){ clearInterval(duoOpponentHydrateLoop); duoOpponentHydrateLoop = null; }
+  if(duoHandshakeWatchLoop){ clearInterval(duoHandshakeWatchLoop); duoHandshakeWatchLoop = null; }
+  duoHandshakeTs = { seed: 0, ready: 0 };
+  duoOpponentHydrated = false;
+  duoOpponentDisconnected = false;
+  duoOpponentLastSeen = 0;
+  duoScoreSubmitted = false;
   duoRealtimeReady = false;
   window.duoConnectionId = null;
+  try { window.duoPlayerId = null; } catch {}
 }
 
 // Fonction principale pour gérer la connexion duo (avec réutilisation d'une session en attente)
 async function handleDuoConnection() {
   try {
-    const user = sessionStorage.getItem('currentUser') || localStorage.getItem('lastUser') || 'Benjamin';
-    duoPlayerId = user;
+  const user = sessionStorage.getItem('currentUser') || localStorage.getItem('lastUser') || 'Benjamin';
+  duoPlayerId = user;
+  try { window.duoPlayerId = duoPlayerId; } catch {}
+  // Préparer les notifications si supportées
+  ensureNotificationPermission();
     const duoWaitCountEl = document.getElementById('duoWaitCount');
     const feedback = (msg)=>{ if(duoWaitCountEl) duoWaitCountEl.textContent = msg; };
     const STALE_MS = 15000;
@@ -2239,6 +2693,14 @@ async function handleDuoConnection() {
         }
       }, 300);
     }
+
+    // Watchdog supplémentaire: même si le realtime marche, on s'assure de ne pas rester bloqué
+    if(!duoHandshakeWatchLoop){
+      duoHandshakeWatchLoop = setInterval(()=>{
+        if(duoStarted){ clearInterval(duoHandshakeWatchLoop); duoHandshakeWatchLoop = null; return; }
+        checkPlayerCount();
+      }, 1200);
+    }
   } catch(e) {
     console.error('Erreur handleDuoConnection:', e);
     const duoWaitCountEl = document.getElementById('duoWaitCount');
@@ -2288,9 +2750,26 @@ function processDuoRoomSnapshot(rows){
   const playerCount = filtered.length;
   if(duoWaitCount) duoWaitCount.textContent = `Joueurs connectés : ${playerCount}/2`;
 
-  const sorted = [...filtered].sort((a,b)=> new Date(a.updated_at) - new Date(b.updated_at));
-  const hostRow = sorted[0];
-  const guestRow = sorted[1];
+  // Déterminer host/guest de façon stable: prioriser data.role==='host', sinon fallback à l'antériorité
+  const parsed = filtered.map(r=>{
+    let d = r.data; if(typeof d==='string'){ try{ d = JSON.parse(d); }catch{ d = {}; } }
+    return { ...r, _data: d||{} };
+  });
+  let hostRow = parsed.find(r => r._data && r._data.role === 'host');
+  let guestRow = null;
+  if(!hostRow){
+    const sorted = [...parsed].sort((a,b)=> new Date(a.updated_at) - new Date(b.updated_at));
+    hostRow = sorted[0] || null;
+    guestRow = sorted[1] || null;
+  } else {
+    guestRow = parsed.find(r => r.joueur !== hostRow.joueur) || null;
+  }
+
+  // Mettre à jour "last seen" de l'adversaire
+  try{
+    const opp = filtered.find(r=> r.joueur !== duoPlayerId);
+    if(opp){ duoOpponentLastSeen = new Date(opp.updated_at).getTime(); }
+  }catch{}
 
   if(!duoRole){
     if(hostRow && hostRow.joueur === duoPlayerId) duoRole = 'host';
@@ -2299,39 +2778,84 @@ function processDuoRoomSnapshot(rows){
 
   if(playerCount === 1){
     if(statusEl) statusEl.textContent = "En attente d'un joueur...";
+  setDuoBackDisabled(false);
+    // Marquer son rôle comme host dès maintenant (idempotent)
+    try{
+      const selfRow = parsed[0];
+      let d = selfRow? selfRow._data||{} : {};
+      if(d.role !== 'host'){
+        d = { ...d, role:'host' };
+        // On reste en etat 'waiting'
+        supabase.from('duo_live').update({ data: d }).eq('room_id', duoConnectionId).eq('joueur', duoPlayerId).then(()=>{}).catch(()=>{});
+      }
+      duoRole = 'host';
+    }catch{}
+    // Dessiner si l'adversaire (seul autre joueur) a déjà un état
+    try{
+      const opp = filtered.find(r=> r.joueur !== duoPlayerId);
+      if(opp && opp.data){
+        let d = opp.data; if(typeof d === 'string'){ try{ d = JSON.parse(d); }catch{} }
+        if(d && d.state){ const wrap = document.getElementById('opponentMini'); if(wrap) wrap.style.display='block'; drawOpponentMini(d.state); }
+      }
+    }catch{}
     return;
   }
   if(playerCount > 2){
     if(statusEl) statusEl.textContent = 'Salle pleine (erreur)';
+  setDuoBackDisabled(false);
     return;
   }
 
-  let hostData = (hostRow && hostRow.data) || {};
-  let guestData = (guestRow && guestRow.data) || {};
+  let hostData = (hostRow && (hostRow._data || hostRow.data)) || {};
+  let guestData = (guestRow && (guestRow._data || guestRow.data)) || {};
   if(typeof hostData === 'string'){ try{ hostData = JSON.parse(hostData);}catch{hostData={};} }
   if(typeof guestData === 'string'){ try{ guestData = JSON.parse(guestData);}catch{guestData={};} }
+
+  // Si aucun rôle n'est défini côté serveur pour host/guest, élire un host de secours de manière déterministe
+  try{
+    const hasRoles = !!(hostRow && hostRow._data && hostRow._data.role) || !!(guestRow && guestRow._data && guestRow._data.role);
+    if(!hasRoles && hostRow && guestRow){
+      const myIsCandidate = duoPlayerId && [hostRow.joueur, guestRow.joueur].sort()[0] === duoPlayerId;
+      if(myIsCandidate){
+        // Se proclamer host si personne ne l'a fait après un petit délai
+        const ageMs = NOW - new Date(hostRow.updated_at).getTime();
+        if(ageMs > 800){ // petit délai pour éviter collision
+          supabase.from('duo_live').update({ data: { role:'host' } }).eq('room_id', duoConnectionId).eq('joueur', duoPlayerId).then(()=>{}).catch(()=>{});
+          duoRole = 'host';
+        }
+      }
+    }
+  }catch{}
+
+  // Résoudre conflit de seeds éventuel: prioriser la seed du host (plus ancien)
+  if(hostData && guestData && hostData.seed && guestData.seed && hostData.seed !== guestData.seed){
+    if(duoRole === 'guest'){
+      duoSeed = hostData.seed; if(typeof window!=='undefined') window.duoSeed = duoSeed;
+      updateOwnDuoState('seed_ack', { role:'guest', seed:duoSeed, ack:true });
+    }
+  }
 
   if(duoRole === 'host' && !hostData.seed){
     duoSeed = Math.random().toString(36).slice(2,10); if(typeof window!=='undefined') window.duoSeed = duoSeed;
     hostData = { role:'host', seed:duoSeed };
     updateOwnDuoState('seed', hostData);
-    if(statusEl) statusEl.textContent = 'Joueur trouvé ! Génération seed...';
+  if(statusEl) statusEl.textContent = 'Joueur trouvé ! Génération seed...'; setDuoBackDisabled(false);
     return;
   }
   if(duoRole === 'guest' && hostRow.etat === 'seed' && hostData.seed && (guestRow.etat==='waiting' || guestRow.etat==='seed')){
     duoSeed = hostData.seed; if(typeof window!=='undefined') window.duoSeed = duoSeed;
     guestData = { role:'guest', seed:duoSeed, ack:true };
     updateOwnDuoState('seed_ack', guestData);
-    if(statusEl) statusEl.textContent = 'Seed reçue. Synchronisation...';
+  if(statusEl) statusEl.textContent = 'Seed reçue. Synchronisation...'; setDuoBackDisabled(false);
     return;
   }
   if(duoRole === 'host' && hostRow.etat==='seed' && guestRow.etat==='seed_ack' && hostData.seed){
     duoSeed = hostData.seed; if(typeof window!=='undefined') window.duoSeed = duoSeed;
-    // Démarrage plus large pour compenser latence (3s)
-    duoStartAt = Date.now() + 3000;
+  // Démarrage plus large pour compenser latence (5s pour countdown visuel)
+  duoStartAt = Date.now() + 5000;
     hostData = { role:'host', seed:duoSeed, startAt:duoStartAt };
     updateOwnDuoState('ready', hostData);
-    if(statusEl) statusEl.textContent = 'Synchronisation prête...';
+  if(statusEl) statusEl.textContent = 'Synchronisation prête...'; setDuoBackDisabled(false);
     return;
   }
   if(duoRole === 'guest' && hostRow.etat==='ready' && hostData.startAt){
@@ -2340,6 +2864,7 @@ function processDuoRoomSnapshot(rows){
     if(!duoStarted){
       scheduleDuoStart();
       if(statusEl) statusEl.textContent = 'Démarrage imminent...';
+  setDuoBackDisabled(true);
     }
     return;
   }
@@ -2349,14 +2874,56 @@ function processDuoRoomSnapshot(rows){
     if(!duoStarted){
       scheduleDuoStart();
       if(statusEl) statusEl.textContent = 'Démarrage imminent...';
+  setDuoBackDisabled(true);
     }
     return;
   }
+
+  // Relances idempotentes si une étape semble bloquée (timeouts légers)
+  try{
+    const nowMs = Date.now();
+    if(playerCount===2){
+      // Host a proposé seed mais pas d'ACK depuis >3s => republier pour réveiller l'autre
+      if(duoRole==='host' && hostRow.etat==='seed' && (!guestRow || guestRow.etat!=='seed_ack')){
+        if(nowMs - (duoHandshakeTs.seed||0) > 3000 && hostData.seed){
+          updateOwnDuoState('seed', { role:'host', seed: hostData.seed });
+          duoHandshakeTs.seed = nowMs;
+        }
+      }
+      // Guest a vu host en seed mais n'a pas encore ack -> ack forcé si retard >2s
+      if(duoRole==='guest' && hostRow.etat==='seed' && hostData.seed && (guestRow.etat==='waiting' || guestRow.etat==='seed')){
+        const hostAge = nowMs - new Date(hostRow.updated_at).getTime();
+        if(hostAge > 2000){
+          duoSeed = hostData.seed; if(typeof window!=='undefined') window.duoSeed = duoSeed;
+          updateOwnDuoState('seed_ack', { role:'guest', seed: duoSeed, ack:true });
+        }
+      }
+      // Host en ready mais l'autre n'a pas réagi → republier ready chaque 3s maxi
+      if(duoRole==='host' && hostRow.etat==='ready' && hostData.startAt){
+        if(guestRow && guestRow.etat!=='ready' && nowMs - (duoHandshakeTs.ready||0) > 3000){
+          updateOwnDuoState('ready', { role:'host', seed: hostData.seed, startAt: hostData.startAt });
+          duoHandshakeTs.ready = nowMs;
+        }
+      }
+      // Si startAt est passé côté guest (événement raté), démarrer quand même avec délai min
+      if(duoRole==='guest' && hostRow.etat==='ready' && hostData.startAt && !duoStarted){
+        duoSeed = hostData.seed; if(typeof window!=='undefined') window.duoSeed = duoSeed;
+        duoStartAt = hostData.startAt;
+        scheduleDuoStart();
+        if(statusEl) statusEl.textContent = 'Démarrage imminent...'; setDuoBackDisabled(true);
+      }
+    }
+  }catch{ /* soft */ }
 }
 
 async function updateOwnDuoState(etat, dataObj){
   try { await supabase.from('duo_live').update({ etat, data: dataObj }).eq('room_id', duoConnectionId).eq('joueur', duoPlayerId); }
   catch(e){ console.warn('updateOwnDuoState error', e); }
+  // mémoriser timestamps locaux pour watchdog
+  try{
+    if(etat==='seed') duoHandshakeTs.seed = Date.now();
+    if(etat==='ready') duoHandshakeTs.ready = Date.now();
+  }catch{}
 }
 
 function scheduleDuoStart(){
@@ -2367,7 +2934,27 @@ function scheduleDuoStart(){
   duoStarted = true;
   if(!duoHealthLoop){ duoHealthLoop = setInterval(checkDuoHealth, 5000); }
   if(!duoSeed){ console.warn('Duo: démarrage sans seed défini'); }
-  setTimeout(()=>{ startDuoGame(); }, delay);
+  // Compte à rebours visuel sur l'overlay d'attente Duo
+  try{
+    const statusEl = document.getElementById('duoWaitStatus');
+    const countEl = document.getElementById('duoWaitCount');
+    let remainingMs = delay;
+    if(statusEl){ statusEl.textContent = 'Démarrage imminent...'; }
+    setDuoBackDisabled(true);
+    // Rafraîchir toutes les ~200ms pour un affichage fluide
+    const tick = () => {
+      remainingMs = Math.max(0, duoStartAt - Date.now());
+      const s = Math.ceil(remainingMs/1000);
+      if(countEl){ countEl.textContent = `Départ dans ${s}s`; }
+      if(remainingMs <= 0){
+        if(countEl) countEl.textContent = 'Départ!';
+        startDuoGame();
+      } else {
+        setTimeout(tick, 200);
+      }
+    };
+    tick();
+  }catch{ setTimeout(()=>{ startDuoGame(); }, delay); }
 }
 
 async function checkDuoHealth(){
@@ -2380,16 +2967,29 @@ async function checkDuoHealth(){
     if(error) return;
     const now = Date.now();
     const stale = data.filter(r => now - new Date(r.updated_at).getTime() > 12000);
-    if(stale.length && !duoStarted){
-      const duoWaitCount = document.getElementById('duoWaitCount');
-      if(duoWaitCount) duoWaitCount.textContent = 'Joueur inactif, fermeture.';
-      setTimeout(()=>{ cleanupDuoConnection(); const ov=document.getElementById('duoWaitOverlay'); if(ov) ov.style.display='none'; },1400);
+    if(stale.length){
+      const oppRow = data.find(r=> r.joueur !== duoPlayerId);
+      const oppIsStale = oppRow ? (now - new Date(oppRow.updated_at).getTime() > 12000) : true;
+      if(!duoStarted){
+        if(oppIsStale){
+          const duoWaitCount = document.getElementById('duoWaitCount');
+          if(duoWaitCount) duoWaitCount.textContent = 'Joueur inactif, fermeture.';
+          setTimeout(()=>{ cleanupDuoConnection(); const ov=document.getElementById('duoWaitOverlay'); if(ov) ov.style.display='none'; },1400);
+        }
+      } else {
+        if(oppIsStale && !duoOpponentDisconnected){
+          markOpponentDisconnected('Adversaire déconnecté');
+        }
+      }
+    } else {
+      // Si tout va bien, enlever éventuellement le badge
+      if(duoOpponentDisconnected){ clearOpponentDisconnectedBadge(); }
     }
   } catch(e){ console.warn('checkDuoHealth error', e);} 
 }
 
 // Lancer le jeu duo
-function startDuoGame() {
+async function startDuoGame() {
   console.log('Lancement du jeu duo !');
   
   // Masquer l'overlay d'attente
@@ -2397,24 +2997,58 @@ function startDuoGame() {
   duoConnecting = false;
   duoHandshakeComplete = true;
   if(duoStatePollLoop){ clearInterval(duoStatePollLoop); duoStatePollLoop=null; }
-  // Pas de démarrage de partie pour l'instant : retour menu + notification
-  if(running){ running = false; }
-  showMenu();
-  cleanupDuoConnection();
-  const statusEl = document.getElementById('duoWaitStatus'); if(statusEl) statusEl.textContent='';
-  (function toast(){
-    let el = document.getElementById('duoNotReadyToast');
-    if(!el){
-      el = document.createElement('div');
-      el.id = 'duoNotReadyToast';
-      el.style.cssText = 'position:fixed;top:18px;left:50%;transform:translate(-50%, -6px);background:linear-gradient(135deg,rgba(255,107,107,0.18),rgba(255,107,107,0.05));border:1px solid rgba(255,107,107,0.45);color:#ff9494;font-weight:700;font-size:14px;padding:10px 18px;border-radius:14px;z-index:99999;backdrop-filter:blur(4px);box-shadow:0 6px 18px -4px rgba(255,107,107,0.35);opacity:0;transition:opacity .4s,transform .4s;pointer-events:none;';
-      el.textContent = 'Pas encore mon coeur 😽';
-      document.body.appendChild(el);
-      requestAnimationFrame(()=>{ el.style.opacity='1'; el.style.transform='translate(-50%, 0)'; });
-      setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translate(-50%, -8px)'; }, 3000);
-      setTimeout(()=>{ if(el && el.parentNode) el.parentNode.removeChild(el); }, 3600);
-    } else { el.textContent = 'Pas encore mon coeur 😽'; }
-  })();
+
+  // Démarrer une partie identique au solo, mais en mode Duo (score masqué)
+  isDuoMode = true;
+  applyDuoUiMode(true);
+  setDuoBackDisabled(false);
+  startGameFromMenu();
+
+  // Hydratation initiale du mini plateau adverse: récupérer le dernier état connu de l'autre joueur
+  try{
+    const { data, error } = await supabase
+      .from('duo_live')
+      .select('joueur, data, updated_at')
+      .eq('room_id', duoConnectionId)
+      .neq('joueur', duoPlayerId)
+      .order('updated_at', { ascending: false })
+      .limit(1);
+    if(!error && data && data.length && data[0].data){
+      let d = data[0].data; if(typeof d === 'string'){ try{ d = JSON.parse(d); }catch{} }
+      if(d && d.state){
+        const wrap = document.getElementById('opponentMini'); if(wrap) wrap.style.display = 'block';
+        drawOpponentMini(d.state);
+        duoOpponentHydrated = true;
+        duoRemote.state = d.state; duoRemote.id = data[0].joueur; duoRemote.startAt = d.startAt || duoStartAt; duoRemote.finishedAt = d.state.finishedAt || (d.state.alive? null : Date.now());
+      }
+    }
+  }catch(e){ /* non bloquant */ }
+
+  // Si non hydraté, petit polling jusqu'à réception (10s max)
+  if(!duoOpponentHydrated && !duoOpponentHydrateLoop){
+    const startedAt = Date.now();
+    duoOpponentHydrateLoop = setInterval(async ()=>{
+      if(Date.now() - startedAt > 10000){ clearInterval(duoOpponentHydrateLoop); duoOpponentHydrateLoop=null; return; }
+      try{
+        const { data } = await supabase
+          .from('duo_live')
+          .select('joueur, data, updated_at')
+          .eq('room_id', duoConnectionId)
+          .neq('joueur', duoPlayerId)
+          .order('updated_at', { ascending: false })
+          .limit(1);
+        if(data && data.length && data[0].data){
+          let d = data[0].data; if(typeof d === 'string'){ try{ d = JSON.parse(d); }catch{} }
+          if(d && d.state){
+            const wrap = document.getElementById('opponentMini'); if(wrap) wrap.style.display = 'block';
+            drawOpponentMini(d.state);
+            duoOpponentHydrated = true;
+            clearInterval(duoOpponentHydrateLoop); duoOpponentHydrateLoop=null;
+          }
+        }
+      }catch(_){ /* ignore */ }
+    }, 600);
+  }
 }
 
 // Gérer les changements temps réel de duo_live
@@ -2423,17 +3057,59 @@ function handleDuoLiveChange(payload) {
     // Un joueur s'est connecté ou a changé de statut
     setTimeout(() => {
       checkPlayerCount();
-    }, 500);
+      // Afficher mini plateau adverse en Duo
+      try{
+        const row = payload.new || payload.record || null;
+    if(row && row.joueur && row.joueur !== duoPlayerId && row.data){
+          // marque la présence adverse
+          duoOpponentLastSeen = Date.now();
+          if(duoOpponentDisconnected){ clearOpponentDisconnectedBadge(); }
+          let d = row.data; if(typeof d === 'string'){ try{ d = JSON.parse(d); }catch{} }
+          if(d && d.state){
+            const wrap = document.getElementById('opponentMini'); if(wrap) wrap.style.display = 'block';
+            drawOpponentMini(d.state);
+            duoOpponentHydrated = true;
+            // Stocker état et finishedAt distant
+      duoRemote.state = d.state;
+      duoRemote.id = row.joueur;
+      duoRemote.startAt = d.startAt || duoRemote.startAt || duoStartAt;
+            duoRemote.finishedAt = d.state.finishedAt || (d.state.alive? null : Date.now());
+            // Si les deux sont KO, arrêter et figer le chrono Duo puis afficher résultat
+            try{
+              const hud = document.getElementById('duoHudTop');
+              const localAlive = !!running;
+              const oppAlive = !!(d.state.alive);
+              if(!localAlive && !oppAlive && hud && hud._intv){
+                // Figer sur le même temps (max des deux finishedAt)
+                if(!duoLocal.finishedAt) duoLocal.finishedAt = Date.now();
+                const freezeAt = Math.max(duoLocal.finishedAt||0, duoRemote.finishedAt||0);
+                const startTs = duoLocal.startAt || duoStartAt || Date.now();
+                const t = Math.max(0, Math.floor((freezeAt-startTs)/1000));
+                duoRemote.elapsedSec = Math.max(duoLocal.elapsedSec||t, t);
+                const mm = String(Math.floor(t/60)).padStart(2,'0');
+                const ss = String(t%60).padStart(2,'0');
+                hud.textContent = `${mm}:${ss}`;
+                clearInterval(hud._intv); hud._intv = null;
+                finalizeDuoResult();
+              }
+            }catch{}
+          }
+        }
+      }catch{}
+    }, 300);
   } else if(payload.eventType === 'DELETE') {
     // Un joueur s'est déconnecté
     const duoWaitCount = document.getElementById('duoWaitCount');
-    if(duoWaitCount && !duoStarted) {
-      duoWaitCount.textContent = 'Joueur perdu, retour menu.';
-      // Fin de session
+    if(!duoStarted) {
+      if(duoWaitCount) duoWaitCount.textContent = 'Joueur perdu, retour menu.';
       setTimeout(()=>{
         cleanupDuoConnection();
-        document.getElementById('duoWaitOverlay').style.display = 'none';
+        const ov = document.getElementById('duoWaitOverlay'); if(ov) ov.style.display = 'none';
       }, 1500);
+    } else {
+      // Pendant la partie: signaler la déconnexion mais laisser continuer
+  markOpponentDisconnected('Votre adversaire a quitté la partie');
+  showUserNotification('Adversaire déconnecté', 'Votre adversaire a quitté la partie.');
     }
   }
 }
@@ -2457,6 +3133,98 @@ setInterval(async () => {
     }
   }
 }, 10000);
+
+// UI: badge de déconnexion adverse sur le mini-plateau
+function markOpponentDisconnected(msg){
+  duoOpponentDisconnected = true;
+  const wrap = document.getElementById('opponentMini');
+  if(!wrap) return;
+  // Atténuer visuellement
+  try { wrap.style.opacity = '0.55'; } catch{}
+  try { wrap.classList.add('opponentMini--disconnected'); } catch{}
+  let badge = document.getElementById('opDiscBadge');
+  if(!badge){
+    badge = document.createElement('div');
+    badge.id = 'opDiscBadge';
+    badge.textContent = msg || 'Adversaire déconnecté';
+    wrap.style.position = 'relative';
+    wrap.appendChild(badge);
+  } else {
+    badge.textContent = msg || 'Adversaire déconnecté';
+  }
+  // Notification/toast utilisateur
+  showUserNotification('Adversaire déconnecté', msg || 'Adversaire déconnecté');
+}
+
+function clearOpponentDisconnectedBadge(){
+  duoOpponentDisconnected = false;
+  const wrap = document.getElementById('opponentMini');
+  if(wrap){
+    try { wrap.style.opacity = '1'; } catch{}
+  try { wrap.classList.remove('opponentMini--disconnected'); } catch{}
+    const badge = document.getElementById('opDiscBadge');
+    if(badge){ try{ badge.remove(); }catch{} }
+  }
+}
+
+// Notifications: wrapper + fallback toast
+function ensureNotificationPermission(){
+  try{
+    if(typeof Notification === 'undefined') return;
+    if(!duoNotifPermissionAsked && Notification.permission === 'default'){
+      duoNotifPermissionAsked = true;
+      Notification.requestPermission().catch(()=>{});
+    }
+  }catch{}
+}
+
+function showUserNotification(title, body){
+  try{
+    if(typeof Notification !== 'undefined' && Notification.permission === 'granted'){
+      new Notification(title || 'Notification', { body: body || '', silent: false });
+      return;
+    }
+  }catch{}
+  // Fallback toast
+  showToast(body || title || 'Notification');
+}
+
+function showToast(msg){
+  try{
+    let cont = document.getElementById('toastContainer');
+    if(!cont){
+      cont = document.createElement('div');
+      cont.id = 'toastContainer';
+      cont.style.position = 'fixed';
+      cont.style.right = '16px';
+      cont.style.bottom = '16px';
+      cont.style.zIndex = '9999';
+      cont.style.display = 'flex';
+      cont.style.flexDirection = 'column';
+      cont.style.gap = '8px';
+      document.body.appendChild(cont);
+    }
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.background = 'rgba(0,0,0,0.85)';
+    t.style.color = '#fff';
+    t.style.padding = '10px 12px';
+    t.style.borderRadius = '8px';
+    t.style.boxShadow = '0 6px 18px rgba(0,0,0,0.35)';
+    t.style.fontSize = '13px';
+    t.style.maxWidth = '60vw';
+    t.style.border = '1px solid rgba(255,255,255,0.2)';
+    t.style.opacity = '0';
+    t.style.transform = 'translateY(8px)';
+    t.style.transition = 'opacity .2s ease, transform .2s ease';
+    cont.appendChild(t);
+    requestAnimationFrame(()=>{ t.style.opacity = '1'; t.style.transform = 'translateY(0)'; });
+    setTimeout(()=>{
+      t.style.opacity = '0'; t.style.transform = 'translateY(8px)';
+      setTimeout(()=>{ try{ t.remove(); }catch{} }, 220);
+    }, 4200);
+  }catch{}
+}
 
 // Exposer les fonctions au scope global
 window.supabaseHandleDuo = handleDuoConnection;
