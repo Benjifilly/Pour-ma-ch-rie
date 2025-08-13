@@ -2186,14 +2186,20 @@ function startGameFromMenu(){
       const startTs = (typeof duoStartAt==='number' && duoStartAt) ? duoStartAt : Date.now();
       duoLocal.startAt = startTs;
       clearInterval(hud._intv); hud._intv = setInterval(()=>{
-        let effectiveNow = Date.now();
-        // Si les deux ont fini, figer sur le max des deux
-  if(duoLocal.finishedAt && duoRemote.finishedAt){ effectiveNow = Math.max(duoLocal.finishedAt, duoRemote.finishedAt); }
-  const t = Math.max(0, Math.floor((effectiveNow-startTs)/1000));
-  duoLocal.elapsedSec = t;
+        // Si le joueur local a déjà perdu, figer le chrono sur son temps de défaite
+        const now = Date.now();
+        let effectiveNow = (duoLocal && duoLocal.finishedAt) ? duoLocal.finishedAt : now;
+        // Si les deux ont fini, figer sur le max des deux (cas double KO)
+        if(duoLocal && duoLocal.finishedAt && duoRemote && duoRemote.finishedAt){
+          effectiveNow = Math.max(duoLocal.finishedAt, duoRemote.finishedAt);
+        }
+        const t = Math.max(0, Math.floor((effectiveNow - startTs)/1000));
+        duoLocal.elapsedSec = t;
         const mm = String(Math.floor(t/60)).padStart(2,'0');
         const ss = String(t%60).padStart(2,'0');
         hud.textContent = `${mm}:${ss}`;
+        // Arrêter la mise à jour si le local est KO (chrono figé pour le perdant)
+        if(duoLocal && duoLocal.finishedAt && hud && hud._intv){ clearInterval(hud._intv); hud._intv = null; }
       }, 250);
     }
     const mini = document.getElementById('opponentMini'); if(mini) mini.style.display='block';
@@ -2252,6 +2258,13 @@ function finalizeDuoResult(){
     const hud = document.getElementById('duoHudTop'); if(hud){ hud.style.display='none'; }
     // S'assurer que l'overlay est visible au moins une fois
     if(!duoResultShown){ overlay.style.display = 'flex'; duoResultShown = true; }
+    // Initialiser UI rematch
+    try{
+      const rb0 = document.getElementById('duoReplayBtn');
+      if(rb0){ rb0.textContent = 'Rejouer 0/2'; }
+      // démarrer le polling si pas déjà actif, afin d’actualiser le compteur en temps réel côté deux joueurs
+      if(!duoRematchLoop){ duoRematchLoop = setInterval(pollRematch, 700); }
+    }catch{}
     // Calculer durées à partir du startAt sync
     const startTs = (duoLocal.startAt || duoRemote.startAt || duoStartAt || Date.now());
     const p1DurMs = Math.max(0, (duoLocal.finishedAt||Date.now()) - startTs);
@@ -2298,12 +2311,48 @@ function finalizeDuoResult(){
     // Afficher (ou garder visible) l'overlay
     overlay.style.display = 'flex';
     // Bind boutons
-    const rb = document.getElementById('duoReplayBtn'); if(rb){ rb.onclick = ()=>{ overlay.style.display='none'; showMenu(); document.getElementById('duoGameBtn')?.click(); } }
-    const mb = document.getElementById('duoMenuBtn'); if(mb){ mb.onclick = ()=>{ overlay.style.display='none'; showMenu(); } }
+    const rb = document.getElementById('duoReplayBtn'); if(rb){ rb.onclick = async ()=>{
+        // Toggle rematch_ready sur Supabase: un second clic annule la participation
+        try{
+          // Interroger notre ligne pour savoir si on est déjà rematch_ready
+          const { data: myRows } = await supabase.from('duo_live').select('etat, data').eq('room_id', duoConnectionId).eq('joueur', duoPlayerId).maybeSingle();
+          const alreadyReady = !!(myRows && myRows.etat === 'rematch_ready');
+          if(alreadyReady){
+            // Annuler la participation
+            await supabase.from('duo_live').update({ etat:'waiting' }).eq('room_id', duoConnectionId).eq('joueur', duoPlayerId);
+            duoRematchReadyLocal = false; duoIsRematch = false;
+          } else {
+            duoResultShown = false; duoScoreSubmitted = false; duoCountdownPinned = false; duoStarted = false; duoCountdownActive = false;
+            duoLocal = { startAt:null, finishedAt:null, elapsedSec:null };
+            duoRematchReadyLocal = true; duoRematchReadyRemote = false;
+            duoIsRematch = true;
+            // Nettoyer flags menu/rematch_block dans data sans écraser le reste
+            let d = myRows && myRows.data ? (typeof myRows.data === 'string' ? JSON.parse(myRows.data) : myRows.data) : {};
+            d.menu = false; d.rematch_block = false;
+            await supabase.from('duo_live').update({ etat:'rematch_ready', data: d }).eq('room_id', duoConnectionId).eq('joueur', duoPlayerId);
+          }
+          if(duoRematchLoop){ clearInterval(duoRematchLoop); }
+          // Rafraîchir tout de suite puis continuer à poller
+          await pollRematch();
+          duoRematchLoop = setInterval(pollRematch, 700);
+        }catch(e){ console.warn('rematch ready error', e); }
+      } }
+  const mb = document.getElementById('duoMenuBtn'); if(mb){ mb.onclick = async ()=>{
+        // Signaler qu'on quitte en désactivant rematch côté supabase et en posant un flag data.menu (merge sans écraser role/seed)
+        try{
+          const { data: cur } = await supabase.from('duo_live').select('data').eq('room_id', duoConnectionId).eq('joueur', duoPlayerId).maybeSingle();
+          let d = cur && cur.data ? (typeof cur.data === 'string' ? JSON.parse(cur.data) : cur.data) : {};
+          d.menu = true; d.rematch_block = true;
+          await supabase.from('duo_live').update({ etat:'waiting', data: d }).eq('room_id', duoConnectionId).eq('joueur', duoPlayerId);
+        }catch{}
+    duoIsRematch = false;
+        overlay.style.display='none'; showMenu();
+      } }
 
     // Enregistrement en base duo_scores - uniquement si on est le gagnant et pas déjà soumis
     try{
       const bothFinished = !!(duoLocal.finishedAt && duoRemote.finishedAt);
+      console.info('[DUO] finalize -> winnerLocal=%s, bothFinished=%s, submitted=%s', (winnerName===localName), bothFinished, duoScoreSubmitted);
       if(!duoScoreSubmitted && winnerName === localName && bothFinished){
         duoScoreSubmitted = true;
         const winner = winnerName;
@@ -2318,9 +2367,25 @@ function finalizeDuoResult(){
           const scoreWinner = (localName===winnerName) ? score : (rs.score||0);
           submitScoreToLeaderboard(scoreWinner, lvlWinner).catch(()=>{});
         }catch(_){ }
+      } else {
+        console.info('[DUO] skip insert (conditions non réunies)');
+        // Fallback tardif: réessayer brièvement si l'info finishedAt distante arrive en retard
+        setTimeout(()=>{
+          try{
+            const ready = !!(duoLocal.finishedAt && duoRemote.finishedAt);
+            if(!duoScoreSubmitted && (winnerName===localName) && ready){
+              duoScoreSubmitted = true;
+              const secSanaa2 = (localName==='Sanaa'? Math.round(p1DurMs/1000) : (remoteName==='Sanaa'? Math.round(p2DurMs/1000) : null));
+              const secBen2 = (localName==='Benjamin'? Math.round(p1DurMs/1000) : (remoteName==='Benjamin'? Math.round(p2DurMs/1000) : null));
+              submitDuoScore({ gagnant: winnerName, temps_sanaa: secSanaa2, temps_benjamin: secBen2 });
+            }
+          }catch{}
+        }, 1500);
       }
     }catch(_){ /* non bloquant */ }
   }catch(e){ console.warn('finalizeDuoResult error', e); }
+  // Remettre l'état en 'waiting' après finalisation pour permettre le rematch simple
+  try{ supabase.from('duo_live').update({ etat:'waiting' }).eq('room_id', duoConnectionId).eq('joueur', duoPlayerId); }catch{}
 }
 
 // Envoi d'un résultat Duo vers public.duo_scores
@@ -2333,8 +2398,10 @@ async function submitDuoScore(row){
       temps_sanaa: (typeof row.temps_sanaa === 'number'? row.temps_sanaa : null),
       temps_benjamin: (typeof row.temps_benjamin === 'number'? row.temps_benjamin : null)
     };
-    const { error } = await window.supabase.from('duo_scores').insert(payload);
-    if(error){ console.warn('duo_scores insert error', error.message); }
+  console.info('[DUO] insert duo_scores ->', payload);
+  const { error } = await window.supabase.from('duo_scores').insert(payload);
+  if(error){ console.warn('duo_scores insert error', error.message); }
+  else { console.info('[DUO] duo_scores insert OK'); }
   }catch(e){ console.warn('submitDuoScore error', e); }
 }
 
@@ -2581,6 +2648,95 @@ let duoLastDiscNotify = 0; // ms: anti-spam notifications
 // duoResultShown & duoCountdownActive déclarés plus haut
 let duoWaitStartTs = 0; // début d'attente en salle (pour migration matchmaking)
 let duoMigratingRoom = false; // évite migrations concurrentes
+// Rematch dans la même salle
+var duoRematchReadyLocal = false;
+var duoRematchReadyRemote = false;
+var duoRematchLoop = null;
+var duoIsRematch = false;
+
+function updateRematchStatusUI(count){
+  try{
+  const rb = document.getElementById('duoReplayBtn');
+  if(rb){ rb.textContent = `Rejouer ${count}/2`; }
+  }catch{}
+}
+
+// Exposer pour utilisation croisée
+try { window.updateRematchStatusUI = updateRematchStatusUI; } catch{}
+
+async function pollRematch(){
+  try{
+    if(!duoConnectionId) return;
+    const { data } = await supabase
+      .from('duo_live')
+      .select('joueur, etat, data')
+      .eq('room_id', duoConnectionId);
+    const rows = data || [];
+    const readyCount = rows.filter(r=> r.etat === 'rematch_ready').length;
+    updateRematchStatusUI(readyCount);
+    // Déterminer état de l'adversaire (menu / prêt)
+    let opp = null, oppData = null, oppAtMenu = false;
+    try{
+      opp = rows.find(r=> r.joueur !== duoPlayerId) || null;
+      oppData = opp && opp.data ? (typeof opp.data === 'string' ? JSON.parse(opp.data) : opp.data) : null;
+      oppAtMenu = !!(oppData && (oppData.menu === true || oppData.rematch_block === true));
+      duoRematchReadyRemote = !!(opp && opp.etat === 'rematch_ready');
+    }catch{}
+    // Gérer l'état du bouton local selon l'état adverse
+    try{
+      const rb = document.getElementById('duoReplayBtn');
+      if(rb){
+        if(oppAtMenu){
+          rb.disabled = true; rb.style.opacity = '0.6'; rb.textContent = 'Adversaire au menu';
+        } else {
+          rb.disabled = false; rb.style.opacity = '';
+          // Le texte est déjà mis à jour via updateRematchStatusUI
+        }
+      }
+    }catch{}
+    if(readyCount >= 2){
+      if(duoRematchLoop){ clearInterval(duoRematchLoop); duoRematchLoop = null; }
+      beginRematch();
+    }
+  }catch{}
+}
+
+try { window.pollRematch = pollRematch; } catch{}
+
+async function beginRematch(){
+  try{
+    // Préparer le redémarrage dans la même room
+    duoStarted = false; duoCountdownPinned = false; duoCountdownActive = false; duoScoreSubmitted = false; duoResultShown = false;
+    duoLocal = { startAt:null, finishedAt:null, elapsedSec:null };
+    duoRemote = { startAt:null, finishedAt:null, elapsedSec:null, state:null, id: duoRemote.id||null };
+    // Afficher overlay d'attente Duo
+    try{
+      const ov = document.getElementById('duoWaitOverlay'); if(ov) ov.style.display = 'flex';
+      const statusEl = document.getElementById('duoWaitStatus'); if(statusEl) statusEl.textContent = 'Démarrage imminent...';
+      const countEl = document.getElementById('duoWaitCount'); if(countEl) countEl.textContent = 'Synchronisation...';
+    }catch{}
+    // Masquer l'overlay de résultat
+    try{ const res = document.getElementById('duoResultOverlay'); if(res) res.style.display='none'; }catch{}
+    // Host: proposer seed + ready; Guest: attendra 'ready'
+    if(duoRole === 'host'){
+      duoSeed = Math.random().toString(36).slice(2,10); if(typeof window!=='undefined') window.duoSeed = duoSeed;
+      duoReadyHostNow = Date.now();
+      // rematch: démarrer plus vite
+      duoStartAt = duoReadyHostNow + 1200;
+  await updateOwnDuoState('ready', { role:'host', seed:duoSeed, startAt:duoStartAt, hostNow:duoReadyHostNow });
+  // Démarrer localement le compte à rebours synchronisé sans attendre un écho
+  scheduleDuoStart();
+    } else {
+      await updateOwnDuoState('waiting', { role:'guest' });
+      await checkPlayerCount();
+    }
+    // Relance watchdog court
+    if(!duoHandshakeWatchLoop){
+      duoHandshakeWatchLoop = setInterval(()=>{ if(duoStarted){ clearInterval(duoHandshakeWatchLoop); duoHandshakeWatchLoop=null; } else { checkPlayerCount(); } }, 900);
+    }
+  }catch(e){ console.warn('beginRematch error', e); }
+}
+try { window.beginRematch = beginRematch; } catch{}
 
 // Fonction pour nettoyer la connexion duo
 async function cleanupDuoConnection() {
@@ -2628,6 +2784,13 @@ async function cleanupDuoConnection() {
 // Fonction principale pour gérer la connexion duo (avec réutilisation d'une session en attente)
 async function handleDuoConnection() {
   try {
+  // Reset léger du contexte handshake pour éviter les restes d'une partie précédente
+  try{
+    duoSeed = null; if(typeof window!=='undefined') window.duoSeed = null;
+    duoStarted = false; duoCountdownPinned = false; duoCountdownActive = false; duoHandshakeComplete = false;
+    duoLocal = { startAt:null, finishedAt:null, elapsedSec:null }; duoRemote = { startAt:null, finishedAt:null, elapsedSec:null, state:null, id:null };
+    duoScoreSubmitted = false; duoResultShown = false;
+  }catch{}
   const user = sessionStorage.getItem('currentUser') || localStorage.getItem('lastUser') || 'Benjamin';
   duoPlayerId = user;
   try { window.duoPlayerId = duoPlayerId; } catch {}
@@ -2871,14 +3034,14 @@ function processDuoRoomSnapshot(rows){
   if(statusEl) statusEl.textContent = 'Joueur trouvé ! Génération seed...'; setDuoBackDisabled(false);
     return;
   }
-  if(duoRole === 'guest' && hostRow.etat === 'seed' && hostData.seed && (guestRow.etat==='waiting' || guestRow.etat==='seed')){
+  if(duoRole === 'guest' && hostRow && hostRow.etat === 'seed' && hostData.seed && (!guestRow || guestRow.etat==='waiting' || guestRow.etat==='seed')){
     duoSeed = hostData.seed; if(typeof window!=='undefined') window.duoSeed = duoSeed;
     guestData = { role:'guest', seed:duoSeed, ack:true };
     updateOwnDuoState('seed_ack', guestData);
   if(statusEl) statusEl.textContent = 'Seed reçue. Synchronisation...'; setDuoBackDisabled(false);
     return;
   }
-  if(duoRole === 'host' && hostRow.etat==='seed' && guestRow.etat==='seed_ack' && hostData.seed){
+  if(duoRole === 'host' && hostRow && hostRow.etat==='seed' && guestRow && guestRow.etat==='seed_ack' && hostData.seed){
     duoSeed = hostData.seed; if(typeof window!=='undefined') window.duoSeed = duoSeed;
     // Démarrage dans 5s basé sur l'horloge du host pour corriger les décalages
     if(!duoCountdownPinned){
@@ -2890,7 +3053,7 @@ function processDuoRoomSnapshot(rows){
   if(statusEl) statusEl.textContent = 'Synchronisation prête...'; setDuoBackDisabled(false);
     return;
   }
-  if(duoRole === 'guest' && hostRow.etat==='ready' && hostData.startAt){
+  if(duoRole === 'guest' && hostRow && hostRow.etat==='ready' && hostData.startAt){
     duoSeed = hostData.seed; if(typeof window!=='undefined') window.duoSeed = duoSeed;
     // Ajuster startAt local en compensant l'offset d'horloge: startAtHost - (hostNow - nowLocal)
     if(!duoCountdownPinned){
@@ -2906,7 +3069,7 @@ function processDuoRoomSnapshot(rows){
     }
     return;
   }
-  if(duoRole === 'host' && hostRow.etat==='ready' && guestRow.etat==='seed_ack' && hostData.startAt){
+  if(duoRole === 'host' && hostRow && hostRow.etat==='ready' && guestRow && guestRow.etat==='seed_ack' && hostData.startAt){
     duoSeed = hostData.seed; if(typeof window!=='undefined') window.duoSeed = duoSeed;
     // Rester cohérent avec la première publication
     duoStartAt = hostData.startAt;
@@ -2923,14 +3086,14 @@ function processDuoRoomSnapshot(rows){
     const nowMs = Date.now();
     if(playerCount===2){
       // Host a proposé seed mais pas d'ACK depuis >3s => republier pour réveiller l'autre
-      if(duoRole==='host' && hostRow.etat==='seed' && (!guestRow || guestRow.etat!=='seed_ack')){
+  if(duoRole==='host' && hostRow && hostRow.etat==='seed' && (!guestRow || guestRow.etat!=='seed_ack')){
         if(nowMs - (duoHandshakeTs.seed||0) > 3000 && hostData.seed){
           updateOwnDuoState('seed', { role:'host', seed: hostData.seed });
           duoHandshakeTs.seed = nowMs;
         }
       }
       // Guest a vu host en seed mais n'a pas encore ack -> ack forcé si retard >2s
-      if(duoRole==='guest' && hostRow.etat==='seed' && hostData.seed && (guestRow.etat==='waiting' || guestRow.etat==='seed')){
+  if(duoRole==='guest' && hostRow && hostRow.etat==='seed' && hostData.seed && (!guestRow || guestRow.etat==='waiting' || guestRow.etat==='seed')){
         const hostAge = nowMs - new Date(hostRow.updated_at).getTime();
         if(hostAge > 2000){
           duoSeed = hostData.seed; if(typeof window!=='undefined') window.duoSeed = duoSeed;
@@ -2938,7 +3101,7 @@ function processDuoRoomSnapshot(rows){
         }
       }
       // Host en ready mais l'autre n'a pas réagi → republier ready chaque 3s maxi
-      if(duoRole==='host' && hostRow.etat==='ready' && hostData.startAt){
+  if(duoRole==='host' && hostRow && hostRow.etat==='ready' && hostData.startAt){
         if(guestRow && guestRow.etat!=='ready' && nowMs - (duoHandshakeTs.ready||0) > 3000){
           const repHostNow = (typeof hostData.hostNow==='number') ? hostData.hostNow : (duoReadyHostNow||null);
           updateOwnDuoState('ready', { role:'host', seed: hostData.seed, startAt: hostData.startAt, hostNow: repHostNow });
@@ -2946,7 +3109,7 @@ function processDuoRoomSnapshot(rows){
         }
       }
       // Si startAt est passé côté guest (événement raté), démarrer quand même (sans recalcul si déjà épinglé)
-      if(duoRole==='guest' && hostRow.etat==='ready' && hostData.startAt && !duoStarted){
+  if(duoRole==='guest' && hostRow && hostRow.etat==='ready' && hostData.startAt && !duoStarted){
         duoSeed = hostData.seed; if(typeof window!=='undefined') window.duoSeed = duoSeed;
         if(!duoCountdownPinned){
           const nowLocal2 = Date.now();
@@ -2974,8 +3137,12 @@ async function updateOwnDuoState(etat, dataObj){
 function scheduleDuoStart(){
   const now = Date.now();
   let delay = Math.max(0, duoStartAt - now);
-  // Garantir un minimum de 600ms local pour laisser l'autre appliquer seed si arrivée tardive
-  if(delay < 600) { duoStartAt = now + 800; delay = 800; }
+  // Si on est en rematch, partir plus vite; sinon garder un petit tampon
+  if(duoIsRematch){
+    if(delay < 200) { duoStartAt = now + 300; delay = 300; }
+  } else {
+    if(delay < 600) { duoStartAt = now + 800; delay = 800; }
+  }
   duoCountdownPinned = true; // ne plus recalculer duoStartAt après ce point
   duoCountdownActive = true;
   duoStarted = true;
@@ -3164,6 +3331,8 @@ function handleDuoLiveChange(payload) {
     // Un joueur s'est connecté ou a changé de statut
     setTimeout(() => {
       checkPlayerCount();
+  // Rafraîchir immédiatement l'état rematch (compteur x/2, verrouillage bouton)
+  try{ pollRematch(); }catch{}
       // Afficher mini plateau adverse en Duo
       try{
         const row = payload.new || payload.record || null;
