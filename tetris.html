@@ -84,6 +84,20 @@
     /* onglets retirés (on utilise pages dédiées avec retour) */
   .menuPage{display:none}
   .menuPage.active{display:flex !important}
+  /* Checkbox animée */
+  .cbx_box{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px}
+  .cbx_svg{overflow:visible}
+  .cbx_bg{fill:rgba(255,255,255,0.06);stroke:rgba(255,255,255,0.18);stroke-width:1}
+  .cbx_tick{stroke:#2BD4A4;stroke-dasharray:26;stroke-dashoffset:26;transition:stroke-dashoffset .28s ease .05s}
+  .cbx{ -webkit-tap-highlight-color: transparent; }
+  .cbx:hover .cbx_bg{fill:rgba(255,255,255,0.09)}
+  /* Montrer l'outline seulement pour la navigation clavier, pas au clic */
+  #toggleTouchControls:focus-visible + .cbx_box .cbx_bg{outline:2px solid #4DD2FF; outline-offset:3px}
+  /* état coché: tracer la coche et mettre un fond accentué */
+  #toggleTouchControls:checked + .cbx_box .cbx_bg{fill:rgba(43,212,164,0.18);stroke:rgba(43,212,164,0.6)}
+  #toggleTouchControls:checked + .cbx_box .cbx_tick{stroke-dashoffset:0}
+  /* dé-check: animer le retour */
+  #toggleTouchControls:not(:checked) + .cbx_box .cbx_tick{transition:stroke-dashoffset .22s ease}
 
     /* Game screen */
     #gameScreen{display:flex;flex-direction:column;align-items:center;gap:clamp(8px,2vh,12px);padding:clamp(8px,2vw,18px);min-height:100vh;box-sizing:border-box}
@@ -419,8 +433,14 @@
                   <div style="color:#fff;font-weight:700;font-size:14px">Boutons tactiles</div>
                   <div style="font-size:11px;color:#bcd6df;max-width:280px;text-align:left">Afficher les contrôles à l'écran (activés par défaut sur iPhone).</div>
                 </div>
-                <label style="display:inline-flex;align-items:center;cursor:pointer;gap:8px">
-                  <input type="checkbox" id="toggleTouchControls" style="width:18px;height:18px;cursor:pointer">
+                <label class="cbx" for="toggleTouchControls" style="display:inline-flex;align-items:center;cursor:pointer;gap:10px;user-select:none;padding:4px 6px;border-radius:8px">
+                  <input type="checkbox" id="toggleTouchControls" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none" aria-label="Boutons tactiles" />
+                  <span class="cbx_box" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" class="cbx_svg" width="24" height="24">
+                      <rect class="cbx_bg" x="3" y="3" width="18" height="18" rx="5"></rect>
+                      <path class="cbx_tick" d="M6 12 L10 16 L18 8" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
                 </label>
               </div>
 
@@ -828,6 +848,14 @@
    - 3-next pieces
    - line clear bar animation + particles
    - combo counter
+*/
+
+// Logger minimaliste: activer pour debug détaillé
+const LOG_DEBUG = false;
+function dlog(){ if(LOG_DEBUG) try{ console.log.apply(console, arguments); }catch{} }
+function dinfo(){ if(LOG_DEBUG) try{ console.info.apply(console, arguments); }catch{} }
+function dwarn(){ if(LOG_DEBUG) try{ console.warn.apply(console, arguments); }catch{} }
+/*
    - animated GAME OVER text
 */
 
@@ -1052,8 +1080,7 @@ function fillQueue(){ while(nextQueue.length<3) nextQueue.push(createPiece(nextF
 
 let cur = null;
 function spawn(){
-  console.log('=== SPAWN FUNCTION START ===');
-  console.log('NextQueue before shift:', nextQueue.map(p => p?.type));
+  dlog('SPAWN start'); dlog('NextQueue before shift:', nextQueue.map(p => p?.type));
   
   cur = nextQueue.shift();
   // Normaliser l'état de la pièce au spawn
@@ -1067,19 +1094,18 @@ function spawn(){
   const newPiece = createPiece(nextFromBag());
   nextQueue.push(newPiece);
   
-  console.log('spawn() after push, nextQueue:', nextQueue.map(p => p?.type));
-  console.log('Current piece:', cur?.type);
+  dlog('After push nextQueue:', nextQueue.map(p => p?.type)); dlog('Current piece:', cur?.type);
   
   // CRITICAL: Forcer le rendu des previews après chaque spawn
-  console.log('About to render previews...');
+  dlog('Render previews');
   try {
     renderNext();
-    console.log('RenderNext completed successfully in spawn');
+  dlog('RenderNext ok');
   } catch (error) {
-    console.error('Error in renderNext during spawn:', error);
+  console.error('Error in renderNext during spawn:', error);
     // En cas d'erreur, essayer de forcer le rendu
     setTimeout(() => {
-      console.log('Fallback: forcing preview render from spawn...');
+  dlog('Fallback forceRenderPreviews');
       forceRenderPreviews();
     }, 10);
   }
@@ -1087,7 +1113,7 @@ function spawn(){
   if(cur && collides(cur,0,0)) onGameOver();
   if(isDuoMode) publishDuoState();
   
-  console.log('=== SPAWN FUNCTION END ===');
+  dlog('SPAWN end');
 }
 
 // game state
@@ -1189,27 +1215,25 @@ function renderNext(){
   const lastQueueSignature = lastRenderedQueue.join(',');
   
   if (currentQueueSignature === lastQueueSignature && currentQueueSignature !== '') {
-    console.log('SKIPPING renderNext - queue unchanged:', currentQueueSignature);
+    dlog('renderNext skip:', currentQueueSignature);
     return;
   }
   
-  // Debug info
-  console.log('=== RENDER NEXT START ===');
-  console.log('Queue changed from', lastQueueSignature, 'to', currentQueueSignature);
-  console.log('NextQueue length:', nextQueue.length);
+  // Log clé
+  dinfo('renderNext ->', currentQueueSignature);
   
   // Sauvegarder la nouvelle queue
   lastRenderedQueue = nextQueue.map(p => p?.type || 'null');
   
   if (!nextQueue || nextQueue.length === 0) {
-    console.log('NextQueue is empty, cannot render previews');
+  dlog('renderNext: empty queue');
     return;
   }
   
   const pairsDesktop = nextCanvases.filter(c=>c).map(c=>({c, ctx:c.getContext('2d')}));
   const pairsMobile = mobileNextCanvases.filter(c=>c).map(c=>({c, ctx:c.getContext('2d')}));
   
-  console.log('Found canvases - Desktop:', pairsDesktop.length, 'Mobile:', pairsMobile.length);
+  dlog('renderNext canvases', pairsDesktop.length, pairsMobile.length);
   
   // Nettoyer TOUS les canvases d'abord
   [...pairsDesktop, ...pairsMobile].forEach(({c, ctx}, index) => {
@@ -1224,7 +1248,7 @@ function renderNext(){
     const piece = nextQueue[idx]; 
     
     if(!piece || !piece.shape || !piece.type) {
-      console.log(`Desktop preview ${idx}: SKIPPING - piece missing or invalid`);
+  dlog(`Desktop ${idx}: skip`);
       return; 
     }
     const shape = piece.shape; 
@@ -1239,7 +1263,7 @@ function renderNext(){
         }
       }
     }
-    console.log(`Desktop ${idx}: RENDERED ${piece.type}`);
+  dlog(`Desktop ${idx}: ${piece.type}`);
   });
   
   // Rendu mobile
@@ -1248,7 +1272,7 @@ function renderNext(){
     const piece = nextQueue[idx];
     
     if(!piece || !piece.shape || !piece.type) {
-      console.log(`Mobile preview ${idx}: SKIPPING - piece missing or invalid`);
+  dlog(`Mobile ${idx}: skip`);
       return; 
     }
     const shape = piece.shape; 
@@ -1263,25 +1287,24 @@ function renderNext(){
         }
       }
     }
-    console.log(`Mobile ${idx}: RENDERED ${piece.type}`);
+    dlog(`Mobile ${idx}: ${piece.type}`);
   });
-  
-  console.log('=== RENDER NEXT COMPLETE ===');
+  dlog('renderNext done');
 }
 
 // Nettoyage explicite des canvases de preview (utile avant relance)
 function clearNextPreviews(){
-  console.log('=== CLEARING ALL PREVIEW CANVASES ===');
+  dlog('clearNextPreviews');
   
   // TRÈS IMPORTANT: Reset la queue mémorisée pour forcer un nouveau rendu
   lastRenderedQueue = [];
   
   const all = [...(nextCanvases||[]), ...(mobileNextCanvases||[])].filter(Boolean);
-  console.log('Found canvases to clear:', all.length);
+  dlog('clear count:', all.length);
   
   for(const c of all){
     try{
-      console.log('Clearing canvas:', c.id || 'no-id', 'size:', c.width, 'x', c.height);
+  dlog('clear', c.id || 'no-id', c.width, 'x', c.height);
       const cx = c.getContext('2d');
       // Triple clear pour être sûr
       cx.clearRect(0,0,c.width,c.height);
@@ -1297,12 +1320,12 @@ function clearNextPreviews(){
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        console.log('Triple RAF: Preview canvases should be completely cleared');
+  dlog('Triple RAF: cleared');
       });
     });
   });
   
-  console.log('=== PREVIEW CANVASES CLEARING COMPLETE ===');
+  dlog('clear previews done');
 }
 
 // Force un rerendu complet des previews
@@ -2283,7 +2306,7 @@ if(touchToggle){
 showMenuPage('home');
 
 function startGameFromMenu(){ 
-  console.log('=== STARTING NEW GAME ===');
+  dinfo('Start new game');
   
   // ARRÊT TOTAL de toute activité précédente
   running = false;
@@ -2319,7 +2342,7 @@ function startGameFromMenu(){
   nextQueue = [];
   cur = null;
   
-  console.log('State reset complete');
+  dlog('State reset');
   
   // Remise à zéro UI (desktop + mobile)
   const sEl = document.getElementById('score'); if(sEl) sEl.innerText = 0;
@@ -2334,11 +2357,11 @@ function startGameFromMenu(){
   
   // REMPLIR la queue avec de NOUVELLES pièces
   fillQueue();
-  console.log('Queue filled, nextQueue:', nextQueue.map(p => p?.type));
+  dlog('Queue filled:', nextQueue.map(p => p?.type));
   
   // PREMIER spawn
   spawn(); 
-  console.log('After spawn, nextQueue:', nextQueue.map(p => p?.type));
+  dlog('After spawn:', nextQueue.map(p => p?.type));
   
   // PREMIER dessin
   try { drawBoard(); } catch(e) { console.error('drawBoard error:', e); }
@@ -2349,7 +2372,7 @@ function startGameFromMenu(){
   
   // FORCE le rendu des previews après affichage
   setTimeout(() => {
-    console.log('Force rendering previews after display...');
+  dlog('Force previews after display');
     forceRenderPreviews();
   }, 50);
 
@@ -2361,7 +2384,7 @@ function startGameFromMenu(){
   startMusic();
   pauseOpen = false;
   
-  console.log('Game started, running:', running);
+  dinfo('Game started');
   // Afficher contrôles tactiles selon préférence
   const pref = localStorage.getItem('tetris_touch_controls');
   let show = false;
@@ -2420,7 +2443,7 @@ function startGameFromMenu(){
   requestAnimationFrame(loop);
 }
 function showMenu(){ // stop and return
-  console.log('showMenu() called');
+  dlog('showMenu');
   
   running = false; stopMusic(); menuScreen.style.display='flex'; gameScreen.style.display='none'; const go = document.getElementById('gameOverOverlay'); if(go) go.style.display='none';
   // Cacher complètement l'overlay de contrôles mobiles au menu
@@ -2444,7 +2467,7 @@ function showMenu(){ // stop and return
   hardDropEffect=null;
   
   // Préviews nettoyés au menu pour éviter un état figé
-  console.log('Clearing previews at menu...');
+  dlog('clear previews (menu)');
   try{ clearNextPreviews(); }catch{}
   
   // Update desktop UI
@@ -2479,7 +2502,7 @@ function finalizeDuoResult(){
   // Afficher/mettre à jour le modal de résultat Duo UNIQUEMENT quand les deux joueurs ont fini.
   try{
     if(!(duoLocal && duoLocal.finishedAt && duoRemote && duoRemote.finishedAt)){
-      console.log('finalizeDuoResult: attente que les deux joueurs aient fini', {
+  dlog('finalizeDuoResult: wait both', {
         localFinished: !!(duoLocal && duoLocal.finishedAt),
         remoteFinished: !!(duoRemote && duoRemote.finishedAt)
       });
@@ -2584,7 +2607,7 @@ function finalizeDuoResult(){
     // Enregistrement en base duo_scores - uniquement si on est le gagnant et pas déjà soumis
     try{
       const bothFinished = !!(duoLocal.finishedAt && duoRemote.finishedAt);
-      console.info('[DUO] finalize -> winnerLocal=%s, bothFinished=%s, submitted=%s', (winnerName===localName), bothFinished, duoScoreSubmitted);
+  dinfo('[DUO] finalize -> winnerLocal=%s, bothFinished=%s, submitted=%s', (winnerName===localName), bothFinished, duoScoreSubmitted);
       if(!duoScoreSubmitted && winnerName === localName && bothFinished){
         duoScoreSubmitted = true;
         const winner = winnerName;
@@ -2600,7 +2623,7 @@ function finalizeDuoResult(){
           submitScoreToLeaderboard(scoreWinner, lvlWinner).catch(()=>{});
         }catch(_){ }
       } else {
-        console.info('[DUO] skip insert (conditions non réunies)');
+  dlog('[DUO] skip insert (conditions non réunies)');
         // Fallback tardif: réessayer brièvement si l'info finishedAt distante arrive en retard
         setTimeout(()=>{
           try{
@@ -3911,18 +3934,19 @@ async function fetchLeaderboardDuo(){
     }
     if(error){ if(status) status.textContent = 'Erreur chargement Duo'; console.warn('duo_scores fetch error', error.message); }
 
-    // Stats
+    // Stats: victoires et meilleur chrono (survie la plus longue => max)
     let sanaaWins = 0, benWins = 0;
     let sanaaBest = null, benBest = null;
     (data||[]).forEach(row=>{
-      const gagnant = (row.gagnant||'').toLowerCase();
-      if(gagnant.includes('sanaa')) sanaaWins++;
-      if(gagnant.includes('ben')) benWins++;
+      const gagnantRaw = (row.gagnant||'').trim();
+      const gagnant = gagnantRaw.toLowerCase();
+      if(gagnant === 'sanaa') sanaaWins++;
+      if(gagnant === 'benjamin' || gagnant === 'ben') benWins++;
       if(typeof row.temps_sanaa === 'number'){
-        sanaaBest = (sanaaBest==null)? row.temps_sanaa : Math.min(sanaaBest, row.temps_sanaa);
+        sanaaBest = (sanaaBest==null)? row.temps_sanaa : Math.max(sanaaBest, row.temps_sanaa);
       }
       if(typeof row.temps_benjamin === 'number'){
-        benBest = (benBest==null)? row.temps_benjamin : Math.min(benBest, row.temps_benjamin);
+        benBest = (benBest==null)? row.temps_benjamin : Math.max(benBest, row.temps_benjamin);
       }
     });
 
