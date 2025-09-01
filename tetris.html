@@ -1348,6 +1348,7 @@ function collides(piece,dx,dy,pros=null){ if(!piece) return true; const shape = 
 
 // line-clear animation: sweep bars
 let sweeps = []; // {row, t, duration}
+let sweepsWillRemove = true; // si false, les lignes ont déjà été retirées du grid
 let particles = [];
 let lastClearedRows = [];
 let clearEffect = null; // {type, t, duration}
@@ -1355,13 +1356,23 @@ function spawnParticlesForRow(r){ for(let c=0;c<COLS;c++){ const x = c*BLOCK + B
 function updateParticles(){ for(let i=particles.length-1;i>=0;i--){ const p=particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.12; p.life--; if(p.life<=0) particles.splice(i,1); } }
 function drawParticles(){ for(const p of particles){ ctx.fillStyle = p.color; ctx.fillRect(p.x-3,p.y-3,6,6); } }
 
-function clearLinesWithSweep(){ // sweep animation then remove lines
+function clearLinesWithSweep(){ // retire les lignes immédiatement, garde une animation visuelle légère
   const full = []; for(let r=0;r<ROWS;r++) if(grid[r].every(cell=>cell)) full.push(r);
   if(!full.length) return 0;
   lastClearedRows = full.slice();
+  // Démarrer une animation de sweep (visuelle) mais ne plus différer le retrait
   sweeps.length = 0;
-  const duration = 260;
-  full.forEach(r=>{ sweeps.push({row:r, t:0, duration}); spawnParticlesForRow(r); });
+  const duration = 220;
+  // Spawner les particules avant retrait pour conserver les couleurs
+  full.forEach(r=>{ spawnParticlesForRow(r); });
+  full.forEach(r=>{ sweeps.push({row:r, t:0, duration}); });
+  // Retirer immédiatement du grid (ordre décroissant)
+  const rowsToRemove = full.slice().sort((a,b)=>b-a);
+  for(const rowIndex of rowsToRemove){
+    grid.splice(rowIndex, 1);
+    grid.unshift(Array(COLS).fill(0));
+  }
+  sweepsWillRemove = false;
   return full.length;
 }
 
@@ -1565,7 +1576,7 @@ function drawHardDropEffect(){
   if(p>=1) boardCanvas.style.transform='';
 }
 
-function processSweeps(dt){ // advance sweeps, when done remove rows
+function processSweeps(dt){ // avance l'animation; le retrait du grid peut déjà être fait
   if(!sweeps.length) return false;
   let allDone = true;
   for(let i=sweeps.length-1;i>=0;i--){ const s=sweeps[i]; s.t += dt; const progress = Math.min(1, s.t/s.duration);
@@ -1574,14 +1585,16 @@ function processSweeps(dt){ // advance sweeps, when done remove rows
     if(progress < 1) allDone = false;
   }
   if(allDone){
-    // remove all rows in one go so multiple full rows vanish together
-    // IMPORTANT: remove in descending index order to avoid reindexing issues
-    const rowsToRemove = sweeps.map(s=>s.row).sort((a,b)=>b-a);
-    for(const rowIndex of rowsToRemove){
-      grid.splice(rowIndex, 1);
-      grid.unshift(Array(COLS).fill(0));
+    // Si on n'a pas encore retiré, faire le retrait ici (cas legacy)
+    if(sweepsWillRemove){
+      const rowsToRemove = sweeps.map(s=>s.row).sort((a,b)=>b-a);
+      for(const rowIndex of rowsToRemove){
+        grid.splice(rowIndex, 1);
+        grid.unshift(Array(COLS).fill(0));
+      }
     }
     sweeps.length = 0;
+    sweepsWillRemove = true; // reset
   }
   return sweeps.length>0;
 }
@@ -1700,20 +1713,55 @@ function hardDrop(){
   lockPiece();
   if(isDuoMode) publishDuoState();
 }
+// Rotation SRS (Standard) avec wall-kicks
+// Tables d'offsets pour JLSTZ et I (sens horaire uniquement ici)
+function getSRSOffsets(type, from, to){
+  // normaliser 0,1,2,3
+  from = ((from%4)+4)%4; to = ((to%4)+4)%4;
+  // JLSTZ
+  const JLSTZ = {
+    '0>1': [[0,0],[-1,0],[-1,1],[0,-2],[-1,-2]],
+    '1>0': [[0,0],[1,0],[1,-1],[0,2],[1,2]],
+    '1>2': [[0,0],[1,0],[1,-1],[0,2],[1,2]],
+    '2>1': [[0,0],[-1,0],[-1,1],[0,-2],[-1,-2]],
+    '2>3': [[0,0],[1,0],[1,1],[0,-2],[1,-2]],
+    '3>2': [[0,0],[-1,0],[-1,-1],[0,2],[-1,2]],
+    '3>0': [[0,0],[1,0],[1,1],[0,-2],[1,-2]],
+    '0>3': [[0,0],[-1,0],[-1,-1],[0,2],[-1,2]],
+  };
+  // I piece
+  const I = {
+    '0>1': [[0,0],[-2,0],[1,0],[-2,-1],[1,2]],
+    '1>0': [[0,0],[2,0],[-1,0],[2,1],[-1,-2]],
+    '1>2': [[0,0],[-1,0],[2,0],[-1,2],[2,-1]],
+    '2>1': [[0,0],[1,0],[-2,0],[1,-2],[-2,1]],
+    '2>3': [[0,0],[2,0],[-1,0],[2,1],[-1,-2]],
+    '3>2': [[0,0],[-2,0],[1,0],[-2,-1],[1,2]],
+    '3>0': [[0,0],[1,0],[-2,0],[1,-2],[-2,1]],
+    '0>3': [[0,0],[-1,0],[2,0],[-1,2],[2,-1]],
+  };
+  const key = `${from}>${to}`;
+  if(type==='I') return I[key] || [[0,0]];
+  return JLSTZ[key] || [[0,0]];
+}
+
 function rotatePiece(){
   if(!cur) return;
-  // Empêcher la rotation de la pièce O (carré) ou garder identique
-  if(cur.type === 'O') return; // ne rien faire
-  const nextIndex = (cur.rotIndex+1) % cur.rots.length;
-  const nextShape = cur.rots[nextIndex];
-  const kicks = [0,-1,1,-2,2];
-  for(const k of kicks){
-    if(!collides(cur,k,0,nextShape)){
-      cur.rotIndex = nextIndex;
+  // On laisse la pièce O inchangée (pas de rotation nécessaire visuellement)
+  if(cur.type === 'O') return;
+  const from = cur.rotIndex % 4;
+  const to = (from + 1) % 4; // rotation horaire
+  const nextShape = cur.rots && cur.rots[to] ? cur.rots[to] : null;
+  if(!nextShape) return;
+  const offsets = getSRSOffsets(cur.type, from, to);
+  for(const [ox, oy] of offsets){
+    if(!collides(cur, ox, oy, nextShape)){
+      cur.rotIndex = to;
       cur.shape = nextShape;
-      cur.x += k;
+      cur.x += ox;
+      cur.y += oy;
       playSfx('rotate');
-  if(isDuoMode) publishDuoState();
+      if(isDuoMode) publishDuoState();
       return;
     }
   }
@@ -2193,6 +2241,22 @@ document.getElementById('backBtn').addEventListener('click', ()=>{
     showMenu();
   }
 });
+
+// Nettoyage duo best-effort à la fermeture de l'onglet
+try{
+  window.addEventListener('beforeunload', (e)=>{
+    try{
+      // Utiliser l'implémentation locale si présente (module supabase)
+      if(typeof cleanupDuoConnection === 'function'){
+        // Best effort sans await (évite de bloquer la fermeture)
+        cleanupDuoConnection();
+      } else if(window.supabaseCleanupDuo){
+        window.supabaseCleanupDuo();
+      }
+    }catch{}
+    // Pas de e.preventDefault() pour ne pas bloquer
+  });
+}catch{}
 const helpBtn = document.getElementById('helpBtn');
 const settingsBtn = document.getElementById('settingsBtn');
 const helpBackBtn = document.getElementById('helpBackBtn');
