@@ -5,12 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-orientation" content="landscape">
     <meta name="screen-orientation" content="landscape">
+    <link rel="stylesheet" href="css/modals-unified.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <title>Casino 🤑</title>
+    <script src="config.js"></script>
     <style>
+        /* Affichage de la currency en haut à droite */
+        .currency-container {
+            position: fixed;
+            top: calc(20px + env(safe-area-inset-top));
+            right: calc(85px + env(safe-area-inset-right));
+            z-index: 1200;
+            display: flex;
+            align-items: center;
+            height: 50px;
+            min-width: 90px;
+            background: rgba(255,255,255,0.18);
+            border-radius: 50px;
+            padding: 0 18px 0 10px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.13);
+            font-size: 1.13rem;
+            font-weight: 600;
+            color: #fff;
+            gap: 10px;
+            border: 2px solid rgba(255,255,255,0.22);
+            backdrop-filter: blur(12px);
+            transition: box-shadow 0.2s, border 0.2s;
+        }
+        .currency-container:hover {
+            box-shadow: 0 6px 24px rgba(255,255,255,0.18);
+            border: 2.5px solid #FFD700;
+        }
+        .currency-img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            margin-right: 8px;
+            filter: drop-shadow(0 2px 6px rgba(255,215,0,0.18));
+        }
+        @media (max-width: 600px) {
+            .currency-container {
+                top: calc(12px + env(safe-area-inset-top));
+                right: calc(55px + env(safe-area-inset-right));
+                font-size: 1rem;
+                height: 40px;
+                min-width: 60px;
+                padding: 0 10px 0 6px;
+            }
+            .currency-img {
+                width: 22px;
+                height: 22px;
+                margin-right: 5px;
+            }
+        }
+        body{
+            user-select: none;
+        }
         /* Message de rotation pour mode portrait */
         .rotate-message {
             position: fixed;
@@ -127,7 +181,7 @@
         }
 
         .icon-container.scale-up {
-            transform: scale(1.3);
+            transform: scale(1.2);
         }
 
         /* Icône casino - plus grande */
@@ -209,18 +263,178 @@
             color: white;
             font-size: 24px;
             text-align: center;
+            position: relative;
         }
 
         .main-content.show {
             opacity: 1;
             transform: translateY(0) scale(1);
+            transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .main-content.zoom-fadeout {
+            opacity: 0;
+            transform: scale(1.25);
+            pointer-events: none;
+            transition: opacity 1.3s cubic-bezier(0.4, 0, 0.2, 1), transform 1.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Machine à sous */
+        .slot-machine-container {
+            position: absolute;
+            /* Variables CSS pour faciliter le positionnement */
+            --slot-position-x: 65%; /* Position horizontale (0% = gauche, 100% = droite) */
+            --slot-position-y: 50%; /* Position verticale (0% = haut, 100% = bas) */
+            --slot-size: 220px; /* Taille de base de la machine */
+            
+            left: var(--slot-position-x);
+            top: var(--slot-position-y);
+            transform: translate(-50%, -50%);
+            z-index: 500;
+        }
+
+        .slot-machine {
+            position: relative;
+            width: var(--slot-size);
+            height: auto;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .slot-machine:hover {
+            transform: scale(1.05);
+        }
+
+        .slot-machine-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));
+            transition: filter 0.3s ease;
+        }
+
+        .slot-machine:hover .slot-machine-image {
+            filter: drop-shadow(0 15px 40px rgba(0, 0, 0, 0.7));
+        }
+
+        /* Effet lumineux en bas de la machine */
+        .slot-machine-glow {
+            position: absolute;
+            bottom: 4px;
+            left: 47%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 40px;
+            background: radial-gradient(ellipse, 
+                rgba(255, 215, 0, 0.3) 0%, 
+                rgba(255, 165, 0, 0.2) 30%, 
+                rgba(255, 215, 0, 0.1) 60%, 
+                transparent 100%);
+            border-radius: 50%;
+            opacity: 0.4;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+
+        .slot-machine:hover .slot-machine-glow {
+            opacity: 1;
+            transform: translateX(-50%) scale(1.1);
+        }
+
+        /* Animation de levier */
+        @keyframes lever-pull {
+            0% { transform: translateY(0) rotate(0deg); }
+            40% { transform: translateY(26px) rotate(2deg); }
+            60% { transform: translateY(26px) rotate(2deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+        #spinLever.pulling { animation: lever-pull 0.5s ease both; transform-origin: top center; }
+
+        /* Score latéral (vue machine) */
+        .machine-score-container {
+            position: fixed;
+            top: 50%;
+            right: calc(18px + env(safe-area-inset-right));
+            transform: translateY(-50%);
+            z-index: 1600;
+            min-width: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.16);
+            border: 2px solid rgba(255,255,255,0.28);
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 14px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+            backdrop-filter: blur(10px);
+        }
+        .machine-score-container img { width: 22px; height: 22px; filter: drop-shadow(0 2px 6px rgba(255,215,0,0.25)); }
+        .machine-score-value { font-weight: 700; font-size: 1.05rem; }
+        .score-delta { position: fixed; right: calc(18px + env(safe-area-inset-right)); z-index: 1700; color: #fff; font-weight: 700; text-shadow: 0 2px 8px rgba(0,0,0,.35); pointer-events:none; opacity: 0; transform: translateY(0); }
+        .score-delta.show { animation: delta-pop 1.1s ease forwards; }
+        @keyframes delta-pop { 0%{opacity:0; transform: translateY(8px);} 15%{opacity:1; transform: translateY(0);} 80%{opacity:1;} 100%{opacity:0; transform: translateY(-28px);} }
+
+        /* Responsive pour différentes tailles d'écran */
+        @media (max-width: 1200px) {
+            .slot-machine-container {
+                --slot-size: 180px;
+                --slot-position-x: 70%;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .slot-machine-container {
+                --slot-size: 150px;
+                --slot-position-x: 75%;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .slot-machine-container {
+                --slot-size: 120px;
+                --slot-position-x: 70%;
+                --slot-position-y: 60%;
+            }
+            
+            .slot-machine-glow {
+                bottom: -8px;
+                height: 30px;
+            }
+        }
+
+        /* Mode portrait sur mobile - repositionner */
+        @media screen and (orientation: portrait) and (max-width: 667px) {
+            .slot-machine-container {
+                --slot-size: 100px;
+                --slot-position-x: 50%;
+                --slot-position-y: 70%;
+            }
+            
+            .slot-machine-glow {
+                bottom: -6px;
+                height: 25px;
+            }
+        }
+
+        /* Très petits écrans */
+        @media (max-width: 400px) {
+            .slot-machine-container {
+                --slot-size: 80px;
+                --slot-position-y: 65%;
+            }
+            
+            .slot-machine-glow {
+                bottom: -5px;
+                height: 20px;
+            }
         }
 
         /* Bouton Exit */
         .exit-button {
             position: fixed;
-            top: 20px;
-            left: 20px;
+            top: calc(20px + env(safe-area-inset-top));
+            left: calc(20px + env(safe-area-inset-left));
             background: rgba(255, 255, 255, 0.1);
             border: 2px solid rgba(255, 255, 255, 0.3);
             color: white;
@@ -252,8 +466,8 @@
         /* Bouton Paramètres */
         .settings-button {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: calc(20px + env(safe-area-inset-top));
+            right: calc(20px + env(safe-area-inset-right));
             background: rgba(255, 255, 255, 0.1);
             border: 2px solid rgba(255, 255, 255, 0.3);
             color: white;
@@ -284,21 +498,47 @@
         /* Responsive pour les boutons sur mobile */
         @media (max-width: 667px) {
             .exit-button {
-                top: 15px;
-                left: 15px;
+                top: calc(15px + env(safe-area-inset-top));
+                left: calc(15px + env(safe-area-inset-left));
                 width: 45px;
                 height: 45px;
                 font-size: 16px;
             }
             
             .settings-button {
-                top: 15px;
-                right: 15px;
+        top: calc(15px + env(safe-area-inset-top));
+        right: calc(15px + env(safe-area-inset-right));
                 width: 45px;
                 height: 45px;
                 font-size: 16px;
             }
         }
+
+    /* Effets de gain */
+    .win-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 3000; overflow: hidden; }
+    .coin { position: absolute; width: 24px; height: 24px; background: url('images/casino/coin.png') center/contain no-repeat; animation: coin-fall 1.1s ease-out forwards; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.35)); }
+    @keyframes coin-fall { 0%{ transform: translateY(-20vh) rotate(0deg) scale(0.8); opacity:0 } 20%{opacity:1} 100%{ transform: translateY(100vh) rotate(360deg) scale(1); opacity:0 } }
+    .slot-win-glow { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width: 130%; height:130%; border-radius: 50%; background: radial-gradient(circle, rgba(255,215,0,0.38) 0%, rgba(255,165,0,0.22) 40%, rgba(255,255,255,0) 70%); filter: blur(10px); opacity:0; transition: opacity .25s ease; pointer-events:none; }
+    .slot-machine.winning .slot-win-glow { opacity:1 }
+    .slot-machine.shake { animation: slot-shake .6s cubic-bezier(.36,.07,.19,.97) both }
+    @keyframes slot-shake { 10%,90%{transform:translate(-50%, -50%) translateX(-1px)} 20%,80%{transform:translate(-50%, -50%) translateX(2px)} 30%,50%,70%{transform:translate(-50%, -50%) translateX(-4px)} 40%,60%{transform:translate(-50%, -50%) translateX(4px)} }
+    /* Flash d'écran lors des gros gains */
+    .win-flash { position: fixed; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.6), rgba(255,255,255,0) 60%); pointer-events: none; opacity: 0; z-index: 2500; }
+    .win-flash.show { animation: flash-pop .6s ease-out forwards; }
+    @keyframes flash-pop { 0%{opacity:0;} 20%{opacity:1;} 100%{opacity:0;} }
+
+    /* (supprimé) effet de blur/balayage pendant le spin à la demande de l'utilisateur */
+    .reel img.pop { animation: icon-pop .22s ease-out; }
+    @keyframes icon-pop { 0%{ transform: translateY(0) scale(1)} 40%{ transform: translateY(-6%) scale(1.06)} 100%{ transform: translateY(0) scale(1)} }
+
+    /* Bannière de gain */
+    .win-banner { position: fixed; left:50%; top:12%; transform: translate(-50%,-50%) scale(0.7); background: rgba(0,0,0,0.55); border:2px solid rgba(255,215,0,0.6); color:#fff; padding:10px 18px; border-radius:14px; font-weight:800; letter-spacing:.5px; box-shadow: 0 10px 30px rgba(0,0,0,.35); z-index:3200; opacity:0; backdrop-filter: blur(8px); }
+    .win-banner.show { animation: win-banner-pop 1.2s ease forwards; }
+    @keyframes win-banner-pop { 0%{opacity:0; transform:translate(-50%,-50%) scale(.7)} 20%{opacity:1; transform:translate(-50%,-50%) scale(1.06)} 60%{transform:translate(-50%,-50%) scale(1)} 100%{opacity:0; transform:translate(-50%,-90%) scale(.92)} }
+
+    /* Confettis */
+    .confetti { position:absolute; width:10px; height:16px; background: var(--c, #f66); transform: rotate(var(--r, 0deg)); opacity:0; animation: confetti-fall 1.2s ease-out forwards; filter: drop-shadow(0 3px 6px rgba(0,0,0,.25)); }
+    @keyframes confetti-fall { 0%{ opacity:0; transform: translateY(-20vh) rotate(0deg);} 10%{opacity:1} 100%{ transform: translateY(100vh) rotate(360deg);} }
 
         /* Modal des paramètres audio */
         .audio-modal {
@@ -541,8 +781,32 @@
         }
 
         .volume-icon.active {
-            display: block;
+            display: block !important;
             color: white;
+        }
+
+        /* Forcer l'affichage unique des icônes sur mobile */
+        @media (max-width: 767px) {
+            .volume-icons {
+                position: relative;
+                width: 28px;
+                height: 28px;
+            }
+            
+            .volume-icon {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 28px;
+                height: 28px;
+                display: none !important;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            .volume-icon.active {
+                display: flex !important;
+            }
         }
 
         .volume-icon:hover {
@@ -660,6 +924,13 @@
     </style>
 </head>
 <body>
+    <!-- Affichage currency casino -->
+    <div class="currency-container" id="currencyContainer">
+        <img src="images/casino/lovecoin.png" alt="Lovecoin" class="currency-img">
+        <span id="currencyValue">...</span>
+    </div>
+    <!-- Delta visuel pour gains/pertes -->
+    <div id="scoreDelta" class="score-delta" style="top: calc(78px + env(safe-area-inset-top)); font-size: 18px;"></div>
     <!-- Message de rotation pour mode portrait -->
     <div class="rotate-message" id="rotateMessage">
         <div class="rotate-icon">
@@ -678,14 +949,14 @@
         <div class="icon-container" id="iconContainer">
             <div class="casino-icon" id="casinoIcon">
                 <!-- Image de base (grisée) -->
-                <img src="images/casino.png" alt="Casino" class="casino-icon-base">
+                <img src="images/casino/casino.png" alt="Casino" class="casino-icon-base">
                 <!-- Image colorée qui se révèle progressivement -->
-                <img src="images/casino.png" alt="Casino" class="casino-icon-colored" id="casinoIconColored">
+                <img src="images/casino/casino.png" alt="Casino" class="casino-icon-colored" id="casinoIconColored">
             </div>
         </div>
     </div>
 
-    <!-- Contenu principal (vide pour l'instant) -->
+        <!-- Contenu principal (vide pour l'instant) -->
     <div class="main-content" id="mainContent">
         <!-- Bouton Exit -->
         <a href="index.html" class="exit-button">
@@ -697,24 +968,34 @@
             <i class="fas fa-cog"></i>
         </button>
         
+        <!-- Machine à sous -->
+        <div class="slot-machine-container">
+            <div class="slot-machine">
+                <div class="slot-machine-glow"></div>
+                <div class="slot-win-glow"></div>
+                <img src="images/casino/machine.png" alt="Machine à sous" class="slot-machine-image" id="slotMachineImg">
+            </div>
+        </div>
+        <!-- Couche d'effets de gain -->
+        <div class="win-overlay" id="winOverlay"></div>
+    <div class="win-flash" id="winFlash"></div>
+        
         <!-- Musique de fond -->
         <audio id="backgroundMusic" autoplay loop>
-            <source src="Son/Joie.mp3" type="audio/mpeg">
         </audio>
         
         <div>
-            <!-- Le contenu principal sera ici -->
         </div>
-    </div>
-
-    <!-- Modal des paramètres audio -->
+    </div>    <!-- Modal des paramètres audio -->
     <div class="audio-modal" id="audioModal">
         <div class="audio-modal-content">
             <div class="audio-modal-header">
                 <h3>Paramètres</h3>
                 <p>Des paramètres quoi :P</p>
             </div>
-            
+            <div class="user-status-container">
+                <div id="connectedUserIndicator" class="connected-user-indicator"></div>
+            </div>
             <div class="audio-controls">
                 <div class="volume-control">
                     <label><i class="fas fa-music"></i>Musique:</label>
@@ -732,6 +1013,78 @@
     </div>
 
     <script>
+        // Affichage de l'utilisateur connecté dans le modal paramètres
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUser = sessionStorage.getItem('currentUser') || 'Benjamin';
+            const userIndicator = document.getElementById('connectedUserIndicator');
+            if (userIndicator) {
+                let userIcon = '<i class="fas fa-user-circle" style="margin-right:8px;font-size:1em;vertical-align:middle;"></i>';
+                userIndicator.innerHTML = `${userIcon}Connecté en tant que <strong>${currentUser}</strong>`;
+            }
+
+            // --- Affichage currency casino ---
+            const currencyValue = document.getElementById('currencyValue');
+            const SUPABASE_URL = (typeof CONFIG !== 'undefined' && CONFIG.SUPABASE_URL) ? CONFIG.SUPABASE_URL : '';
+            const SUPABASE_ANON_KEY = (typeof CONFIG !== 'undefined' && CONFIG.SUPABASE_ANON_KEY) ? CONFIG.SUPABASE_ANON_KEY : '';
+            if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js';
+                script.onload = async function() {
+                    window._supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                    await updateCasinoBalance();
+                };
+                document.head.appendChild(script);
+            } else {
+                currencyValue.textContent = '?';
+            }
+
+            // Fonction pour mettre à jour le solde casino
+            window.updateCasinoBalance = async function() {
+                if (!window._supabase) return;
+                const user = sessionStorage.getItem('currentUser') || 'Benjamin';
+                try {
+                    const TABLE = 'casino'; 
+                    const url = `${CONFIG.SUPABASE_URL}/rest/v1/${TABLE}?select=balance&username=eq.${encodeURIComponent(user)}`;
+                    const resp = await fetch(url, {
+                        headers: {
+                            'apikey': CONFIG.SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}`,
+                            'Accept': 'application/json',
+                            'Prefer': 'return=representation',
+                        }
+                    });
+                    if (resp.ok) {
+                        let arr;
+                        try { arr = await resp.json(); } catch { arr = []; }
+                        if (arr && arr.length > 0 && arr[0].balance !== undefined) {
+                            currencyValue.textContent = arr[0].balance;
+                            currencyValue.style.color = '';
+                            currencyValue.title = '';
+                            const cvm = document.getElementById('currencyValueMachine');
+                            if (cvm) cvm.textContent = String(arr[0].balance);
+                        } else {
+                            currencyValue.textContent = '0';
+                            currencyValue.style.color = 'red';
+                            currencyValue.title = `Aucun solde trouvé pour l'utilisateur "${user}". Vérifiez la base.`;
+                            const cvm = document.getElementById('currencyValueMachine');
+                            if (cvm) cvm.textContent = '0';
+                        }
+                    } else {
+                        currencyValue.textContent = '?';
+                        currencyValue.style.color = 'red';
+                        currencyValue.title = `Erreur API Supabase : ${resp.status}`;
+                        const cvm = document.getElementById('currencyValueMachine');
+                        if (cvm) cvm.textContent = '?';
+                    }
+                } catch (e) {
+                    currencyValue.textContent = '?';
+                    currencyValue.style.color = 'red';
+                    currencyValue.title = `Erreur JS : ${e}`;
+                    const cvm = document.getElementById('currencyValueMachine');
+                    if (cvm) cvm.textContent = '?';
+                }
+            };
+        });
         // Variables globales pour le chargement réel
         let progress = 0;
         let loadingComplete = false;
@@ -741,9 +1094,557 @@
         const loadingScreen = document.getElementById('loadingScreen');
         const mainContent = document.getElementById('mainContent');
 
+        // Effet zoom/fadeout sur la machine à sous
+        document.addEventListener('DOMContentLoaded', function() {
+            const slotImg = document.getElementById('slotMachineImg');
+            if (slotImg) {
+                slotImg.style.cursor = 'pointer';
+                slotImg.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // Zoom/fadeout sur tout le contenu principal
+                    mainContent.classList.add('zoom-fadeout');
+                    // Après l'animation, masquer le contenu principal et afficher le bouton retour
+                    setTimeout(function() {
+                        mainContent.style.display = 'none';
+                        // Créer le PNG du contour de la machine si pas déjà présent
+                        if (!document.getElementById('machineCaseImg')) {
+                            // Conteneur principal relatif pour la machine
+                            const machineContainer = document.createElement('div');
+                            machineContainer.id = 'machineSanaaContainer';
+                            machineContainer.style.position = 'fixed';
+                            machineContainer.style.left = '50%';
+                            machineContainer.style.bottom = '0';
+                            machineContainer.style.transform = 'translateX(-50%)';
+                            machineContainer.style.zIndex = '1500';
+                            machineContainer.style.width = '33vw';
+                            machineContainer.style.height = 'auto';
+                            machineContainer.style.maxWidth = '700px';
+                            machineContainer.style.maxHeight = '90vh';
+                            machineContainer.style.display = 'flex';
+                            machineContainer.style.justifyContent = 'center';
+                            machineContainer.style.alignItems = 'flex-end';
+                            machineContainer.style.pointerEvents = 'auto';
+                            machineContainer.style.opacity = '0';
+                            machineContainer.style.transform += ' scale(1.25)';
+                            machineContainer.style.transition = 'opacity 1.1s cubic-bezier(0.4,0,0.2,1), transform 1.1s cubic-bezier(0.4,0,0.2,1)';
+
+                            // Image du contour
+                            const caseImg = document.createElement('img');
+                            caseImg.src = 'images/casino/machine-slot.png';
+                            caseImg.alt = 'Contour machine à sous';
+                            caseImg.id = 'machineCaseImg';
+                            caseImg.style.width = '100%';
+                            caseImg.style.height = 'auto';
+                            caseImg.style.display = 'block';
+                            caseImg.style.position = 'relative';
+                            caseImg.style.zIndex = '1';
+                            caseImg.style.pointerEvents = 'none';
+                            machineContainer.appendChild(caseImg);
+
+                            // Rouleaux (absolus sur la machine)
+                            const reels = document.createElement('div');
+                            reels.id = 'machineReels';
+                            reels.style.position = 'absolute';
+                            reels.style.left = '50%';
+                            reels.style.top = '32%'; // plus haut
+                            reels.style.transform = 'translate(-50%, 0)';
+                            reels.style.width = '77%'; // plus étroit
+                            reels.style.height = '32%';
+                            reels.style.display = 'flex';
+                            reels.style.justifyContent = 'space-between';
+                            reels.style.alignItems = 'center';
+                            reels.style.zIndex = '2';
+                            reels.style.pointerEvents = 'auto';
+
+                            // 3 rouleaux rapprochés
+                            for (let i = 0; i < 3; i++) {
+                                const reel = document.createElement('div');
+                                reel.className = 'reel';
+                                reel.style.width = '31%';
+                                reel.style.height = '100%';
+                                reel.style.borderRadius = '12px';
+                                reel.style.display = 'flex';
+                                reel.style.flexDirection = 'column';
+                                reel.style.alignItems = 'center';
+                                reel.style.justifyContent = 'center';
+                                reel.style.overflow = 'hidden';
+                                reel.style.position = 'relative';
+                                // Icône initiale
+                                const icon = document.createElement('img');
+                                icon.className = 'reel-icon';
+                                icon.src = 'images/casino/7.png';
+                                icon.style.width = '70%';
+                                icon.style.maxHeight = '80%';
+                                icon.style.objectFit = 'contain';
+                                icon.style.transition = 'transform 0.5s cubic-bezier(0.4,0,0.2,1)';
+                                reel.appendChild(icon);
+                                reels.appendChild(reel);
+                            }
+                            machineContainer.appendChild(reels);
+
+                            // Bouton pour lancer la machine
+
+                            // Levier à droite de la machine
+                            const lever = document.createElement('img');
+                            lever.id = 'spinLever';
+                            lever.src = 'images/casino/levier.png';
+                            lever.alt = 'Levier';
+                            lever.style.position = 'absolute';
+                            lever.style.right = '-70px'; // plus à gauche
+                            lever.style.top = '24%';
+                            lever.style.width = '60px'; // plus petit
+                            lever.style.height = '130px'; // plus petit
+                            lever.style.zIndex = '4';
+                            lever.style.cursor = 'pointer';
+                            lever.style.userSelect = 'none';
+                            lever.style.transition = 'transform 0.2s cubic-bezier(0.4,0,0.2,1), filter 0.2s';
+                            lever.style.filter = 'drop-shadow(0 6px 18px rgba(0,0,0,0.25))';
+                            lever.setAttribute('tabindex', '0');
+                            lever.setAttribute('aria-label', 'Tirer le levier');
+                            lever.style.pointerEvents = 'auto';
+                            machineContainer.appendChild(lever);
+
+                            document.body.appendChild(machineContainer);
+
+                            // (Supprimé) Pas de second indicateur de monnaie en vue machine
+                            // Delta juste sous le compteur machine
+                            if (!document.getElementById('scoreDelta')) {
+                                const scoreDelta = document.createElement('div');
+                                scoreDelta.id = 'scoreDelta';
+                                scoreDelta.className = 'score-delta';
+                                scoreDelta.style.top = 'calc(20px + env(safe-area-inset-top) + 60px)';
+                                document.body.appendChild(scoreDelta);
+                            }
+                            // Rien à initialiser côté monnaie: on garde uniquement l'indicateur d'en-tête
+
+                            // Animation d'apparition (zoom out + fade in)
+                            setTimeout(() => {
+                                machineContainer.style.opacity = '1';
+                                machineContainer.style.transform = 'translateX(-50%) scale(1)';
+                            }, 30);
+
+                            // Animation JS pour les rouleaux
+                            const icons = [
+                                'images/casino/7.png',
+                                'images/casino/bar.png',
+                                'images/casino/bell.png',
+                                'images/casino/cerise.PNG',
+                                'images/casino/citron.png',
+                                'images/casino/diamant.png',
+                                'images/casino/pomme.png',
+                                'images/casino/raisin.png',
+                                'images/casino/star.png'
+                            ];
+                            // Nouvelle version : retourne le résultat des 3 rouleaux et résout quand TOUT est fini
+                            // Optionnellement, impose des résultats finaux (finals)
+                            function spinReels(finals) {
+                                const reelDivs = reels.querySelectorAll('.reel');
+                                const results = new Array(reelDivs.length);
+                                let finished = 0;
+                                // (supprimé) pas d'état global spinning
+                                return new Promise(resolve => {
+                                    reelDivs.forEach((reel, idx) => {
+                                        const icon = reel.querySelector('img');
+                                        const spins = Math.floor(Math.random() * 8) + 8 + idx * 2;
+                                        let count = 0;
+                                        function animate() {
+                                            const rand = Math.floor(Math.random() * icons.length);
+                                            // Si finals est fourni, on utilise la cible uniquement sur la dernière frame
+                                            const next = (finals && count >= spins - 1) ? finals[idx] : icons[rand];
+                                            icon.style.transform = 'translateY(-120%) scale(0.7)';
+                                            setTimeout(() => {
+                                                icon.src = next;
+                                                icon.style.transform = 'translateY(120%) scale(0.7)';
+                                                setTimeout(() => {
+                                                    icon.style.transform = 'translateY(0) scale(1)';
+                                                    count++;
+                                                    if (count < spins) {
+                                                        setTimeout(animate, 80 + idx * 30);
+                                                    } else {
+                                                        results[idx] = next;
+                                                        finished++;
+                                                        // Petit rebond visuel à l'arrêt
+                                                        try{ icon.classList.remove('pop'); void icon.offsetWidth; icon.classList.add('pop'); setTimeout(()=>icon.classList.remove('pop'), 220);}catch{}
+                                                        if (finished === reelDivs.length) {
+                                                            // (supprimé) pas d'état global spinning
+                                                            resolve(results);
+                                                        }
+                                                    }
+                                                }, 60);
+                                            }, 60);
+                                        }
+                                        animate();
+                                    });
+                                });
+                            }
+                            let leverLocked = false;
+                            const SPIN_COST = 5; // coût par partie
+                            const USE_RPC = false; // désactiver les RPC tant que la fonction côté DB est ambigüe
+
+                            // Barème de gains par combinaison (exact match 3x)
+                            const PAY_TABLE = {
+                                'images/casino/7.png': 500,
+                                'images/casino/diamant.png': 250,
+                                'images/casino/bar.png': 150,
+                                'images/casino/bell.png': 120,
+                                'images/casino/star.png': 100,
+                                'images/casino/raisin.png': 60,
+                                'images/casino/pomme.png': 40,
+                                'images/casino/citron.png': 30,
+                                'images/casino/cerise.PNG': 20
+                            };
+
+                            // Pity naturel: augmente la probabilité d'aligner 3 symboles après chaque perte
+                            let lossStreak = 0;
+
+                            function computeBiasedResults(streak){
+                                // Probabilité qu'un rouleau prenne le symbole cible
+                                const p = Math.min(0.55, 0.15 + 0.10 * Math.max(0, streak));
+                                const target = icons[Math.floor(Math.random()*icons.length)];
+                                return [0,1,2].map(()=> (Math.random() < p) ? target : icons[Math.floor(Math.random()*icons.length)]);
+                            }
+
+                            function showDelta(text, positive){
+                                const sd = document.getElementById('scoreDelta');
+                                if(!sd) return;
+                                sd.textContent = (positive?'+':'') + text;
+                                sd.style.color = positive ? '#35ff9b' : '#ff6b6b';
+                                sd.classList.remove('show');
+                                void sd.offsetWidth; // reflow
+                                sd.classList.add('show');
+                            }
+
+                            // Ajuste localement le compteur (UI) en attendant la MAJ serveur
+                            function adjustCurrency(delta){
+                                try{
+                                    const v1 = document.getElementById('currencyValue');
+                                    if(!v1) return;
+                                    const cur = parseInt((v1.textContent||'0').replace(/\D/g,''), 10) || 0;
+                                    const next = Math.max(0, cur + delta);
+                                    v1.textContent = String(next);
+                                }catch{}
+                            }
+
+                            function playWinEffects(amount){
+                                try{
+                                    let overlay = document.getElementById('winOverlay');
+                                    const machine = document.querySelector('.slot-machine');
+                                    let winFlash = document.getElementById('winFlash');
+                                    const intensity = amount >= 400 ? 'ultra' : amount >= 200 ? 'high' : amount >= 80 ? 'mid' : 'low';
+                                    // Overlays fallback au niveau du body si le main est masqué
+                                    if (!overlay) {
+                                        overlay = document.getElementById('winOverlayMachine');
+                                        if (!overlay) {
+                                            overlay = document.createElement('div');
+                                            overlay.id = 'winOverlayMachine';
+                                            overlay.className = 'win-overlay';
+                                            document.body.appendChild(overlay);
+                                        }
+                                    }
+                                    if (!winFlash) {
+                                        winFlash = document.getElementById('winFlashMachine');
+                                        if (!winFlash) {
+                                            winFlash = document.createElement('div');
+                                            winFlash.id = 'winFlashMachine';
+                                            winFlash.className = 'win-flash';
+                                            document.body.appendChild(winFlash);
+                                        }
+                                    }
+                                    if(machine){
+                                        machine.classList.add('winning');
+                                        if (intensity !== 'low') machine.classList.add('shake');
+                                        setTimeout(()=>{
+                                            machine.classList.remove('winning');
+                                            machine.classList.remove('shake');
+                                        }, intensity==='ultra' ? 1400 : intensity==='high'? 1100 : 800);
+                                    }
+                                    if(overlay){
+                                        // pluie de pièces en fonction du gain
+                                        const COINS = intensity==='ultra' ? 56 : intensity==='high' ? 40 : intensity==='mid' ? 26 : 14;
+                                        for(let i=0;i<COINS;i++){
+                                            const c = document.createElement('div');
+                                            c.className = 'coin';
+                                            c.style.left = (10 + Math.random()*80) + '%';
+                                            c.style.top = (-10 - Math.random()*30) + 'vh';
+                                            c.style.animationDelay = (Math.random()*0.4)+'s';
+                                            const scale = intensity==='ultra' ? 1.5 : intensity==='high' ? 1.25 : intensity==='mid' ? 1.0 : 0.85;
+                                            c.style.transform = `translateY(-20vh) rotate(${Math.random()*180}deg) scale(${scale})`;
+                                            overlay.appendChild(c);
+                                            setTimeout(()=> c.remove(), 1400);
+                                        }
+                                    }
+                                    if ((intensity==='ultra' || intensity==='high') && winFlash){
+                                        winFlash.classList.remove('show');
+                                        void winFlash.offsetWidth;
+                                        winFlash.classList.add('show');
+                                        setTimeout(()=> winFlash.classList.remove('show'), 650);
+                                    }
+                                }catch{}
+                            }
+
+            async function triggerLever() {
+                if (leverLocked) return;
+                leverLocked = true;
+                // anime le levier visuellement
+                try{ document.getElementById('spinLever')?.classList.add('pulling'); setTimeout(()=>document.getElementById('spinLever')?.classList.remove('pulling'), 520);}catch{}
+                // Décrémente le solde à chaque spin
+                if (window._supabase) {
+                    const user = sessionStorage.getItem('currentUser') || 'Benjamin';
+                    // Utilise la requête RPC si activée, sinon REST PATCH
+                    // Feedback immédiat UI
+                    showDelta(`-${SPIN_COST}`, false);
+                    adjustCurrency(-SPIN_COST);
+                    let ok = true;
+                    if (USE_RPC) {
+                        let decResp;
+                        try{
+                            decResp = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/rpc/decrement_balance`, {
+                                method: 'POST',
+                                headers: {
+                                    'apikey': CONFIG.SUPABASE_ANON_KEY,
+                                    'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}`,
+                                    'Content-Type': 'application/json',
+                                    'Prefer': 'return=representation',
+                                },
+                                body: JSON.stringify({ username: user, amount: SPIN_COST })
+                            });
+                        }catch(e){ decResp = undefined; }
+                        ok = !!decResp && decResp.ok;
+                        if (!ok) { try{ const t = decResp ? await decResp.text() : '(no response)'; console.error('decrement_balance failed:', decResp?.status, t); }catch{} }
+                    }
+                    if (!USE_RPC || !ok) {
+                        // REST direct
+                        try {
+                            const getUrl = `${CONFIG.SUPABASE_URL}/rest/v1/casino?select=balance&username=eq.${encodeURIComponent(user)}&limit=1`;
+                            const getResp = await fetch(getUrl, { headers: { 'apikey': CONFIG.SUPABASE_ANON_KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}`, 'Accept': 'application/json' } });
+                            if (getResp.ok) {
+                                const arr = await getResp.json();
+                                if (arr && arr[0] && typeof arr[0].balance === 'number') {
+                                    const newBal = Math.max(0, arr[0].balance - SPIN_COST);
+                                    const patchUrl = `${CONFIG.SUPABASE_URL}/rest/v1/casino?username=eq.${encodeURIComponent(user)}`;
+                                    const patchResp = await fetch(patchUrl, { method: 'PATCH', headers: { 'apikey': CONFIG.SUPABASE_ANON_KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' }, body: JSON.stringify({ balance: newBal }) });
+                                    ok = patchResp.ok;
+                                }
+                            }
+                        } catch {}
+                        if (!ok) { adjustCurrency(SPIN_COST); console.warn('Débit échoué (REST) – rollback local'); }
+                    }
+                    if (window.updateCasinoBalance) { await window.updateCasinoBalance(); }
+                }
+                // Animation des rouleaux
+                const plannedResults = computeBiasedResults(lossStreak);
+                let results = await spinReels(plannedResults);
+                let gain = 0;
+                const threeSame = (arr)=> arr.length===3 && arr[0] && arr[0]===arr[1] && arr[1]===arr[2];
+                if(!threeSame(results)){
+                    lossStreak++;
+                } else {
+                    lossStreak = 0;
+                }
+                // Calculer le gain selon le barème
+                if(threeSame(results)){
+                    const sym = results[0];
+                    gain = PAY_TABLE[sym] || 100;
+                    // Sécurité: forcer visuellement les 3 mêmes symboles quand on gagne
+                    try{
+                        const imgs = document.querySelectorAll('#machineReels .reel img');
+                        imgs.forEach((img)=>{ img.src = sym; });
+                    }catch{}
+                }
+                // Si gain, ajoute au solde
+                if (gain > 0 && window._supabase) {
+                    const user = sessionStorage.getItem('currentUser') || 'Benjamin';
+                    // Feedback immédiat UI
+                    showDelta(`+${gain}`, true);
+                    adjustCurrency(gain);
+                    let ok = true;
+                    if (USE_RPC) {
+                        let incResp;
+                        try{
+                            incResp = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/rpc/increment_balance`, { method:'POST', headers:{ 'apikey': CONFIG.SUPABASE_ANON_KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}`, 'Content-Type':'application/json','Prefer':'return=representation' }, body: JSON.stringify({ username:user, amount: gain }) });
+                        }catch(e){ incResp = undefined; }
+                        ok = !!incResp && incResp.ok;
+                        if (!ok) { try{ const t = incResp ? await incResp.text() : '(no response)'; console.error('increment_balance failed:', incResp?.status, t); }catch{} }
+                    }
+                    if (!USE_RPC || !ok) {
+                        try{
+                            const getUrl = `${CONFIG.SUPABASE_URL}/rest/v1/casino?select=balance&username=eq.${encodeURIComponent(user)}&limit=1`;
+                            const getResp = await fetch(getUrl, { headers: { 'apikey': CONFIG.SUPABASE_ANON_KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}`, 'Accept': 'application/json' } });
+                            if (getResp.ok){
+                                const arr = await getResp.json();
+                                if (arr && arr[0] && typeof arr[0].balance === 'number'){
+                                    const newBal = Math.max(0, arr[0].balance + gain);
+                                    const patchUrl = `${CONFIG.SUPABASE_URL}/rest/v1/casino?username=eq.${encodeURIComponent(user)}`;
+                                    const patchResp = await fetch(patchUrl, { method:'PATCH', headers:{ 'apikey': CONFIG.SUPABASE_ANON_KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json','Prefer':'return=representation' }, body: JSON.stringify({ balance: newBal }) });
+                                    ok = patchResp.ok;
+                                }
+                            }
+                        }catch{}
+                        if (!ok){ adjustCurrency(-gain); console.warn('Crédit échoué (REST) – rollback local'); }
+                    }
+                    if (window.updateCasinoBalance) { await window.updateCasinoBalance(); }
+                    // Effets de victoire + bannière + confettis
+                    playWinEffects(gain);
+                    try{
+                        // Bannière
+                        let banner = document.getElementById('winBanner');
+                        if(!banner){ banner = document.createElement('div'); banner.id='winBanner'; banner.className='win-banner'; document.body.appendChild(banner); }
+                        banner.textContent = `+${gain} 💰`;
+                        banner.classList.remove('show'); void banner.offsetWidth; banner.classList.add('show');
+                        setTimeout(()=> banner && banner.classList.remove('show'), 1300);
+                        // Confettis
+                        const colors = ['#FFD700','#FF6B6B','#7CFC00','#1E90FF','#FF8C00'];
+                        const confCount = Math.min(60, 12 + Math.floor(gain/10));
+                        const root = document.getElementById('winOverlay') || document.body;
+                        for(let i=0;i<confCount;i++){
+                            const d = document.createElement('div');
+                            d.className = 'confetti';
+                            d.style.left = (5 + Math.random()*90) + '%';
+                            d.style.top = (-10 - Math.random()*30) + 'vh';
+                            d.style.setProperty('--c', colors[i % colors.length]);
+                            d.style.setProperty('--r', `${Math.floor(Math.random()*360)}deg`);
+                            root.appendChild(d);
+                            setTimeout(()=> d.remove(), 1400);
+                        }
+                    }catch{}
+                }
+                setTimeout(() => {
+                    leverLocked = false;
+                }, 900);
+                            // Adapter la taille du levier pour iPhone et petits écrans
+                            function adjustLeverSize() {
+                                const isIphone = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+                                const isSmallScreen = window.innerWidth < 500 || window.innerHeight < 500;
+                                if (isIphone || isSmallScreen) {
+                                    lever.style.width = '38px';
+                                    lever.style.height = '80px';
+                                    lever.style.right = '-40px';
+                                    lever.style.top = '28%';
+                                } else {
+                                    lever.style.width = '60px';
+                                    lever.style.height = '130px';
+                                    lever.style.right = '-70px';
+                                    lever.style.top = '24%';
+                                }
+                            }
+                            window.addEventListener('resize', adjustLeverSize);
+                            adjustLeverSize();
+                            }
+                            lever.addEventListener('click', function() {
+                                triggerLever();
+                            });
+                            lever.addEventListener('keydown', function(e) {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    triggerLever();
+                                }
+                            });
+                        }
+                        // Créer le bouton retour si pas déjà présent
+                        if (!document.getElementById('backBtn')) {
+                            const backBtn = document.createElement('a');
+                            backBtn.href = '#';
+                            backBtn.className = 'exit-button';
+                            backBtn.id = 'backBtn';
+                            backBtn.title = 'Retour';
+                            backBtn.innerHTML = '<i class="fas fa-arrow-left"></i>';
+                            backBtn.style.position = 'fixed';
+                            backBtn.style.top = '24px';
+                            backBtn.style.left = '24px';
+                            backBtn.style.zIndex = '2000';
+                            document.body.appendChild(backBtn);
+                            backBtn.addEventListener('click', function(ev) {
+                                ev.preventDefault();
+                                // Réafficher le contenu principal avec effet inverse
+                                mainContent.style.display = 'flex';
+                                mainContent.classList.remove('zoom-fadeout');
+                                mainContent.classList.add('show');
+                                // Supprimer le bouton retour et le PNG
+                                backBtn.remove();
+                                const machineContainer = document.getElementById('machineSanaaContainer');
+                                if (machineContainer) machineContainer.remove();
+                                document.getElementById('currencyContainerMachine')?.remove();
+                                document.getElementById('scoreDelta')?.remove();
+                                document.getElementById('winOverlayMachine')?.remove();
+                                document.getElementById('winFlashMachine')?.remove();
+                            });
+                        }
+                    }, 1300);
+                });
+            }
+        });
+
+        // Variables pour la gestion des musiques
+        let casinoMusics = [];
+
+        // Fonction pour récupérer tous les fichiers MP3 du dossier Son/casino
+        async function loadMusicFiles() {
+            try {
+                // Essayer de récupérer la liste des fichiers via une requête fetch
+                const response = await fetch('Son/casino/');
+                const text = await response.text();
+                
+                // Parser le HTML pour extraire les liens vers les fichiers MP3
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                const links = doc.querySelectorAll('a[href$=".mp3"], a[href$=".MP3"]');
+                
+                casinoMusics = Array.from(links).map(link => {
+                    const href = link.getAttribute('href');
+                    return href.startsWith('/') ? href : `Son/casino/${href}`;
+                });
+                
+                console.log('Fichiers musicaux trouvés:', casinoMusics);
+                
+                // Si aucun fichier trouvé via cette méthode, utiliser une liste de fallback
+                if (casinoMusics.length === 0) {
+                    throw new Error('Aucun fichier trouvé via listing');
+                }
+                
+            } catch (error) {
+                console.log('Impossible de récupérer la liste automatiquement, aucune musique trouvée');
+                casinoMusics = [];
+            }
+        }
+
+        // Charger une musique aléatoire
+        async function loadRandomMusic() {
+            const music = document.getElementById('backgroundMusic');
+            
+            // S'assurer qu'on a des musiques
+            if (casinoMusics.length === 0) {
+                await loadMusicFiles();
+            }
+            
+            // Vérifier qu'on a bien des musiques
+            if (casinoMusics.length === 0) {
+                console.error('Aucune musique disponible');
+                return null;
+            }
+            
+            // Choisir une musique aléatoire
+            const randomIndex = Math.floor(Math.random() * casinoMusics.length);
+            const nextMusic = casinoMusics[randomIndex];
+            console.log('Chargement de:', nextMusic);
+            
+            // Vider les sources actuelles
+            music.innerHTML = '';
+            
+            // Ajouter la nouvelle source
+            const source = document.createElement('source');
+            source.src = nextMusic;
+            source.type = 'audio/mpeg';
+            music.appendChild(source);
+            
+            // Recharger l'audio
+            music.load();
+            
+            return nextMusic;
+        }
+
         // Ressources à charger
         const resourcesToLoad = [
-            'images/casino.png',
+            'images/casino/casino.png',
             // Ajoutez ici d'autres ressources si nécessaire
         ];
 
@@ -805,37 +1706,40 @@
             images.forEach((img, index) => {
                 if (img.complete) {
                     imagesLoaded++;
+                    updateProgress(20);
                 } else {
-                    img.onload = () => {
+                    img.addEventListener('load', () => {
                         imagesLoaded++;
-                        updateProgress(70 + (imagesLoaded / images.length) * 25); // 25% pour les images de la page
-                    };
-                    img.onerror = () => {
+                        updateProgress(20);
+                    });
+                    img.addEventListener('error', () => {
                         imagesLoaded++;
-                        updateProgress(70 + (imagesLoaded / images.length) * 25);
-                    };
+                        updateProgress(20);
+                    });
                 }
             });
-
-            // Si toutes les images sont déjà chargées
-            if (imagesLoaded === images.length) {
-                updateProgress(95);
-            }
-
-            // Simuler la finalisation (fonts, scripts, etc.)
-            setTimeout(() => {
-                updateProgress(100);
-            }, Math.max(1000, resourcesLoaded * 200)); // Au moins 1 seconde de chargement
-        }
-
-        // Démarrer le chargement basé sur l'état réel de la page
-        function startRealLoading() {
-            // Étape 1: DOM chargé (20%)
-            updateProgress(20);
             
-            // Étape 2: Charger les ressources
-            loadResources();
+            // Étape 2: le démarrage est déclenché par startRealLoading()
         }
+
+// Démarrage orchestré du chargement réel (progrès + finalisation)
+function startRealLoading(){
+    try{
+        updateProgress(5);
+        loadResources();
+        const t0 = performance.now();
+        function tick(){
+            if(loadingComplete) return;
+            const elapsed = performance.now() - t0;
+            const p = Math.min(92, 5 + (elapsed/1000)*60); // grimpe vers ~92%
+            updateProgress(p);
+            if(!loadingComplete) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+        // filet de sécurité pour terminer si les images sont déjà en cache
+        setTimeout(()=>{ if(!loadingComplete) updateProgress(100); }, 1500);
+    }catch{}
+}
 
         // Terminer le chargement
         function finishLoading() {
@@ -866,9 +1770,46 @@
         }
 
         // Fonction pour démarrer la musique de fond
-        function startBackgroundMusic() {
+        async function startBackgroundMusic() {
             const music = document.getElementById('backgroundMusic');
             if (music) {
+                // Charger la liste des fichiers musicaux
+                await loadMusicFiles();
+                
+                // Charger la première musique aléatoire
+                await loadRandomMusic();
+                
+                // Écouter la fin de chaque musique pour passer à une autre aléatoire
+                music.addEventListener('ended', async () => {
+                    console.log('Musique terminée, chargement d\'une nouvelle musique aléatoire');
+                    await loadRandomMusic();
+                    
+                    // Redémarrer la lecture
+                    const playNext = () => {
+                        music.play().then(() => {
+                            console.log('Nouvelle musique démarrée');
+                            
+                            // Pour iOS - forcer le volume après le démarrage
+                            if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+                                setTimeout(() => {
+                                    const volumeSlider = document.getElementById('volumeSlider');
+                                    if (volumeSlider) {
+                                        const volume = volumeSlider.value / 100;
+                                        music.volume = volume;
+                                        setTimeout(() => music.volume = volume, 50);
+                                        setTimeout(() => music.volume = volume, 100);
+                                    }
+                                }, 200);
+                            }
+                        }).catch(e => {
+                            console.log('Erreur lors de la lecture de la nouvelle musique:', e);
+                        });
+                    };
+                    
+                    // Petit délai pour s'assurer que la nouvelle musique est chargée
+                    setTimeout(playNext, 100);
+                });
+                
                 // Pour les navigateurs qui nécessitent une interaction utilisateur
                 const playMusic = () => {
                     music.play().then(() => {
