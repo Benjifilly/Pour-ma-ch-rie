@@ -1953,18 +1953,54 @@
         // Initialiser : écran de mot de passe actif au démarrage
         togglePasswordScreenMode(true);
 
+        // Écoutes robustes: utiliser currentTarget et gérer appui long sur la touche effacer
+        let deleteHoldTimer = null;
+        // Évite l'effet "double action" (le clic qui suit l'appui long)
+        let deleteClearedViaHold = false;
+        function handleDeleteHoldStart(e){
+            // Empêche le ghost click mobile et lance un timer pour effacer tout le code
+            if (e) { try { e.preventDefault(); } catch {} }
+            deleteHoldTimer = setTimeout(() => {
+                enteredPasscode = '';
+                updatePasscodeDots();
+                // Feedback haptique léger si disponible
+                if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                    try { navigator.vibrate(40); } catch {}
+                }
+                // Marquer que l'effacement complet a été fait via appui long
+                deleteClearedViaHold = true;
+            }, 500);
+        }
+        function handleDeleteHoldEnd(){
+            if (deleteHoldTimer){ clearTimeout(deleteHoldTimer); deleteHoldTimer = null; }
+        }
+
         keypadButtons.forEach(button => {
             button.addEventListener('click', handleKeypadClick);
+            if (button.dataset.action === 'delete'){
+                button.addEventListener('mousedown', handleDeleteHoldStart);
+                button.addEventListener('mouseup', handleDeleteHoldEnd);
+                button.addEventListener('mouseleave', handleDeleteHoldEnd);
+                button.addEventListener('touchstart', handleDeleteHoldStart, { passive: false });
+                button.addEventListener('touchend', handleDeleteHoldEnd);
+                button.addEventListener('touchcancel', handleDeleteHoldEnd);
+            }
         });
 
         function handleKeypadClick(e) {
-            const number = e.target.getAttribute('data-number');
-            const action = e.target.getAttribute('data-action');
-
+            const btn = e.currentTarget || (e.target && e.target.closest ? e.target.closest('.keypad-button') : null);
+            if (!btn) return;
+            const { number, action } = btn.dataset;
             if (action === 'delete') {
+                // Si on vient de terminer un appui long, ignorer le clic suivant
+                if (deleteClearedViaHold) { deleteClearedViaHold = false; return; }
                 if (enteredPasscode.length > 0) {
                     enteredPasscode = enteredPasscode.slice(0, -1);
                     updatePasscodeDots();
+                    // Feedback haptique discret
+                    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                        try { navigator.vibrate(15); } catch {}
+                    }
                 }            } else if (number && enteredPasscode.length < 6) {
                 enteredPasscode += number;
                 updatePasscodeDots();
@@ -2006,6 +2042,11 @@
             dots.forEach(dot => {
                 dot.classList.add('error');
             });
+
+            // Vibration plus marquée pour signaler l'erreur (si supportée)
+            if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                try { navigator.vibrate([60, 40, 60]); } catch {}
+            }
 
             setTimeout(() => {
                 enteredPasscode = '';
